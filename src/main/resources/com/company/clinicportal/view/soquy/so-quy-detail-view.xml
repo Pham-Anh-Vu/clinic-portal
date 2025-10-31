@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://soQuyDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="soQuyDc"
+                  class="com.company.clinicportal.entity.SoQuy">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="soQuyDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="soQuyDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <dateTimePicker id="createdAtField" property="createdAt"/>
+            <textField id="createdByIdField" property="createdById"/>
+            <textArea id="ghiChuField" height="9.5em" property="ghiChu"/>
+            <datePicker id="thangField" property="thang"/>
+            <textField id="tongChiField" property="tongChi"/>
+            <textField id="tongThuField" property="tongThu"/>
+            <dateTimePicker id="updatedAtField" property="updatedAt"/>
+            <textField id="updatedByIdField" property="updatedById"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

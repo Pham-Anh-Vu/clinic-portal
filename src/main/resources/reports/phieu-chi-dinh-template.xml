@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<w:wordDocument xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml">
+  <w:body>
+    <w:p>
+      <w:r><w:t>PHIẾU CHỈ ĐỊNH</w:t></w:r>
+    </w:p>
+
+    <w:p><w:r><w:t>Thông tin bệnh nhân</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Họ và tên: ${detail.idBenhNhan.hoVaTen}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Giới tính: ${detail.idBenhNhan.gioiTinh}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Ngày sinh: ${detail.idBenhNhan.ngaySinh}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tuổi: ${detail.idBenhNhan.tuoi}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Điện thoại: ${detail.idBenhNhan.dienThoai}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Địa chỉ: ${detail.idBenhNhan.diaChi}</w:t></w:r></w:p>
+
+    <w:p><w:r><w:t>Thông tin chung phiếu</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Mã phiếu: ${detail.id}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tên phiếu: ${detail.tenPhieuDieuTri}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Bác sĩ phụ trách: ${detail.idNhanSu.hoTen}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Ngày bắt đầu: ${detail.ngayBatDau}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Ngày chỉ định: ${detail.ngayChiDinh}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Ngày kết thúc: ${detail.ngayKetThuc}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Ngày thanh toán: ${detail.ngayThanhToan}</w:t></w:r></w:p>
+
+    <w:p><w:r><w:t>Triệu chứng và chẩn đoán</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Triệu chứng: ${detail.trieuChung}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Chẩn đoán: ${detail.chuanDoan}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Chẩn đoán ra viện: ${detail.chuanDoanRaVien}</w:t></w:r></w:p>
+
+    <w:p><w:r><w:t>Khám và cận lâm sàng</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Khám bộ phận: ${detail.kbBoPhan}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>KQ cận lâm sàng: ${detail.ketQuaCanLamSang}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>KQ xét nghiệm: ${detail.ketQuaXetNghiem}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Quá trình bệnh: ${detail.khamBenhQuaTrinhBenh}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tiền sử bệnh: ${detail.khamBenhTienSuBenh}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Khám toàn thân: ${detail.khamBenhToanThan}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Hướng điều trị: ${detail.huongDieuTri}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Lý do vào viện: ${detail.lyDoVaoVien}</w:t></w:r></w:p>
+
+    <w:p><w:r><w:t>KPI và trọng số</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tính KPI: ${detail.tinhKpi}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số điện trị liệu: ${detail.trongSoDienTriLieu}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số kéo giãn: ${detail.trongSoKeoGian}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số vận động trị liệu: ${detail.trongSoVanDongTriLieu}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số tập PHCN: ${detail.trongSoTapPhcn}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số KPI: ${detail.trongSoKpi}</w:t></w:r></w:p>
+
+    <w:p><w:r><w:t>Thanh toán tổng hợp</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tổng tiền: ${detail.tongTien}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Khuyến mãi: ${detail.khuyenMai}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tổng sau khuyến mãi: ${detail.tongTienSauKhuyenMai}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Đã thanh toán: ${detail.daThanhToan}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Phải đóng: ${detail.phaiDong}</w:t></w:r></w:p>
+
+    <w:p><w:r><w:t>Thông tin hệ thống</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tạo lúc: ${detail.createdAt}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Tạo bởi: ${detail.createdById}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Cập nhật lúc: ${detail.updatedAt}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Cập nhật bởi: ${detail.updatedById}</w:t></w:r></w:p>
+
+    <w:p><w:r><w:t>Chỉ định dịch vụ</w:t></w:r></w:p>
+    <w:tbl>
+      <w:tr>
+        <w:tc><w:p><w:r><w:t>Dịch vụ</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Bác sĩ</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Khoảng cách (buổi)</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Số lượng</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Ngày bắt đầu</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Tạo lúc</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Cập nhật lúc</w:t></w:r></w:p></w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc><w:p><w:r><w:t>${services.idDichVu}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${services.idBacSi}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${services.khoangCachBuoiDieuTri}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${services.soLuong}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${services.ngayBatDau}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${services.createdAt}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${services.updatedAt}</w:t></w:r></w:p></w:tc>
+      </w:tr>
+    </w:tbl>
+
+    <w:p><w:r><w:t>Lịch sử thanh toán</w:t></w:r></w:p>
+    <w:tbl>
+      <w:tr>
+        <w:tc><w:p><w:r><w:t>Thời điểm TT</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Số tiền</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Người nộp</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>SĐT</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Ghi chú</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Sổ quỹ tháng</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Tạo lúc</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>Cập nhật lúc</w:t></w:r></w:p></w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc><w:p><w:r><w:t>${payments.thanhToanLuc}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${payments.daThanhToan}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${payments.hoTenNguoiNopTien}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${payments.soDienThoai}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${payments.ghiChu}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${payments.idSoQuyThang}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${payments.createdAt}</w:t></w:r></w:p></w:tc>
+        <w:tc><w:p><w:r><w:t>${payments.updatedAt}</w:t></w:r></w:p></w:tc>
+      </w:tr>
+    </w:tbl>
+
+  </w:body>
+  
+</w:wordDocument>
+
+
+

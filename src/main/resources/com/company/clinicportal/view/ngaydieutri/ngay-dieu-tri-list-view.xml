@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://ngayDieuTriListView.title"
+      focusComponent="ngayDieuTrisDataGrid">
+    <data>
+        <collection id="ngayDieuTrisDc"
+                    class="com.company.clinicportal.entity.NgayDieuTri">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+                <property name="idBenhNhan" fetchPlan="_base">
+                    <property name="phieuDieuTri" fetchPlan="_base">
+                        <property name="chiTietDieuTri" fetchPlan="_base">
+                        </property>
+                    </property>
+                </property>
+            </fetchPlan>
+            <loader id="ngayDieuTrisDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NgayDieuTri e where e.ngay = :currentDate]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="ngayDieuTrisDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="ngayDieuTrisDataGrid.createAction"/>
+            <button id="editButton" action="ngayDieuTrisDataGrid.editAction"/>
+            <button id="removeButton" action="ngayDieuTrisDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="ngayDieuTrisDl"/>
+        </hbox>
+        <dataGrid id="ngayDieuTrisDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="ngayDieuTrisDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="gioHen"/>
+                <column property="idBenhNhan.hoVaTen"/>
+                <column property="idBenhNhan.ngaySinh"/>
+                <column property="idBenhNhan.diaChi"/>
+                <column property="soBuoi"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://tblKhachhangDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="tblKhachhangDc"
+                  class="com.company.clinicportal.entity.TblKhachhang">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="tblKhachhangDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="tblKhachhangDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <dateTimePicker id="createdAtField" property="createdAt"/>
+            <textField id="createdByIdField" property="createdById"/>
+            <textArea id="diaChiField" height="9.5em" property="diaChi"/>
+            <textField id="hoTenField" property="hoTen"/>
+            <textField id="hoTenNguoiLienHeField" property="hoTenNguoiLienHe"/>
+            <textField id="nguoiLienHeField" property="nguoiLienHe"/>
+            <textField id="soDienThoaiField" property="soDienThoai"/>
+            <dateTimePicker id="updatedAtField" property="updatedAt"/>
+            <textField id="updatedByIdField" property="updatedById"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

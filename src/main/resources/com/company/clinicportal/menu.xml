@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<menu-config xmlns="http://jmix.io/schema/flowui/menu">
+
+    <menu id="application" title="msg://com.company.clinicportal/menu.application.title" opened="true">
+        <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title"/>
+        <item view="NgayDieuTri.list"
+              title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"/>
+        <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title"/>
+        <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title"/>
+        <item view="BuoiDieuTri.list"
+              title="msg://com.company.clinicportal.view.buoidieutri/buoiDieuTriListView.title"/>
+        <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title"/>
+
+
+<!--        <item view="BenhNhan.list" title="msg://com.company.clinicportal.view.benhnhan/benhNhanListView.title"/>-->
+
+<!--        <item view="ChiTietDichVu.list"-->
+<!--              title="msg://com.company.clinicportal.view.chitietdichvu/chiTietDichVuListView.title"/>-->
+<!--        <item view="ChiTietDieuTri.list"-->
+<!--              title="msg://com.company.clinicportal.view.chitietdieutri/chiTietDieuTriListView.title"/>-->
+<!--        <item view="GiaKpi.list" title="msg://com.company.clinicportal.view.giakpi/giaKpiListView.title"/>-->
+<!--        <item view="LichSuThanhToan.list"-->
+<!--              title="msg://com.company.clinicportal.view.lichsuthanhtoan/lichSuThanhToanListView.title"/>-->
+<!--        <item view="LuongThang.list" title="msg://com.company.clinicportal.view.luongthang/luongThangListView.title"/>-->
+
+<!--        <item view="PhieuChi.list" title="msg://com.company.clinicportal.view.phieuchi/phieuChiListView.title"/>-->
+<!--        <item view="PhieuDieuTri.list"-->
+<!--              title="msg://com.company.clinicportal.view.phieudieutri/phieuDieuTriListView.title"/>-->
+<!--        <item view="SoQuy.list" title="msg://com.company.clinicportal.view.soquy/soQuyListView.title"/>-->
+<!--        <item view="TblKhachhang.list"-->
+<!--              title="msg://com.company.clinicportal.view.tblkhachhang/tblKhachhangListView.title"/>-->
+<!--        <item view="TinhKpi.list" title="msg://com.company.clinicportal.view.tinhkpi/tinhKpiListView.title"/>-->
+<!--        <item view="TrongSoKpiDichVu.list"-->
+<!--              title="msg://com.company.clinicportal.view.trongsokpidichvu/trongSoKpiDichVuListView.title"/>-->
+    </menu>
+
+</menu-config>

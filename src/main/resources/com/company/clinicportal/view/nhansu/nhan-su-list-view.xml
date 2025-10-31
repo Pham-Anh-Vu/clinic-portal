@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://nhanSuListView.title"
+      focusComponent="nhanSusDataGrid">
+    <data>
+        <collection id="nhanSusDc"
+                    class="com.company.clinicportal.entity.NhanSu">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="nhanSusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NhanSu e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="nhanSusDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="nhanSusDataGrid.createAction"/>
+            <button id="editButton" action="nhanSusDataGrid.editAction"/>
+            <button id="removeButton" action="nhanSusDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="nhanSusDl"/>
+        </hbox>
+        <dataGrid id="nhanSusDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="nhanSusDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="hoTen"/>
+                <column property="chucVu"/>
+                <column property="diaChi"/>
+                <column property="dienThoai"/>
+                <column property="gioiTinh"/>
+                <column property="hinhThucLamVic"/>
+                <column property="luongCoBan"/>
+                <column property="maNhanSu"/>
+                <column property="ngaySinh"/>
+                <column property="ngayVaoLam"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

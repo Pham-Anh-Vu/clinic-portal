@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://phieuChiDinhListView.title"
+      focusComponent="benhNhansDataGrid">
+    <data>
+        <collection id="benhNhansDc"
+                    class="com.company.clinicportal.entity.BenhNhan">
+            <fetchPlan>
+                <property name="diaChi"/>
+                <property name="dienThoai"/>
+                <property name="gioiTinh"/>
+                <property name="hoVaTen"/>
+                <property name="ngaySinh"/>
+                <property name="tuoi"/>
+            </fetchPlan>
+            <loader id="benhNhansDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BenhNhan e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="benhNhansDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <simplePagination id="pagination" dataLoader="benhNhansDl"/>
+        </hbox>
+        <dataGrid id="benhNhansDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="benhNhansDc"
+                  columnReorderingAllowed="true">
+            <actions>
+            </actions>
+            <columns resizable="true">
+                <column property="id"/>
+                <column property="hoVaTen"/>
+                <column property="ngaySinh"/>
+                <column property="tuoi"/>
+                <column property="diaChi"/>
+                <column property="dienThoai"/>
+                <column property="gioiTinh"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

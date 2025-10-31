@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://lichHenDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="lichHenDc"
+                  class="com.company.clinicportal.entity.LichHen">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="lichHenDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="lichHenDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <dateTimePicker id="createdAtField" property="createdAt"/>
+            <textField id="createdByIdField" property="createdById"/>
+            <textField id="hinhThucField" property="hinhThuc"/>
+            <textField id="idBacSiField" property="idBacSi"/>
+            <textField id="idBenhNhanField" property="idBenhNhan"/>
+            <textField id="luuYField" property="luuY"/>
+            <datePicker id="ngayHenField" property="ngayHen"/>
+            <textField id="nhuCauKhachHangField" property="nhuCauKhachHang"/>
+            <timePicker id="thoiGianHenField" property="thoiGianHen"/>
+            <textField id="tinhTrangBenhField" property="tinhTrangBenh"/>
+            <dateTimePicker id="updatedAtField" property="updatedAt"/>
+            <textField id="updatedByIdField" property="updatedById"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

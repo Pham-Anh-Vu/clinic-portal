@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://luongThangListView.title"
+      focusComponent="luongThangsDataGrid">
+    <data>
+        <collection id="luongThangsDc"
+                    class="com.company.clinicportal.entity.LuongThang">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="luongThangsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from LuongThang e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="luongThangsDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="luongThangsDataGrid.createAction"/>
+            <button id="editButton" action="luongThangsDataGrid.editAction"/>
+            <button id="removeButton" action="luongThangsDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="luongThangsDl"/>
+        </hbox>
+        <dataGrid id="luongThangsDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="luongThangsDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="createdAt"/>
+                <column property="createdById"/>
+                <column property="idNhanSu"/>
+                <column property="idSoQuyThang"/>
+                <column property="thang"/>
+                <column property="tongLuong"/>
+                <column property="updatedAt"/>
+                <column property="updatedById"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

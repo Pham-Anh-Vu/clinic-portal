@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://dmDichVuDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="dmDichVuDc"
+                  class="com.company.clinicportal.entity.DmDichVu">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="dmDichVuDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="dmDichVuDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <dateTimePicker id="createdAtField" property="createdAt"/>
+            <textField id="createdByIdField" property="createdById"/>
+            <textField id="donViTinhField" property="donViTinh"/>
+            <textField id="fNanlovbceviField" property="fNanlovbcevi"/>
+            <textField id="giaField" property="gia"/>
+            <textField id="giaKpiSangField" property="giaKpiSang"/>
+            <textField id="giaKpiToiField" property="giaKpiToi"/>
+            <textField id="idChiTietDichVuField" property="idChiTietDichVu"/>
+            <textField id="khuyenMaiField" property="khuyenMai"/>
+            <textArea id="moTaField" height="9.5em" property="moTa"/>
+            <textField id="nhomDichVuField" property="nhomDichVu"/>
+            <textField id="tenDichVuField" property="tenDichVu"/>
+            <dateTimePicker id="updatedAtField" property="updatedAt"/>
+            <textField id="updatedByIdField" property="updatedById"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

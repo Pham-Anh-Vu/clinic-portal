@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://luongThangDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="luongThangDc"
+                  class="com.company.clinicportal.entity.LuongThang">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="luongThangDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="luongThangDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <dateTimePicker id="createdAtField" property="createdAt"/>
+            <textField id="createdByIdField" property="createdById"/>
+            <textField id="idNhanSuField" property="idNhanSu"/>
+            <textField id="idSoQuyThangField" property="idSoQuyThang"/>
+            <datePicker id="thangField" property="thang"/>
+            <textField id="tongLuongField" property="tongLuong"/>
+            <dateTimePicker id="updatedAtField" property="updatedAt"/>
+            <textField id="updatedByIdField" property="updatedById"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

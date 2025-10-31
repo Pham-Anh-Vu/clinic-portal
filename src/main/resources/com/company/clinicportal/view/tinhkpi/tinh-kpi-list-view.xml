@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://tinhKpiListView.title"
+      focusComponent="tinhKpisDataGrid">
+    <data>
+        <collection id="tinhKpisDc"
+                    class="com.company.clinicportal.entity.TinhKpi">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="tinhKpisDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from TinhKpi e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="tinhKpisDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="tinhKpisDataGrid.createAction"/>
+            <button id="editButton" action="tinhKpisDataGrid.editAction"/>
+            <button id="removeButton" action="tinhKpisDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="tinhKpisDl"/>
+        </hbox>
+        <dataGrid id="tinhKpisDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="tinhKpisDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="createdAt"/>
+                <column property="createdById"/>
+                <column property="idLuongThang"/>
+                <column property="idNhanSu"/>
+                <column property="kpiSang"/>
+                <column property="kpiToi"/>
+                <column property="kpiTong"/>
+                <column property="thang"/>
+                <column property="thanhTien"/>
+                <column property="updatedAt"/>
+                <column property="updatedById"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

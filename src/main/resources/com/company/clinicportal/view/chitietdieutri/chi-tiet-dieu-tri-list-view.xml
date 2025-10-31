@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://chiTietDieuTriListView.title"
+      focusComponent="chiTietDieuTrisDataGrid">
+    <data>
+        <collection id="chiTietDieuTrisDc"
+                    class="com.company.clinicportal.entity.ChiTietDieuTri">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+                <property name="idBenhNhan" fetchPlan="_base">
+                    <property name="hoVaTen"/>
+                </property>
+                <property name="idNhanSu" fetchPlan="_base">
+                    <property name="hoTen"/>
+                </property>
+            </fetchPlan>
+            <loader id="chiTietDieuTrisDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select e from ChiTietDieuTri e
+                        where (:idBenhNhan is null or e.idBenhNhan.id = :idBenhNhan)
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="chiTietDieuTrisDataGrid.createAction"/>
+            <button id="editButton" action="chiTietDieuTrisDataGrid.editAction"/>
+            <button id="removeButton" action="chiTietDieuTrisDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="chiTietDieuTrisDl"/>
+        </hbox>
+        <dataGrid id="chiTietDieuTrisDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="chiTietDieuTrisDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="id"/>
+                <column property="idBenhNhan.hoVaTen"/>
+                <column property="tenPhieuDieuTri"/>
+                <column property="idNhanSu.hoTen"/>
+                <column property="tongTien"/>
+                <column property="phaiDong"/>
+                <column property="daThanhToan"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

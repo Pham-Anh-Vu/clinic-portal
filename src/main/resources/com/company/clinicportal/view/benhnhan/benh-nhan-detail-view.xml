@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://benhNhanDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="benhNhanDc"
+                  class="com.company.clinicportal.entity.BenhNhan">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="benhNhanDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="benhNhanDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <dateTimePicker id="createdAtField" property="createdAt"/>
+            <textField id="createdByIdField" property="createdById"/>
+            <textArea id="diaChiField" height="9.5em" property="diaChi"/>
+            <textField id="dienThoaiField" property="dienThoai"/>
+            <textField id="gioiTinhField" property="gioiTinh"/>
+            <textField id="hoTenNguoiThanField" property="hoTenNguoiThan"/>
+            <textField id="hoVaTenField" property="hoVaTen"/>
+            <datePicker id="ngaySinhField" property="ngaySinh"/>
+            <textField id="nguoiGioiThieuField" property="nguoiGioiThieu"/>
+            <textField id="nguonBenhNhanField" property="nguonBenhNhan"/>
+            <textField id="quanHeVoiBenhNhanField" property="quanHeVoiBenhNhan"/>
+            <textField id="sdtNguoiThanField" property="sdtNguoiThan"/>
+            <textField id="tuoiField" property="tuoi"/>
+            <dateTimePicker id="updatedAtField" property="updatedAt"/>
+            <textField id="updatedByIdField" property="updatedById"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://buoiDieuTriDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="buoiDieuTriDc"
+                  class="com.company.clinicportal.entity.BuoiDieuTri">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+            </fetchPlan>
+            <loader id="buoiDieuTriDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="buoiDieuTriDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <textField id="caField" property="ca"/>
+            <dateTimePicker id="createdAtField" property="createdAt"/>
+            <textField id="createdByIdField" property="createdById"/>
+            <textField id="fS6gkc3y0vfjField" property="fS6gkc3y0vfj"/>
+            <timePicker id="gioBatDauField" property="gioBatDau"/>
+            <timePicker id="gioBatDauStagingField" property="gioBatDauStaging"/>
+            <timePicker id="gioKetThucField" property="gioKetThuc"/>
+            <textField id="idBenhNhanField" property="idBenhNhan"/>
+            <textField id="idChiTietDichVuField" property="idChiTietDichVu"/>
+            <textField id="idNgayDieuTriField" property="idNgayDieuTri"/>
+            <textField id="idNhanSu2Field" property="idNhanSu2"/>
+            <textField id="idNhanSu2StagingField" property="idNhanSu2Staging"/>
+            <textField id="idNhanSuStagingField" property="idNhanSuStaging"/>
+            <datePicker id="ngayThucHienField" property="ngayThucHien"/>
+            <datePicker id="ngayThucHienStagingField" property="ngayThucHienStaging"/>
+            <textField id="trangThaiField" property="trangThai"/>
+            <dateTimePicker id="updatedAtField" property="updatedAt"/>
+            <textField id="updatedByIdField" property="updatedById"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

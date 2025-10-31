@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://lichHenListView.title"
+      focusComponent="lichHensDataGrid">
+    <data>
+        <collection id="lichHensDc"
+                    class="com.company.clinicportal.entity.LichHen">
+            <fetchPlan extends="_base">
+                <property name="id"/>
+                <property name="idBenhNhan" fetchPlan="_base">
+                </property>
+            </fetchPlan>
+            <loader id="lichHensDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select e
+                        from LichHen e
+                        where e.ngayHen = :currentDate
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="lichHensDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="lichHensDataGrid.createAction"/>
+            <button id="editButton" action="lichHensDataGrid.editAction"/>
+            <button id="removeButton" action="lichHensDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="lichHensDl"/>
+        </hbox>
+        <dataGrid id="lichHensDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="lichHensDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="idBenhNhan.hoVaTen"/>
+                <column property="hinhThuc"/>
+                <column property="idBacSi"/>
+                <column property="luuY"/>
+                <column property="ngayHen"/>
+                <column property="nhuCauKhachHang"/>
+                <column property="thoiGianHen"/>
+                <column property="tinhTrangBenh"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>
