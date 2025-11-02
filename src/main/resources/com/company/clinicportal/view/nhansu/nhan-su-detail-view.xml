@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
       title="msg://nhanSuDetailView.title"
-      focusComponent="form">
+      focusComponent="form"
+>
     <data>
         <instance id="nhanSuDc"
                   class="com.company.clinicportal.entity.NhanSu">
@@ -32,7 +33,9 @@
                     <![CDATA[select e from BuoiDieuTri e where e.idNhanSuStaging = :idNhanSuStaging ]]>
                 </query>
             </loader>
-            <fetchPlan extends="_base"/>
+            <fetchPlan extends="_base">
+                <property name="idBenhNhan" fetchPlan="_base"/>
+            </fetchPlan>
         </collection>
 
     </data>
@@ -46,63 +49,123 @@
     <layout>
         <formLayout id="form" dataContainer="nhanSuDc">
 
-            <textField id="chucVuField" property="chucVu"/>
-            <dateTimePicker id="createdAtField" property="createdAt"/>
-            <textField id="createdByIdField" property="createdById"/>
-            <textField id="diaChiField" property="diaChi"/>
-            <textField id="dienThoaiField" property="dienThoai"/>
-            <textField id="gioiTinhField" property="gioiTinh"/>
-            <textField id="hinhThucLamVicField" property="hinhThucLamVic"/>
-            <textField id="hoTenField" property="hoTen"/>
-            <textField id="luongCoBanField" property="luongCoBan"/>
-            <textField id="maNhanSuField" property="maNhanSu"/>
-            <datePicker id="ngaySinhField" property="ngaySinh"/>
-            <datePicker id="ngayVaoLamField" property="ngayVaoLam"/>
+            <vbox width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid" colspan="2">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="THÔNG TIN CHUNG"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
 
-            <dataGrid id="buoiDieuTrisDataGrid" dataContainer="buoiDieuTrisDc" minWidth="100px" width="100%" colspan="2">
-                <actions>
-                    <action id="create" type="list_create"/>
-                    <action id="edit" type="list_edit"/>
-                    <action id="remove" type="list_remove"/>
-                </actions>
-                <columns>
-                    <column property="ca"/>
-                    <column property="createdAt"/>
-                    <column property="createdById"/>
-                    <column property="fS6gkc3y0vfj"/>
-                    <column property="gioBatDau"/>
-                    <column property="gioBatDauStaging"/>
-                    <column property="gioKetThuc"/>
-                    <column property="idBenhNhan"/>
-                    <column property="idNgayDieuTri"/>
-                    <column property="idNhanSu2"/>
-                    <column property="idNhanSu2Staging"/>
-                    <column property="ngayThucHien"/>
-                    <column property="ngayThucHienStaging"/>
-                    <column property="trangThai"/>
-                    <column property="updatedAt"/>
-                    <column property="updatedById"/>
-                </columns>
-            </dataGrid>
-            <dataGrid id="tinhKpisDataGrid" dataContainer="tinhKpisDc" minWidth="100px" width="100%" colspan="2">
-                <actions>
-                    <action id="create" type="list_create"/>
-                    <action id="edit" type="list_edit"/>
-                    <action id="remove" type="list_remove"/>
-                </actions>
-                <columns>
-                    <column property="createdAt"/>
-                    <column property="createdById"/>
-                    <column property="idLuongThang"/>
-                    <column property="kpiSang"/>
-                    <column property="kpiToi"/>
-                    <column property="kpiTong"/>
-                    <column property="thang"/>
-                    <column property="thanhTien"/>
-                    <column property="updatedAt"/>
-                    <column property="updatedById"/>
-                </columns>
-            </dataGrid>
+                <vbox padding="false" classNames="grid-data">
+                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="4"/>
+                        </responsiveSteps>
+                        <textField label="Thông tin nhân sự" id="hoTenField" property="hoTen"/>
+                        <datePicker id="ngaySinhField" property="ngaySinh"/>
+                        <select id="gioiTinhField" property="gioiTinh"/>
+                        <textField id="dienThoaiField" property="dienThoai"/>
+                        <datePicker id="ngayVaoLamField" property="ngayVaoLam"/>
+                        <select id="chucVuField" property="chucVu"/>
+                        <textField id="luongCoBanField" property="luongCoBan"/>
+                        <textField id="diaChiField" property="diaChi"/>
+                        <textField id="maNhanSuField" property="maNhanSu"/>
+                    </formLayout>
+                </vbox>
+            </vbox>
+
+            <vbox id="kpiMonth" width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid" colspan="2" visible="false">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="CHI TIẾT KPI"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
+
+                <vbox padding="false" classNames="grid-data">
+                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="2"/>
+                        </responsiveSteps>
+                        <dataGrid id="buoiDieuTrisDataGrid" dataContainer="buoiDieuTrisDc" minWidth="100px" width="100%" colspan="2">
+                            <emptyStateComponent>
+                                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                    <h2 text="Chưa có dữ liệu"/>
+                                </vbox>
+                            </emptyStateComponent>
+                            <actions>
+                                <action id="create" type="list_create"/>
+                                <action id="edit" type="list_edit"/>
+                                <action id="remove" type="list_remove"/>
+                            </actions>
+                            <columns>
+                                <column property="trangThai"/>
+                                <column property="idBenhNhan.hoVaTen"/>
+                                <column property="ngayThucHien"/>
+                                <column property="gioBatDau"/>
+                                <column property="gioKetThuc"/>
+                                <column property="ca"/>
+                            </columns>
+                        </dataGrid>
+                    </formLayout>
+                </vbox>
+            </vbox>
+
+            <vbox id="kpiDetail" width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid" colspan="2" visible="false">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="KPI theo tháng"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
+
+                <vbox padding="false" classNames="grid-data">
+                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="2"/>
+                        </responsiveSteps>
+                        <dataGrid id="tinhKpisDataGrid" dataContainer="tinhKpisDc" minWidth="100px" width="100%" colspan="2">
+                            <emptyStateComponent>
+                                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                    <h2 text="Chưa có dữ liệu"/>
+                                </vbox>
+                            </emptyStateComponent>
+                            <actions>
+                                <action id="create" type="list_create"/>
+                                <action id="edit" type="list_edit"/>
+                                <action id="remove" type="list_remove"/>
+                            </actions>
+                            <columns>
+                                <column property="thang"/>
+                                <column property="kpiSang"/>
+                                <column property="kpiToi"/>
+                                <column property="kpiTong"/>
+                                <column property="thanhTien"/>
+                            </columns>
+                        </dataGrid>
+                    </formLayout>
+                </vbox>
+            </vbox>
+
+
             <responsiveSteps>
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>

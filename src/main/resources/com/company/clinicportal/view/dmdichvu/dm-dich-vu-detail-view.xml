@@ -24,20 +24,15 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <dateTimePicker id="createdAtField" property="createdAt"/>
-            <textField id="createdByIdField" property="createdById"/>
-            <textField id="donViTinhField" property="donViTinh"/>
-            <textField id="fNanlovbceviField" property="fNanlovbcevi"/>
+            <textField id="tenDichVuField" property="tenDichVu"/>
+            <select id="nhomDichVuField" property="nhomDichVu"/>
+            <textArea id="moTaField" height="9.5em" property="moTa" colspan="2"/>
             <textField id="giaField" property="gia"/>
             <textField id="giaKpiSangField" property="giaKpiSang"/>
             <textField id="giaKpiToiField" property="giaKpiToi"/>
-            <textField id="idChiTietDichVuField" property="idChiTietDichVu"/>
-            <textField id="khuyenMaiField" property="khuyenMai"/>
-            <textArea id="moTaField" height="9.5em" property="moTa"/>
-            <textField id="nhomDichVuField" property="nhomDichVu"/>
-            <textField id="tenDichVuField" property="tenDichVu"/>
-            <dateTimePicker id="updatedAtField" property="updatedAt"/>
-            <textField id="updatedByIdField" property="updatedById"/>
+            <textField id="donViTinhField" property="donViTinh"/>
+
+
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

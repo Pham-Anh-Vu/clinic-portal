@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://thuThuatDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="buoiDieuTriDc"
+                  class="com.company.clinicportal.entity.BuoiDieuTri">
+            <fetchPlan>
+                <property name="gioBatDau"/>
+                <property name="gioKetThuc"/>
+                <property name="idBenhNhan" fetchPlan="_base"/>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                    <property name="idDichVu" fetchPlan="_base"/>
+                </property>
+                <property name="idNhanSu2Staging"/>
+                <property name="idNhanSuStaging" fetchPlan="_base"/>
+                <property name="ngayThucHien"/>
+                <property name="trangThai"/>
+            </fetchPlan>
+            <loader id="buoiDieuTriDl"/>
+        </instance>
+        <collection id="nhanSusDc" class="com.company.clinicportal.entity.NhanSu">
+            <loader id="nhanSusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NhanSu e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="buoiDieuTriDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <timePicker id="gioBatDauField" property="gioBatDau"/>
+            <timePicker id="gioKetThucField" property="gioKetThuc"/>
+            <datePicker id="ngayThucHienField" property="ngayThucHien"/>
+            <select id="trangThaiField" property="trangThai"/>
+            <entityComboBox id="idNhanSuStagingField" property="idNhanSuStaging" itemsContainer="nhanSusDc" label="KTV thực hiện"/>
+            <entityComboBox id="idNhanSu2StagingField" property="idNhanSu2Staging" itemsContainer="nhanSusDc" label="KTV thực hiện 2"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

@@ -50,7 +50,8 @@
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                    <formLayout
+                            css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="4"/>
                         </responsiveSteps>
@@ -60,7 +61,7 @@
                         <textField id="tuoiField" property="idBenhNhan.tuoi" readOnly="true"/>
                         <textField id="dienThoaiField" property="idBenhNhan.dienThoai" readOnly="true"/>
                         <textField id="diaChiField" property="idBenhNhan.diaChi" readOnly="true"/>
-                        <textArea id="trieuChungField" height="9.5em" property="trieuChung" />
+                        <textArea id="trieuChungField" height="9.5em" property="trieuChung"/>
                         <textArea id="chuanDoanField" height="9.5em" property="chuanDoan"/>
                         <textField id="idNhanSuField" property="idNhanSu.hoTen" colspan="2" readOnly="true"/>
                     </formLayout>
@@ -77,24 +78,34 @@
                                 <span text="CHỈ ĐỊNH DỊCH VỤ"/>
                             </div>
                             <div classNames="function-flex-end">
-                                <button action="chiTietDichVusDataGrid.create" text="msg:///create" classNames="action-button create"/>
-                                <button action="chiTietDichVusDataGrid.edit" text="msg:///edit" classNames="action-button create"/>
-                                <button action="chiTietDichVusDataGrid.remove" text="msg:///remove" classNames="action-button create"/>
+                                <button action="chiTietDichVusDataGrid.create" text="msg:///create"
+                                        classNames="action-button create" css="min-width: 80px; height: 28px;"/>
+                                <button action="chiTietDichVusDataGrid.edit" text="msg:///edit"
+                                        classNames="action-button create" css="min-width: 80px; height: 28px;"/>
+                                <button action="chiTietDichVusDataGrid.remove" text="msg:///remove"
+                                        classNames="action-button create" css="min-width: 80px; height: 28px;"/>
                             </div>
                         </div>
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                    <formLayout
+                            css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="1"/>
                         </responsiveSteps>
-<!--                        <hbox css="width: 100%; justify-content: flex-end; gap: 8px;">-->
-<!--                           -->
-<!--                        </hbox>-->
+                        <!--                        <hbox css="width: 100%; justify-content: flex-end; gap: 8px;">-->
+                        <!--                           -->
+                        <!--                        </hbox>-->
                         <dataGrid id="chiTietDichVusDataGrid"
                                   dataContainer="chiTietDichVuDc"
                                   width="100%">
+                            <emptyStateComponent>
+                                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                    <h2 text="Chưa có dữ liệu"/>
+                                </vbox>
+                            </emptyStateComponent>
                             <actions>
                                 <action id="create" type="list_create"/>
                                 <action id="edit" type="list_edit"/>
@@ -127,11 +138,12 @@
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                    <formLayout
+                            css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="2"/>
                         </responsiveSteps>
-                        <textField id="tinhKpiField" property="tinhKpi" colspan="2" readOnly="true"/>
+                        <textField id="tinhKpiField" property="tinhKpi" colspan="2"/>
                         <textField id="trongSoDienTriLieuField" property="trongSoDienTriLieu"/>
                         <textField id="trongSoKeoGianField" property="trongSoKeoGian"/>
                         <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
@@ -153,15 +165,17 @@
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                    <formLayout
+                            css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
-                            <responsiveStep minWidth="0" columns="2"/>
+                            <responsiveStep minWidth="0" columns="6"/>
                         </responsiveSteps>
-                        <textField id="tongTienField" property="tongTien"/>
+                        <textField id="tongTienField" property="tongTien" readOnly="true"/>
                         <textField id="khuyenMaiField" property="khuyenMai"/>
-                        <textField id="tongTienSauKhuyenMaiField" property="tongTienSauKhuyenMai"/>
-                        <textField id="daThanhToanField" property="daThanhToan"/>
-                        <textField id="phaiDongField" property="phaiDong"/>
+                        <textField id="tongTienSauKhuyenMaiField" property="tongTienSauKhuyenMai" readOnly="true"/>
+                        <textField id="daThanhToanField" property="daThanhToan" readOnly="true"/>
+                        <textField id="phaiDongField" property="phaiDong" readOnly="true"/>
+                        <datePicker id="ngayThanhToanField" property="ngayThanhToan" readOnly="true"/>
                     </formLayout>
                 </vbox>
             </vbox>
@@ -175,38 +189,42 @@
                             <div classNames="title-grid">
                                 <span text="LỊCH SỬ THANH TOÁN"/>
                             </div>
+                            <div classNames="function-flex-end">
+                                <button action="lichSuThanhToansDataGrid.create" classNames="action-button"
+                                        text="msg:///create" css="min-width: 80px; height: 28px;"/>
+                                <button action="lichSuThanhToansDataGrid.edit" classNames="action-button"
+                                        text="msg:///edit" css="min-width: 80px; height: 28px;"/>
+                                <button action="lichSuThanhToansDataGrid.remove" classNames="action-button"
+                                        text="msg:///remove" css="min-width: 80px; height: 28px;"/>
+                            </div>
                         </div>
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                    <formLayout
+                            css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="1"/>
                         </responsiveSteps>
-                        <hbox css="width: 100%; justify-content: flex-end; gap: 8px;">
-                            <button action="lichSuThanhToansDataGrid.create" text="msg:///create" css="min-width: 80px; height: 28px;"/>
-                            <button action="lichSuThanhToansDataGrid.edit" text="msg:///edit" css="min-width: 80px; height: 28px;"/>
-                            <button action="lichSuThanhToansDataGrid.remove" text="msg:///remove" css="min-width: 80px; height: 28px;"/>
-                        </hbox>
                         <dataGrid id="lichSuThanhToansDataGrid" dataContainer="lichSuThanhToansDc" minWidth="100px"
                                   width="100%">
+                            <emptyStateComponent>
+                                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                    <h2 text="Chưa có dữ liệu"/>
+                                </vbox>
+                            </emptyStateComponent>
                             <actions>
                                 <action id="create" type="list_create"/>
                                 <action id="edit" type="list_edit"/>
                                 <action id="remove" type="list_remove"/>
                             </actions>
                             <columns>
-                                <column property="createdAt"/>
-                                <column property="createdById"/>
+                                <column property="thanhToanLuc"/>
                                 <column property="daThanhToan"/>
                                 <column property="ghiChu"/>
                                 <column property="hoTenNguoiNopTien"/>
-                                <column property="idSoQuyThang"/>
                                 <column property="soDienThoai"/>
-                                <column property="thanhToanLuc"/>
-                                <column property="thanhToanLucStaging"/>
-                                <column property="updatedAt"/>
-                                <column property="updatedById"/>
                             </columns>
                         </dataGrid>
 
@@ -214,29 +232,29 @@
                     </formLayout>
                 </vbox>
             </vbox>
-<!--            <textField id="chuanDoanRaVienField" property="chuanDoanRaVien"/>-->
-<!--            <dateTimePicker id="createdAtField" property="createdAt"/>-->
-<!--            <textField id="createdByIdField" property="createdById"/>-->
-<!--            <textField id="daXuLyField" property="daXuLy"/>-->
-<!--            <textArea id="dienBienBenhField" height="9.5em" property="dienBienBenh"/>-->
-<!--            <textField id="giamTrucTiepField" property="giamTrucTiep"/>-->
-<!--            <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>-->
-<!--            <textField id="huongDieuTriField" property="huongDieuTri"/>-->
-<!--            <textField id="idPhieuDieuTriField" property="idPhieuDieuTri"/>-->
-<!--            <textArea id="kbBoPhanField" height="9.5em" property="kbBoPhan"/>-->
-<!--            <textArea id="ketQuaCanLamSangField" height="9.5em" property="ketQuaCanLamSang"/>-->
-<!--            <textArea id="ketQuaXetNghiemField" height="9.5em" property="ketQuaXetNghiem"/>-->
-<!--            <textArea id="khamBenhQuaTrinhBenhField" height="9.5em" property="khamBenhQuaTrinhBenh"/>-->
-<!--            <textArea id="khamBenhTienSuBenhField" height="9.5em" property="khamBenhTienSuBenh"/>-->
-<!--            <textField id="khamBenhToanThanField" property="khamBenhToanThan"/>-->
-<!--            <textField id="lyDoVaoVienField" property="lyDoVaoVien"/>-->
-<!--            <datePicker id="ngayBatDauField" property="ngayBatDau"/>-->
-<!--            <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh"/>-->
-<!--            <datePicker id="ngayKetThucField" property="ngayKetThuc"/>-->
-<!--            <dateTimePicker id="ngayThanhToanField" property="ngayThanhToan"/>-->
-<!--            <textField id="tenPhieuDieuTriField" property="tenPhieuDieuTri"/>-->
-<!--            <textField id="tinhTrangBenhNhanField" property="tinhTrangBenhNhan"/>-->
-<!--            <textField id="tinhTrangBnField" property="tinhTrangBn"/>-->
+            <!--            <textField id="chuanDoanRaVienField" property="chuanDoanRaVien"/>-->
+            <!--            <dateTimePicker id="createdAtField" property="createdAt"/>-->
+            <!--            <textField id="createdByIdField" property="createdById"/>-->
+            <!--            <textField id="daXuLyField" property="daXuLy"/>-->
+            <!--            <textArea id="dienBienBenhField" height="9.5em" property="dienBienBenh"/>-->
+            <!--            <textField id="giamTrucTiepField" property="giamTrucTiep"/>-->
+            <!--            <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>-->
+            <!--            <textField id="huongDieuTriField" property="huongDieuTri"/>-->
+            <!--            <textField id="idPhieuDieuTriField" property="idPhieuDieuTri"/>-->
+            <!--            <textArea id="kbBoPhanField" height="9.5em" property="kbBoPhan"/>-->
+            <!--            <textArea id="ketQuaCanLamSangField" height="9.5em" property="ketQuaCanLamSang"/>-->
+            <!--            <textArea id="ketQuaXetNghiemField" height="9.5em" property="ketQuaXetNghiem"/>-->
+            <!--            <textArea id="khamBenhQuaTrinhBenhField" height="9.5em" property="khamBenhQuaTrinhBenh"/>-->
+            <!--            <textArea id="khamBenhTienSuBenhField" height="9.5em" property="khamBenhTienSuBenh"/>-->
+            <!--            <textField id="khamBenhToanThanField" property="khamBenhToanThan"/>-->
+            <!--            <textField id="lyDoVaoVienField" property="lyDoVaoVien"/>-->
+            <!--            <datePicker id="ngayBatDauField" property="ngayBatDau"/>-->
+            <!--            <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh"/>-->
+            <!--            <datePicker id="ngayKetThucField" property="ngayKetThuc"/>-->
+            <!--            <dateTimePicker id="ngayThanhToanField" property="ngayThanhToan"/>-->
+            <!--            <textField id="tenPhieuDieuTriField" property="tenPhieuDieuTri"/>-->
+            <!--            <textField id="tinhTrangBenhNhanField" property="tinhTrangBenhNhan"/>-->
+            <!--            <textField id="tinhTrangBnField" property="tinhTrangBn"/>-->
 
         </formLayout>
         <hbox id="detailActions">

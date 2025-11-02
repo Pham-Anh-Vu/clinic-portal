@@ -6,6 +6,8 @@ import com.vaadin.flow.router.Route;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 
+import java.util.Date;
+
 
 @Route(value = "buoi-dieu-tris", layout = MainView.class)
 @ViewController(id = "BuoiDieuTri.list")
@@ -14,6 +16,7 @@ import io.jmix.flowui.view.*;
 @DialogMode(width = "64em")
 public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
     public Long idChiTietDichVu = null;
+
     @ViewComponent
     private CollectionLoader<BuoiDieuTri> buoiDieuTrisDl;
 

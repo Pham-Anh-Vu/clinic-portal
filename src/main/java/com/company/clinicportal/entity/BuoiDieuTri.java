@@ -1,5 +1,6 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -43,8 +44,9 @@ public class BuoiDieuTri {
     @Column(name = "gio_ket_thuc")
     private Date gioKetThuc;
 
-    @Column(name = "id_benh_nhan")
-    private Long idBenhNhan;
+    @JoinColumn(name = "ID_BENH_NHAN")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private BenhNhan idBenhNhan;
 
     @JoinColumn(name = "ID_CHI_TIET_DICH_VU")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -56,8 +58,9 @@ public class BuoiDieuTri {
     @Column(name = "id_nhan_su_2")
     private Long idNhanSu2;
 
-    @Column(name = "id_nhan_su_2_staging")
-    private Long idNhanSu2Staging;
+    @JoinColumn(name = "ID_NHAN_SU_2_STAGING")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private NhanSu idNhanSu2Staging;
 
     @JoinColumn(name = "ID_NHAN_SU_STAGING")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -80,6 +83,22 @@ public class BuoiDieuTri {
 
     @Column(name = "\"updatedById\"")
     private Long updatedById;
+
+    public void setIdNhanSu2Staging(NhanSu idNhanSu2Staging) {
+        this.idNhanSu2Staging = idNhanSu2Staging;
+    }
+
+    public NhanSu getIdNhanSu2Staging() {
+        return idNhanSu2Staging;
+    }
+
+    public void setIdBenhNhan(BenhNhan idBenhNhan) {
+        this.idBenhNhan = idBenhNhan;
+    }
+
+    public BenhNhan getIdBenhNhan() {
+        return idBenhNhan;
+    }
 
     public void setIdNhanSuStaging(NhanSu idNhanSuStaging) {
         this.idNhanSuStaging = idNhanSuStaging;
@@ -113,12 +132,12 @@ public class BuoiDieuTri {
         this.updatedAt = updatedAt;
     }
 
-    public String getTrangThai() {
-        return trangThai;
+    public TrangThaiBuoiDieuTri getTrangThai() {
+        return trangThai == null ? null : TrangThaiBuoiDieuTri.fromId(trangThai);
     }
 
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
+    public void setTrangThai(TrangThaiBuoiDieuTri trangThai) {
+        this.trangThai = trangThai == null ? null : trangThai.getId();
     }
 
     public Date getNgayThucHienStaging() {
@@ -137,14 +156,6 @@ public class BuoiDieuTri {
         this.ngayThucHien = ngayThucHien;
     }
 
-    public Long getIdNhanSu2Staging() {
-        return idNhanSu2Staging;
-    }
-
-    public void setIdNhanSu2Staging(Long idNhanSu2Staging) {
-        this.idNhanSu2Staging = idNhanSu2Staging;
-    }
-
     public Long getIdNhanSu2() {
         return idNhanSu2;
     }
@@ -159,14 +170,6 @@ public class BuoiDieuTri {
 
     public void setIdNgayDieuTri(Long idNgayDieuTri) {
         this.idNgayDieuTri = idNgayDieuTri;
-    }
-
-    public Long getIdBenhNhan() {
-        return idBenhNhan;
-    }
-
-    public void setIdBenhNhan(Long idBenhNhan) {
-        this.idBenhNhan = idBenhNhan;
     }
 
     public Date getGioKetThuc() {

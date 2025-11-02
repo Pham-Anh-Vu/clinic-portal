@@ -43,6 +43,12 @@
                   minHeight="20em"
                   dataContainer="tblKhachhangsDc"
                   columnReorderingAllowed="true">
+            <emptyStateComponent>
+                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                    <h2 text="Chưa có dữ liệu"/>
+                </vbox>
+            </emptyStateComponent>
             <actions>
                 <action id="createAction" type="list_create"/>
                 <action id="editAction" type="list_edit"/>

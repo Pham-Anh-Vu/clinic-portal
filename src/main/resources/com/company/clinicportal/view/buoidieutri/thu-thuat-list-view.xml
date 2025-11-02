@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://thuThuatListView.title"
+      focusComponent="buoiDieuTrisDataGrid">
+    <data>
+        <collection id="buoiDieuTrisDc"
+                    class="com.company.clinicportal.entity.BuoiDieuTri">
+            <fetchPlan>
+                <property name="gioBatDau"/>
+                <property name="gioKetThuc"/>
+                <property name="idBenhNhan" fetchPlan="_base"/>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                    <property name="idDichVu" fetchPlan="_base"/>
+                </property>
+                <property name="idNhanSu2Staging"/>
+                <property name="idNhanSuStaging" fetchPlan="_base"/>
+                <property name="ngayThucHien"/>
+                <property name="trangThai"/>
+                <property name="ca"/>
+            </fetchPlan>
+            <loader id="buoiDieuTrisDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BuoiDieuTri e where e.ngayThucHien = :ngayThucHien]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="buoiDieuTrisDc_1" class="com.company.clinicportal.entity.BuoiDieuTri">
+            <loader id="buoiDieuTrisDl_1" readOnly="true">
+                <query>
+                    <![CDATA[select e from BuoiDieuTri e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base">
+                <property name="idBenhNhan" fetchPlan="_base">
+                    <property name="id"/>
+                </property>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                    <property name="idDichVu" fetchPlan="_base">
+                        <property name="tenDichVu"/>
+                    </property>
+                </property>
+                <property name="idNhanSuStaging" fetchPlan="_base">
+                    <property name="hoTen"/>
+                </property>
+                <property name="idNhanSu2Staging" fetchPlan="_base">
+                    <property name="hoTen"/>
+                </property>
+            </fetchPlan>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <genericFilter component="genericFilter2"/>
+            <pagination component="pagination"/>
+            <pagination component="pagination2"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+
+
+        <tabSheet width="100%" id="tabSheet" classNames="styled-tabs">
+            <tab id="tab1" label="Mới">
+                <vbox width="100%">
+                    <genericFilter id="genericFilter"
+                                   dataLoader="buoiDieuTrisDl" opened="false">
+                        <properties include=".*"/>
+                    </genericFilter>
+                    <hbox id="buttonsPanel" classNames="buttons-panel">
+                        <button id="editButton" action="buoiDieuTrisDataGrid.editAction"/>
+                        <button id="removeButton" action="buoiDieuTrisDataGrid.removeAction"/>
+                    </hbox>
+                    <dataGrid id="buoiDieuTrisDataGrid"
+                              width="100%"
+                              minHeight="20em"
+                              dataContainer="buoiDieuTrisDc"
+                              columnReorderingAllowed="true">
+                        <emptyStateComponent>
+                            <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                <h2 text="Chưa có dữ liệu"/>
+                            </vbox>
+                        </emptyStateComponent>
+                        <actions>
+                            <action id="createAction" type="list_create"/>
+                            <action id="editAction" type="list_edit"/>
+                            <action id="removeAction" type="list_remove"/>
+                        </actions>
+                        <columns resizable="true">
+                            <column property="idBenhNhan.id"/>
+                            <column property="idBenhNhan.hoVaTen"/>
+                            <column property="trangThai"/>
+                            <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
+                            <column property="idNhanSuStaging.hoTen" header="KTV thực hiện"/>
+                            <column property="idNhanSu2Staging.hoTen" header="KTV thực hiện 2"/>
+                            <column property="ngayThucHien"/>
+                            <column property="gioBatDau"/>
+                            <column property="gioKetThuc"/>
+                        </columns>
+                    </dataGrid>
+                    <simplePagination id="pagination" dataLoader="buoiDieuTrisDl" alignSelf="END"/>
+                    <hbox id="lookupActions" visible="false">
+                        <button id="selectButton" action="selectAction"/>
+                        <button id="discardButton" action="discardAction"/>
+                    </hbox>
+                </vbox>
+            </tab>
+            <tab id="tab2" label="Tất cả">
+                <vbox width="100%">
+                    <genericFilter id="genericFilter2"
+                                   dataLoader="buoiDieuTrisDl_1" opened="false">
+                        <properties include=".*"/>
+                    </genericFilter>
+                    <hbox id="buttonsPanel2" classNames="buttons-panel">
+                        <button id="editButton2" action="buoiDieuTrisDataGrid2.editAction2"/>
+                        <button id="removeButton2" action="buoiDieuTrisDataGrid2.removeAction2"/>
+                    </hbox>
+                    <dataGrid id="buoiDieuTrisDataGrid2"
+                              width="100%"
+                              minHeight="20em"
+                              dataContainer="buoiDieuTrisDc_1"
+                              columnReorderingAllowed="true">
+                        <emptyStateComponent>
+                            <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                <h2 text="Chưa có dữ liệu"/>
+                            </vbox>
+                        </emptyStateComponent>
+                        <actions>
+                            <action id="editAction2" type="list_edit"/>
+                            <action id="removeAction2" type="list_remove"/>
+                        </actions>
+                        <columns resizable="true">
+                            <column property="idBenhNhan.id"/>
+                            <column property="idBenhNhan.hoVaTen"/>
+                            <column property="trangThai"/>
+                            <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
+                            <column property="idNhanSuStaging.hoTen" header="KTV thực hiện"/>
+                            <column property="idNhanSu2Staging.hoTen" header="KTV thực hiện 2"/>
+                            <column property="ngayThucHien"/>
+                            <column property="gioBatDau"/>
+                            <column property="gioKetThuc"/>
+                        </columns>
+                    </dataGrid>
+                    <simplePagination id="pagination2" dataLoader="buoiDieuTrisDl_1" alignSelf="END"/>
+
+                    <hbox id="lookupActions2" visible="false">
+                        <button id="selectButton2" action="selectAction"/>
+                        <button id="discardButton2" action="discardAction"/>
+                    </hbox>
+                </vbox>
+            </tab>
+        </tabSheet>
+    </layout>
+</view>

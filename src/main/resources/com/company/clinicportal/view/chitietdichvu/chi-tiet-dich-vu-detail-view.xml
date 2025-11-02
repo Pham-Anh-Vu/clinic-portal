@@ -11,6 +11,14 @@
             </fetchPlan>
             <loader id="chiTietDichVuDl"/>
         </instance>
+        <collection id="dmDichVusDc" class="com.company.clinicportal.entity.DmDichVu">
+            <loader id="dmDichVusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from DmDichVu e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -25,16 +33,12 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <dateTimePicker id="createdAtField" property="createdAt"/>
-            <textField id="createdByIdField" property="createdById"/>
-            <textField id="idBacSiField" property="idBacSi"/>
-            <textField id="idChiTietPhieuDieuTriField" property="idChiTietPhieuDieuTri"/>
-            <textField id="idDichVuField" property="idDichVu"/>
-            <textField id="khoangCachBuoiDieuTriField" property="khoangCachBuoiDieuTri"/>
-            <datePicker id="ngayBatDauField" property="ngayBatDau"/>
-            <textField id="soLuongField" property="soLuong"/>
-            <dateTimePicker id="updatedAtField" property="updatedAt"/>
-            <textField id="updatedByIdField" property="updatedById"/>
+            <entityComboBox id="idDichVuField" property="idDichVu" itemsContainer="dmDichVusDc" label="msg:///dichVu" required="true"/>
+            <textField id="soLuongField" property="soLuong" label="msg:///soBuoi" required="true"/>
+            <textField id="giaField" property="idDichVu.gia" label="msg:///gia" readOnly="true"/>
+            <textField id="donViTinhField" property="idDichVu.donViTinh" label="msg:///donViTinh" readOnly="true"/>
+            <datePicker id="ngayBatDauField" property="ngayBatDau" required="true"/>
+            <textField id="khoangCachBuoiDieuTriField" property="khoangCachBuoiDieuTri" required="true"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

@@ -3,6 +3,7 @@ package com.company.clinicportal.view.benhnhan;
 import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
@@ -35,9 +36,11 @@ public class PhieuChiDinhListView extends StandardListView<BenhNhan> {
             button.setText("Chi tiết");
             button.addClickListener(e -> {
                 if (benhNhan != null && benhNhan.getId() != null) {
-                    DialogWindow<ChiTietDieuTriListView> dialogWindow =  dialogWindows.view(this, ChiTietDieuTriListView.class).build();
-                    dialogWindow.getView().setIdBenhNhan(benhNhan.getId());
-                    dialogWindow.open();
+                    DialogWindow<ChiTietDieuTriListView> windows = dialogWindows.view(this, ChiTietDieuTriListView.class).build();
+                    windows.getView().setIdBenhNhan(benhNhan.getId());
+                    windows.setHeight("100%");
+                    windows.setWidth("80%");
+                    windows.open();
                 }
             });
             return button;

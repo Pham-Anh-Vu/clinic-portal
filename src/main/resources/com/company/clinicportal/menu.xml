@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
-
-    <menu id="application" title="msg://com.company.clinicportal/menu.application.title" opened="true">
-        <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title"/>
+    <menu id="application" title="msg://com.company.clinicportal/menu.application.title" opened="true" >
+        <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar"/>
         <item view="NgayDieuTri.list"
-              title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"/>
-        <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title"/>
-        <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title"/>
-        <item view="BuoiDieuTri.list"
-              title="msg://com.company.clinicportal.view.buoidieutri/buoiDieuTriListView.title"/>
-        <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title"/>
+              title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"
+              icon="vaadin:plus-square-o" />
+        <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title" icon="vaadin:user"/>
 
 
-<!--        <item view="BenhNhan.list" title="msg://com.company.clinicportal.view.benhnhan/benhNhanListView.title"/>-->
+        <menu id="indication" description="msg://fis.pbcap.finexbackoffice/menu_config.indication.description"
+              icon="vaadin:clipboard-text"
+             title="msg://fis.pbcap.finexbackoffice/menu_config.indication.title">
+            <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title" icon="vaadin:file-text"/>
+            <item view="ThuThuat.list" title="msg://com.company.clinicportal.view.buoidieutri/thuThuatListView.title" icon="vaadin:wrench"/>
+            <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title" icon="vaadin:list"/>
+        </menu>
+
+        <menu id="patient" description="msg://fis.pbcap.finexbackoffice/menu_config.patient.description"
+              icon="vaadin:users"
+             title="msg://fis.pbcap.finexbackoffice/menu_config.patient.title">
+            <item view="BenhNhan.list" title="msg://com.company.clinicportal.view.benhnhan/benhNhanListView.title" icon="vaadin:users"/>
+            <item id="soBenhAn" view="PhieuChiDinh.list" title="Sổ bệnh án" icon="vaadin:book"/>
+        </menu>
+
 
 <!--        <item view="ChiTietDichVu.list"-->
 <!--              title="msg://com.company.clinicportal.view.chitietdichvu/chiTietDichVuListView.title"/>-->

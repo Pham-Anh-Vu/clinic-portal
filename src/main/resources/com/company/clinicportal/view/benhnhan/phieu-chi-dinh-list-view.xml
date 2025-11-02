@@ -34,17 +34,22 @@
     </actions>
     <layout>
         <genericFilter id="genericFilter"
-                       dataLoader="benhNhansDl">
+                       dataLoader="benhNhansDl" opened="false">
             <properties include=".*"/>
         </genericFilter>
         <hbox id="buttonsPanel" classNames="buttons-panel">
-            <simplePagination id="pagination" dataLoader="benhNhansDl"/>
         </hbox>
         <dataGrid id="benhNhansDataGrid"
                   width="100%"
                   minHeight="20em"
                   dataContainer="benhNhansDc"
                   columnReorderingAllowed="true">
+            <emptyStateComponent>
+                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                    <h2 text="Chưa có dữ liệu"/>
+                </vbox>
+            </emptyStateComponent>
             <actions>
             </actions>
             <columns resizable="true">
@@ -54,9 +59,9 @@
                 <column property="tuoi"/>
                 <column property="diaChi"/>
                 <column property="dienThoai"/>
-                <column property="gioiTinh"/>
             </columns>
         </dataGrid>
+        <simplePagination id="pagination" dataLoader="benhNhansDl" alignSelf="END"/>
         <hbox id="lookupActions" visible="false">
             <button id="selectButton" action="selectAction"/>
             <button id="discardButton" action="discardAction"/>

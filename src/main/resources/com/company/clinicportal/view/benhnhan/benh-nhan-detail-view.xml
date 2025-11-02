@@ -22,23 +22,18 @@
         <formLayout id="form" dataContainer="benhNhanDc">
             <responsiveSteps>
                 <responsiveStep minWidth="0" columns="1"/>
-                <responsiveStep minWidth="40em" columns="2"/>
+                <responsiveStep minWidth="40em" columns="4"/>
             </responsiveSteps>
-            <dateTimePicker id="createdAtField" property="createdAt"/>
-            <textField id="createdByIdField" property="createdById"/>
-            <textArea id="diaChiField" height="9.5em" property="diaChi"/>
-            <textField id="dienThoaiField" property="dienThoai"/>
-            <textField id="gioiTinhField" property="gioiTinh"/>
-            <textField id="hoTenNguoiThanField" property="hoTenNguoiThan"/>
             <textField id="hoVaTenField" property="hoVaTen"/>
             <datePicker id="ngaySinhField" property="ngaySinh"/>
+            <select id="gioiTinhField" property="gioiTinh"/>
+            <textField id="dienThoaiField" property="dienThoai"/>
+            <textArea id="diaChiField" height="9.5em" property="diaChi" colspan="4"/>
             <textField id="nguoiGioiThieuField" property="nguoiGioiThieu"/>
-            <textField id="nguonBenhNhanField" property="nguonBenhNhan"/>
-            <textField id="quanHeVoiBenhNhanField" property="quanHeVoiBenhNhan"/>
+            <select id="nguonBenhNhanField" property="nguonBenhNhan"/>
+            <textField id="hoTenNguoiThanField" property="hoTenNguoiThan"/>
             <textField id="sdtNguoiThanField" property="sdtNguoiThan"/>
-            <textField id="tuoiField" property="tuoi"/>
-            <dateTimePicker id="updatedAtField" property="updatedAt"/>
-            <textField id="updatedByIdField" property="updatedById"/>
+            <textField id="quanHeVoiBenhNhanField" property="quanHeVoiBenhNhan"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

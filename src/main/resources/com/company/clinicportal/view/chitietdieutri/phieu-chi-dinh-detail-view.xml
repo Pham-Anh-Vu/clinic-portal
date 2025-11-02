@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://phieuChiDinhDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="chiTietDieuTriDc"
+                  class="com.company.clinicportal.entity.ChiTietDieuTri">
+            <fetchPlan>
+                <property name="chuanDoan"/>
+                <property name="gioHenMacDinh"/>
+                <property name="idNhanSu" fetchPlan="_base"/>
+                <property name="ngayChiDinh"/>
+                <property name="tenPhieuDieuTri"/>
+                <property name="trieuChung"/>
+            </fetchPlan>
+            <loader id="chiTietDieuTriDl"/>
+        </instance>
+        <collection id="nhanSusDc" class="com.company.clinicportal.entity.NhanSu">
+            <loader id="nhanSusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NhanSu e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="chiTietDieuTriDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <textField id="tenPhieuDieuTriField" property="tenPhieuDieuTri"/>
+            <entityComboBox id="idNhanSuField" property="idNhanSu"  itemsContainer="nhanSusDc"/>
+            <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh"/>
+            <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
+            <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2"/>
+            <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

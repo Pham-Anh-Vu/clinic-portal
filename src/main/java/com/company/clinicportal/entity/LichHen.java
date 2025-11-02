@@ -1,5 +1,6 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.HinhThuc;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -9,7 +10,8 @@ import java.util.Date;
 @DdlGeneration(value = DdlGeneration.DbScriptGenerationMode.DISABLED)
 @JmixEntity
 @Table(name = "lich_hen", indexes = {
-        @Index(name = "IDX_LICH_HEN_ID_BENH_NHAN", columnList = "ID_BENH_NHAN")
+        @Index(name = "IDX_LICH_HEN_ID_BENH_NHAN", columnList = "ID_BENH_NHAN"),
+        @Index(name = "IDX_LICH_HEN_", columnList = "")
 })
 @Entity
 public class LichHen {
@@ -28,8 +30,9 @@ public class LichHen {
     @Column(name = "hinh_thuc")
     private String hinhThuc;
 
-    @Column(name = "id_bac_si")
-    private Long idBacSi;
+    @JoinColumn(name = "ID_BAC_SI")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private NhanSu idBacSi;
 
     @JoinColumn(name = "ID_BENH_NHAN")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -58,6 +61,14 @@ public class LichHen {
 
     @Column(name = "\"updatedById\"")
     private Long updatedById;
+
+    public void setIdBacSi(NhanSu idBacSi) {
+        this.idBacSi = idBacSi;
+    }
+
+    public NhanSu getIdBacSi() {
+        return idBacSi;
+    }
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -123,20 +134,12 @@ public class LichHen {
         this.luuY = luuY;
     }
 
-    public Long getIdBacSi() {
-        return idBacSi;
+    public HinhThuc getHinhThuc() {
+        return hinhThuc == null ? null : HinhThuc.fromId(hinhThuc);
     }
 
-    public void setIdBacSi(Long idBacSi) {
-        this.idBacSi = idBacSi;
-    }
-
-    public String getHinhThuc() {
-        return hinhThuc;
-    }
-
-    public void setHinhThuc(String hinhThuc) {
-        this.hinhThuc = hinhThuc;
+    public void setHinhThuc(HinhThuc hinhThuc) {
+        this.hinhThuc = hinhThuc == null ? null : hinhThuc.getId();
     }
 
     public Long getCreatedById() {

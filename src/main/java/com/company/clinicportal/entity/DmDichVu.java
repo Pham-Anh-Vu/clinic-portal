@@ -1,5 +1,8 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.NhomDichVu;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -85,12 +88,12 @@ public class DmDichVu {
         this.tenDichVu = tenDichVu;
     }
 
-    public String getNhomDichVu() {
-        return nhomDichVu;
+    public NhomDichVu getNhomDichVu() {
+        return nhomDichVu == null ? null : NhomDichVu.fromId(nhomDichVu);
     }
 
-    public void setNhomDichVu(String nhomDichVu) {
-        this.nhomDichVu = nhomDichVu;
+    public void setNhomDichVu(NhomDichVu nhomDichVu) {
+        this.nhomDichVu = nhomDichVu == null ? null : nhomDichVu.getId();
     }
 
     public String getMoTa() {
@@ -181,4 +184,9 @@ public class DmDichVu {
         this.id = id;
     }
 
+    @InstanceName
+    @DependsOnProperties({"id", "tenDichVu"})
+    public String getDisplayName() {
+        return String.format("%s %s", id, tenDichVu);
+    }
 }

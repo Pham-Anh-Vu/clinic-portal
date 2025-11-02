@@ -1,5 +1,11 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.ChucVu;
+import com.company.clinicportal.enumentity.GioiTinh;
+import com.company.clinicportal.enumentity.HinhThucLamViec;
+import io.jmix.core.MetadataTools;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -118,20 +124,20 @@ public class NhanSu {
         this.hoTen = hoTen;
     }
 
-    public String getHinhThucLamVic() {
-        return hinhThucLamVic;
+    public HinhThucLamViec getHinhThucLamVic() {
+        return hinhThucLamVic == null ? null : HinhThucLamViec.fromId(hinhThucLamVic);
     }
 
-    public void setHinhThucLamVic(String hinhThucLamVic) {
-        this.hinhThucLamVic = hinhThucLamVic;
+    public void setHinhThucLamVic(HinhThucLamViec hinhThucLamVic) {
+        this.hinhThucLamVic = hinhThucLamVic == null ? null : hinhThucLamVic.getId();
     }
 
-    public String getGioiTinh() {
-        return gioiTinh;
+    public GioiTinh getGioiTinh() {
+        return gioiTinh == null ? null : GioiTinh.fromId(gioiTinh);
     }
 
-    public void setGioiTinh(String gioiTinh) {
-        this.gioiTinh = gioiTinh;
+    public void setGioiTinh(GioiTinh gioiTinh) {
+        this.gioiTinh = gioiTinh == null ? null : gioiTinh.getId();
     }
 
     public String getDienThoai() {
@@ -166,12 +172,12 @@ public class NhanSu {
         this.createdAt = createdAt;
     }
 
-    public String getChucVu() {
-        return chucVu;
+    public ChucVu getChucVu() {
+        return chucVu == null ? null : ChucVu.fromId(chucVu);
     }
 
-    public void setChucVu(String chucVu) {
-        this.chucVu = chucVu;
+    public void setChucVu(ChucVu chucVu) {
+        this.chucVu = chucVu == null ? null : chucVu.getId();
     }
 
     public Long getId() {
@@ -182,4 +188,9 @@ public class NhanSu {
         this.id = id;
     }
 
+    @InstanceName
+    @DependsOnProperties({"hoTen", "id"})
+    public String getInstanceName(MetadataTools metadataTools) {
+        return String.format("%s - %s",id ,hoTen);
+    }
 }

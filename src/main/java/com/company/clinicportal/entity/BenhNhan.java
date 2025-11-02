@@ -1,6 +1,11 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.GioiTinh;
+import com.company.clinicportal.enumentity.NguonBenhNhan;
+import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.annotation.Composition;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -119,12 +124,12 @@ public class BenhNhan {
         this.quanHeVoiBenhNhan = quanHeVoiBenhNhan;
     }
 
-    public String getNguonBenhNhan() {
-        return nguonBenhNhan;
+    public NguonBenhNhan getNguonBenhNhan() {
+        return nguonBenhNhan == null ? null : NguonBenhNhan.fromId(nguonBenhNhan);
     }
 
-    public void setNguonBenhNhan(String nguonBenhNhan) {
-        this.nguonBenhNhan = nguonBenhNhan;
+    public void setNguonBenhNhan(NguonBenhNhan nguonBenhNhan) {
+        this.nguonBenhNhan = nguonBenhNhan == null ? null : nguonBenhNhan.getId();
     }
 
     public String getNguoiGioiThieu() {
@@ -159,12 +164,12 @@ public class BenhNhan {
         this.hoTenNguoiThan = hoTenNguoiThan;
     }
 
-    public String getGioiTinh() {
-        return gioiTinh;
+    public GioiTinh getGioiTinh() {
+        return gioiTinh == null ? null : GioiTinh.fromId(gioiTinh);
     }
 
-    public void setGioiTinh(String gioiTinh) {
-        this.gioiTinh = gioiTinh;
+    public void setGioiTinh(GioiTinh gioiTinh) {
+        this.gioiTinh = gioiTinh == null ? null : gioiTinh.getId();
     }
 
     public String getDienThoai() {
@@ -207,4 +212,9 @@ public class BenhNhan {
         this.id = id;
     }
 
+    @InstanceName
+    @DependsOnProperties({"hoVaTen", "id"})
+    public String getInstanceName(MetadataTools metadataTools) {
+        return String.format("%s - %s",id ,hoVaTen);
+    }
 }

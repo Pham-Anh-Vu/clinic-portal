@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import io.jmix.flowui.model.CollectionLoader;
@@ -24,6 +25,8 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
     private CollectionLoader<ChiTietDieuTri> chiTietDieuTrisDl;
 
     public Long idBenhNhan;
+    @Autowired
+    private DialogWindows dialogWindows;
 
     public void setIdBenhNhan(Long idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -35,5 +38,26 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
             chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
             chiTietDieuTrisDl.load();
         }
+    }
+
+    @Subscribe("chiTietDieuTrisDataGrid.createAction")
+    public void onChiTietDieuTrisDataGridCreateAction(final ActionPerformedEvent event) {
+        DialogWindow<PhieuChiDinhDetailView> dialogWindow =  dialogWindows.detail(this, ChiTietDieuTri.class)
+                .withViewClass(PhieuChiDinhDetailView.class)
+                .newEntity()
+                .build();
+        dialogWindow.getView().setIdBenhNhan(idBenhNhan);
+        dialogWindow.setWidth("80%");
+        dialogWindow.setHeight("100%");
+        
+        // Reload datagrid after dialog closes
+        dialogWindow.addAfterCloseListener(event1 -> {
+            if(idBenhNhan != null){
+                chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
+                chiTietDieuTrisDl.load();
+            }
+        });
+        
+        dialogWindow.open();
     }
 }

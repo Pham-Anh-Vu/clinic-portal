@@ -2,9 +2,16 @@ package com.company.clinicportal.view.lichhen;
 
 import com.company.clinicportal.entity.LichHen;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.Messages;
+import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -18,10 +25,44 @@ import java.util.Date;
 public class LichHenListView extends StandardListView<LichHen> {
     @ViewComponent
     private CollectionLoader<LichHen> lichHensDl;
+    @Autowired
+    private Messages messages;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         lichHensDl.setParameter("currentDate", new Date());
         lichHensDl.load();
     }
+
+    @Autowired
+    private UiComponents uiComponents;
+
+    @Supply(to = "lichHensDataGrid.hinhThuc", subject = "renderer")
+    private Renderer<LichHen> lichHensDataGridHinhThucRenderer() {
+        return new ComponentRenderer<>(lichhen -> {
+            // TODO: create suitable component
+            Span span = uiComponents.create(Span.class);
+            if (lichhen.getHinhThuc()!=null) {
+                span.setText(messages.getMessage(lichhen.getHinhThuc()));
+                span.addClassName(lichhen.getHinhThuc().toString());
+            }
+            span.getElement().getThemeList().add("badge");
+            return span;
+        }); 
+    }
+
+    @Supply(to = "lichHensDataGrid2.hinhThuc", subject = "renderer")
+    private Renderer<LichHen> lichHensDataGrid2HinhThucRenderer() {
+        return new ComponentRenderer<>(lichhen -> {
+            Span span = uiComponents.create(Span.class);
+            if (lichhen.getHinhThuc()!=null) {
+                span.setText(messages.getMessage(lichhen.getHinhThuc()));
+                span.addClassName(lichhen.getHinhThuc().toString());
+            }
+            span.getElement().getThemeList().add("badge");
+            return span;
+        });
+    }
+    
+    
 }

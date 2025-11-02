@@ -7,9 +7,39 @@
                   class="com.company.clinicportal.entity.LichHen">
             <fetchPlan extends="_base">
                 <property name="id"/>
+                <property name="idBenhNhan" fetchPlan="_base">
+                    <property name="gioiTinh"/>
+                    <property name="ngaySinh"/>
+                    <property name="tuoi"/>
+                    <property name="dienThoai"/>
+                    <property name="diaChi"/>
+                    <property name="nguonBenhNhan"/>
+                    <property name="nguoiGioiThieu"/>
+                    <property name="hoTenNguoiThan"/>
+                    <property name="sdtNguoiThan"/>
+                    <property name="quanHeVoiBenhNhan"/>
+                </property>
+                <property name="idBacSi" fetchPlan="_base"/>
             </fetchPlan>
             <loader id="lichHenDl"/>
         </instance>
+        <collection id="benhNhansDc" class="com.company.clinicportal.entity.BenhNhan">
+            <loader id="benhNhansDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BenhNhan e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+        <collection id="nhanSusDc" class="com.company.clinicportal.entity.NhanSu">
+            <loader id="nhanSusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NhanSu e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -24,18 +54,69 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <dateTimePicker id="createdAtField" property="createdAt"/>
-            <textField id="createdByIdField" property="createdById"/>
-            <textField id="hinhThucField" property="hinhThuc"/>
-            <textField id="idBacSiField" property="idBacSi"/>
-            <textField id="idBenhNhanField" property="idBenhNhan"/>
-            <textField id="luuYField" property="luuY"/>
-            <datePicker id="ngayHenField" property="ngayHen"/>
-            <textField id="nhuCauKhachHangField" property="nhuCauKhachHang"/>
-            <timePicker id="thoiGianHenField" property="thoiGianHen"/>
+            <vbox width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid" colspan="2">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="THÔNG TIN CHUNG"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
+
+                <vbox padding="false" classNames="grid-data">
+                    <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="4"/>
+                        </responsiveSteps>
+                        <entityPicker id="benhNhanField" property="idBenhNhan" required="true" allowCustomValue="true" colspan="4"
+                                      label="msg:///tenBenhNhan">
+                            <actions>
+                                <action id="entityLookup" type="entity_lookup">
+                                    <properties>
+                                        <property name="viewId" value="BenhNhan.list"/>
+                                    </properties>
+                                </action>
+                                <action id="entityClear" type="entity_clear"/>
+                            </actions>
+                        </entityPicker>
+                        <textField id="ngaySinhField" property="idBenhNhan.ngaySinh" readOnly="true"/>
+                        <select id="gioiTinhField" property="idBenhNhan.gioiTinh" readOnly="true"/>
+                        <textField id="dienThoaiField" property="idBenhNhan.dienThoai" readOnly="true"/>
+                        <textField id="tuoiField" property="idBenhNhan.tuoi" readOnly="true"/>
+                        <textField id="diaChiField" property="idBenhNhan.diaChi" readOnly="true" colspan="4"/>
+                        <select id="nguonBenhNhanField" property="idBenhNhan.nguonBenhNhan" readOnly="true" colspan="2"/>
+                        <textField id="nguoigioithieuField" property="idBenhNhan.nguoiGioiThieu" readOnly="true" colspan="2"/>
+                        <textField id="hoTenNguoiThanField" property="idBenhNhan.hoTenNguoiThan" readOnly="true"/>
+                        <textField id="soDienThoaiNguoiThanField" property="idBenhNhan.sdtNguoiThan" readOnly="true"/>
+                        <textField id="quanHeVoiNguoiThanField" property="idBenhNhan.quanHeVoiBenhNhan" readOnly="true"/>
+                    </formLayout>
+                </vbox>
+            </vbox>
+
+
+            <vbox width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid" colspan="2">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="THÔNG TIN CHUNG"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
+            </vbox>
+            <datePicker id="ngayHenField" property="ngayHen" required="true"/>
+            <timePicker id="thoiGianHenField" property="thoiGianHen" required="true"/>
             <textField id="tinhTrangBenhField" property="tinhTrangBenh"/>
-            <dateTimePicker id="updatedAtField" property="updatedAt"/>
-            <textField id="updatedByIdField" property="updatedById"/>
+            <textField id="nhuCauKhachHangField" property="nhuCauKhachHang"/>
+            <select id="hinhThucField" property="hinhThuc" required="true" itemsEnum="com.company.clinicportal.enumentity.HinhThuc"/>
+            <entityComboBox id="idBacSiField" property="idBacSi" itemsContainer="nhanSusDc"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>
