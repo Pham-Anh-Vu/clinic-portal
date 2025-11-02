@@ -30,7 +30,7 @@
             <textField id="hoTenNguoiNopTienField" property="hoTenNguoiNopTien"/>
             <textField id="soDienThoaiField" property="soDienThoai"/>
         </formLayout>
-        <hbox id="detailActions">
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>

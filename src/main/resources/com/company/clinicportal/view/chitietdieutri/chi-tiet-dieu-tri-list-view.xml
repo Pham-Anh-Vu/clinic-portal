@@ -36,10 +36,18 @@
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-        <hbox id="buttonsPanel" classNames="buttons-panel" alignSelf="END">
-            <button id="createButton" action="chiTietDieuTrisDataGrid.createAction" alignSelf="END"/>
-            <button id="editButton" action="chiTietDieuTrisDataGrid.editAction" alignSelf="END"/>
-            <button id="removeButton" action="chiTietDieuTrisDataGrid.removeAction" alignSelf="END"/>
+        <hbox id="benhNhanBox"
+              classNames="benh-nhan-box"
+              alignItems="CENTER"
+              padding="true"
+              spacing="true"
+              width="100%">
+            <h3 id="benhNhanField"/>
+
+        </hbox>
+        <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END">
+            <button id="createButton" action="chiTietDieuTrisDataGrid.createAction"/>
+            <button id="refreshButton" action="chiTietDieuTrisDataGrid.refreshAction"/>
         </hbox>
         <dataGrid id="chiTietDieuTrisDataGrid"
                   width="100%"
@@ -53,13 +61,14 @@
                 </vbox>
             </emptyStateComponent>
             <actions>
-                <action id="createAction" type="list_create">
+                <action id="createAction" type="list_create" text="Thêm phiếu chỉ định">
                     <properties>
                         <property name="viewId" value="PhieuChiDinh.detail"/>
                     </properties>
                 </action>
-                <action id="editAction" type="list_edit"/>
-                <action id="removeAction" type="list_remove"/>
+                <action id="editAction" type="list_edit" text="Sửa"/>
+                <action id="removeAction" type="list_remove" text="Xóa"/>
+                <action id="refreshAction" type="list_refresh"/>
             </actions>
             <columns resizable="true">
                 <column property="id"/>

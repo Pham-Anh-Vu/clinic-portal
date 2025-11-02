@@ -1,12 +1,21 @@
 package com.company.clinicportal.view.chitietdieutri;
 
+import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
+import com.company.clinicportal.entity.LichHen;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
+import com.company.clinicportal.view.lichhen.LichHenDetailView;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.DataManager;
+import io.jmix.core.Metadata;
+import io.jmix.core.MetadataTools;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.action.list.RemoveAction;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -14,12 +23,14 @@ import io.jmix.flowui.view.*;
 import io.jmix.flowui.model.CollectionLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
+
 
 @Route(value = "chi-tiet-dieu-tris", layout = MainView.class)
 @ViewController(id = "ChiTietDieuTri.list")
 @ViewDescriptor(path = "chi-tiet-dieu-tri-list-view.xml")
 @LookupComponent("chiTietDieuTrisDataGrid")
-@DialogMode(width = "64em")
+@DialogMode(width = "80%", height = "100%")
 public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
     @ViewComponent
     private CollectionLoader<ChiTietDieuTri> chiTietDieuTrisDl;
@@ -27,6 +38,20 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
     public Long idBenhNhan;
     @Autowired
     private DialogWindows dialogWindows;
+    @Autowired
+    private DataManager dataManager;
+    @ViewComponent
+    private H3 benhNhanField;
+    @Autowired
+    private Metadata metadata;
+    @Autowired
+    private MetadataTools metadataTools;
+    @ViewComponent
+    private DataGrid<ChiTietDieuTri> chiTietDieuTrisDataGrid;
+    @Autowired
+    private UiComponents uiComponents;
+    @ViewComponent("chiTietDieuTrisDataGrid.removeAction")
+    private RemoveAction<ChiTietDieuTri> chiTietDieuTrisDataGridRemoveAction;
 
     public void setIdBenhNhan(Long idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -38,6 +63,48 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
             chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
             chiTietDieuTrisDl.load();
         }
+
+        BenhNhan bn = dataManager.load(BenhNhan.class).id(idBenhNhan).optional().orElse(null);
+        if(bn != null) benhNhanField.setText("Bệnh nhân: " + bn.getInstanceName(metadataTools));
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        chiTietDieuTrisDataGrid.addComponentColumn(chiTietDieuTri -> {
+                    // Tạo layout chứa hai nút
+                    HorizontalLayout actionsLayout = uiComponents.create(HorizontalLayout.class);
+
+                    // Nút Sửa
+                    JmixButton editButton = uiComponents.create(JmixButton.class);
+                    editButton.setText("Chi tiết");
+                    editButton.addClickListener(e -> {
+                        DialogWindow<ChiTietDieuTriDetailView> window = dialogWindows.detail(this, ChiTietDieuTri.class)
+                                .editEntity(chiTietDieuTri) // chỉnh sửa entity hiện tại
+                                .withViewClass(ChiTietDieuTriDetailView.class)
+                                .build();
+                        window.addAfterCloseListener(e1 -> {
+                            chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
+                            chiTietDieuTrisDl.load();
+                        });
+                        window.open();
+                    });
+
+                    // Nút Xóa
+                    JmixButton deleteButton = uiComponents.create(JmixButton.class);
+                    deleteButton.setText("Xóa");
+                    deleteButton.addClickListener(e -> {
+                        chiTietDieuTrisDataGrid.select(chiTietDieuTri);
+                        chiTietDieuTrisDataGridRemoveAction.execute();
+                    });
+
+                    // Thêm 2 nút vào layout
+                    actionsLayout.add(editButton);
+                    actionsLayout.add(deleteButton);
+
+                    return actionsLayout;
+                })
+                .setHeader("Thao tác")
+                .setAutoWidth(true);
     }
 
     @Subscribe("chiTietDieuTrisDataGrid.createAction")

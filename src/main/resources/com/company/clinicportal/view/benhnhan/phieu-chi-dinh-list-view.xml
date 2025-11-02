@@ -53,12 +53,11 @@
             <actions>
             </actions>
             <columns resizable="true">
-                <column property="id"/>
-                <column property="hoVaTen"/>
+                <column property="id" header="Mã BN"/>
+                <column property="hoVaTen" header="Họ tên bệnh nhân"/>
                 <column property="ngaySinh"/>
                 <column property="tuoi"/>
-                <column property="diaChi"/>
-                <column property="dienThoai"/>
+                <column property="dienThoai" header="SĐT liên lạc"/>
             </columns>
         </dataGrid>
         <simplePagination id="pagination" dataLoader="benhNhansDl" alignSelf="END"/>

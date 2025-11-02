@@ -10,6 +10,15 @@
             </fetchPlan>
             <loader id="buoiDieuTriDl"/>
         </instance>
+        <collection id="nhanSusDc" class="com.company.clinicportal.entity.NhanSu">
+            <loader id="nhanSusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NhanSu e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -24,26 +33,13 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <textField id="caField" property="ca"/>
-            <dateTimePicker id="createdAtField" property="createdAt"/>
-            <textField id="createdByIdField" property="createdById"/>
-            <textField id="fS6gkc3y0vfjField" property="fS6gkc3y0vfj"/>
-            <timePicker id="gioBatDauField" property="gioBatDau"/>
-            <timePicker id="gioBatDauStagingField" property="gioBatDauStaging"/>
-            <timePicker id="gioKetThucField" property="gioKetThuc"/>
-            <textField id="idBenhNhanField" property="idBenhNhan"/>
-            <textField id="idChiTietDichVuField" property="idChiTietDichVu"/>
-            <textField id="idNgayDieuTriField" property="idNgayDieuTri"/>
-            <textField id="idNhanSu2Field" property="idNhanSu2"/>
-            <textField id="idNhanSu2StagingField" property="idNhanSu2Staging"/>
-            <textField id="idNhanSuStagingField" property="idNhanSuStaging"/>
             <datePicker id="ngayThucHienField" property="ngayThucHien"/>
-            <datePicker id="ngayThucHienStagingField" property="ngayThucHienStaging"/>
-            <textField id="trangThaiField" property="trangThai"/>
-            <dateTimePicker id="updatedAtField" property="updatedAt"/>
-            <textField id="updatedByIdField" property="updatedById"/>
+            <timePicker id="gioBatDauField" property="gioBatDau"/>
+            <timePicker id="gioKetThucField" property="gioKetThuc"/>
+            <entityComboBox id="idNhanSuStagingField" property="idNhanSuStaging" label="Nhân sự" itemsContainer="nhanSusDc"/>
+            <select id="trangThaiField" property="trangThai"/>
         </formLayout>
-        <hbox id="detailActions">
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>

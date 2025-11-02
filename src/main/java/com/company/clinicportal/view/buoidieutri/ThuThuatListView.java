@@ -19,7 +19,7 @@ import java.util.Date;
 @Route(value = "thu-thuats", layout = MainView.class)
 @ViewController(id = "ThuThuat.list")
 @ViewDescriptor(path = "thu-thuat-list-view.xml")
-@LookupComponent("buoiDieuTrisDataGrid")
+@LookupComponent("thuThuatsDataGrid")
 @DialogMode(width = "64em")
 public class ThuThuatListView extends StandardListView<BuoiDieuTri> {
     @Autowired

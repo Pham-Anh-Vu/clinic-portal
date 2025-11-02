@@ -171,7 +171,7 @@
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
         </formLayout>
-        <hbox id="detailActions">
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>

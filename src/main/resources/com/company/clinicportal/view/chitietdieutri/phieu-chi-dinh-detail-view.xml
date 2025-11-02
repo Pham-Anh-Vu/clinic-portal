@@ -44,7 +44,7 @@
             <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2"/>
             <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2"/>
         </formLayout>
-        <hbox id="detailActions">
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>

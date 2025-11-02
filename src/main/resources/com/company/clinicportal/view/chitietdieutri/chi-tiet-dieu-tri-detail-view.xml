@@ -55,15 +55,19 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="4"/>
                         </responsiveSteps>
-                        <textField id="idBenhNhanField" property="idBenhNhan.hoVaTen" readOnly="true"/>
+                        <h3 property="idBenhNhan.hoVaTen" colspan="4"/>
+                        <textField id="idBenhNhanField" property="idBenhNhan.hoVaTen" readOnly="true" label="Họ tên bệnh nhân"/>
                         <textField id="gioiTinhField" property="idBenhNhan.gioiTinh" readOnly="true"/>
                         <textField id="ngaySinhField" property="idBenhNhan.ngaySinh" readOnly="true"/>
                         <textField id="tuoiField" property="idBenhNhan.tuoi" readOnly="true"/>
-                        <textField id="dienThoaiField" property="idBenhNhan.dienThoai" readOnly="true"/>
+                        <textField id="dienThoaiField" property="idBenhNhan.dienThoai" readOnly="true" label="SĐT liên lạc"/>
                         <textField id="diaChiField" property="idBenhNhan.diaChi" readOnly="true"/>
                         <textArea id="trieuChungField" height="9.5em" property="trieuChung"/>
                         <textArea id="chuanDoanField" height="9.5em" property="chuanDoan"/>
-                        <textField id="idNhanSuField" property="idNhanSu.hoTen" colspan="2" readOnly="true"/>
+                        <textField id="idNhanSuField" property="idNhanSu.hoTen" colspan="2" readOnly="true" label="Bác sĩ chỉ định"/>
+                        <hbox id="trangThaiBox"
+                              alignItems="CENTER"
+                              spacing="true"/>
                     </formLayout>
                 </vbox>
             </vbox>
@@ -78,12 +82,9 @@
                                 <span text="CHỈ ĐỊNH DỊCH VỤ"/>
                             </div>
                             <div classNames="function-flex-end">
-                                <button action="chiTietDichVusDataGrid.create" text="msg:///create"
-                                        classNames="action-button create" css="min-width: 80px; height: 28px;"/>
-                                <button action="chiTietDichVusDataGrid.edit" text="msg:///edit"
-                                        classNames="action-button create" css="min-width: 80px; height: 28px;"/>
-                                <button action="chiTietDichVusDataGrid.remove" text="msg:///remove"
-                                        classNames="action-button create" css="min-width: 80px; height: 28px;"/>
+                                <button action="chiTietDichVusDataGrid.create" text="Thêm dịch vụ"
+                                        classNames="action-button create"/>
+                                <button action="chiTietDichVusDataGrid.refresh" classNames="action-button refresh"/>
                             </div>
                         </div>
                     </hbox>
@@ -107,16 +108,17 @@
                                 </vbox>
                             </emptyStateComponent>
                             <actions>
-                                <action id="create" type="list_create"/>
-                                <action id="edit" type="list_edit"/>
-                                <action id="remove" type="list_remove"/>
+                                <action id="create" type="list_create" text="Thêm dịch vụ"/>
+                                <action id="edit" type="list_edit" text="Chi tiết"/>
+                                <action id="remove" type="list_remove" text="xóa"/>
+                                <action id="refresh" type="list_refresh"/>
                             </actions>
 
                             <columns>
-                                <column property="idDichVu"/>
-                                <column property="idBacSi"/>
-                                <column property="khoangCachBuoiDieuTri"/>
-                                <column property="soLuong"/>
+                                <column property="idDichVu.tenDichVu"/>
+                                <column property="idDichVu.nhomDichVu"/>
+                                <column property="idDichVu.gia"/>
+                                <column property="soLuong" header="Số buổi"/>
                                 <column property="ngayBatDau"/>
                             </columns>
                         </dataGrid>
@@ -190,12 +192,8 @@
                                 <span text="LỊCH SỬ THANH TOÁN"/>
                             </div>
                             <div classNames="function-flex-end">
-                                <button action="lichSuThanhToansDataGrid.create" classNames="action-button"
-                                        text="msg:///create" css="min-width: 80px; height: 28px;"/>
-                                <button action="lichSuThanhToansDataGrid.edit" classNames="action-button"
-                                        text="msg:///edit" css="min-width: 80px; height: 28px;"/>
-                                <button action="lichSuThanhToansDataGrid.remove" classNames="action-button"
-                                        text="msg:///remove" css="min-width: 80px; height: 28px;"/>
+                                <button action="lichSuThanhToansDataGrid.create" classNames="action-button"/>
+                                <button action="lichSuThanhToansDataGrid.refresh" classNames="action-button"/>
                             </div>
                         </div>
                     </hbox>
@@ -215,9 +213,10 @@
                                 </vbox>
                             </emptyStateComponent>
                             <actions>
-                                <action id="create" type="list_create"/>
-                                <action id="edit" type="list_edit"/>
-                                <action id="remove" type="list_remove"/>
+                                <action id="create" type="list_create" text="Thanh toán"/>
+                                <action id="edit" type="list_edit" text="Chi tiết"/>
+                                <action id="remove" type="list_remove" text="Xóa"/>
+                                <action id="refresh" type="list_refresh"/>
                             </actions>
                             <columns>
                                 <column property="thanhToanLuc"/>
@@ -257,7 +256,7 @@
             <!--            <textField id="tinhTrangBnField" property="tinhTrangBn"/>-->
 
         </formLayout>
-        <hbox id="detailActions">
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>

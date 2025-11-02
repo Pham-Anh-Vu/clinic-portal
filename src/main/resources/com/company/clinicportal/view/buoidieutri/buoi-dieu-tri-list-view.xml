@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
-      title="Thủ thuật"
+      title="Buổi điều trị của dịch vụ"
       focusComponent="buoiDieuTrisDataGrid">
     <data>
         <collection id="buoiDieuTrisDc"
                     class="com.company.clinicportal.entity.BuoiDieuTri">
             <fetchPlan extends="_base">
                 <property name="id"/>
+                <property name="idNhanSuStaging" fetchPlan="_base"/>
             </fetchPlan>
             <loader id="buoiDieuTrisDl" readOnly="true">
                 <query>
@@ -21,7 +22,6 @@
     <facets>
         <dataLoadCoordinator auto="true"/>
         <urlQueryParameters>
-            <genericFilter component="genericFilter"/>
             <pagination component="pagination"/>
         </urlQueryParameters>
     </facets>
@@ -30,57 +30,72 @@
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-        <genericFilter id="genericFilter"
-                       dataLoader="buoiDieuTrisDl">
-            <properties include=".*"/>
-        </genericFilter>
-        <hbox id="buttonsPanel" classNames="buttons-panel">
-            <button id="createButton" action="buoiDieuTrisDataGrid.createAction"/>
-            <button id="editButton" action="buoiDieuTrisDataGrid.editAction"/>
-            <button id="removeButton" action="buoiDieuTrisDataGrid.removeAction"/>
+        <hbox id="benhNhanBox"
+              classNames="benh-nhan-box"
+              alignItems="CENTER"
+              padding="true"
+              spacing="true"
+              width="100%">
+            <h3 id="dichVuField"/>
         </hbox>
-        <dataGrid id="buoiDieuTrisDataGrid"
-                  width="100%"
-                  minHeight="20em"
-                  dataContainer="buoiDieuTrisDc"
-                  columnReorderingAllowed="true">
-            <emptyStateComponent>
-                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
-                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
-                    <h2 text="Chưa có dữ liệu"/>
-                </vbox>
-            </emptyStateComponent>
-            <actions>
-                <action id="createAction" type="list_create"/>
-                <action id="editAction" type="list_edit"/>
-                <action id="removeAction" type="list_remove"/>
-            </actions>
-            <columns resizable="true">
-                <column property="ca"/>
-                <column property="createdAt"/>
-                <column property="createdById"/>
-                <column property="fS6gkc3y0vfj"/>
-                <column property="gioBatDau"/>
-                <column property="gioBatDauStaging"/>
-                <column property="gioKetThuc"/>
-                <column property="idBenhNhan"/>
-                <column property="idChiTietDichVu"/>
-                <column property="idNgayDieuTri"/>
-                <column property="idNhanSu2"/>
-                <column property="idNhanSu2Staging"/>
-                <column property="idNhanSuStaging"/>
-                <column property="ngayThucHien"/>
-                <column property="ngayThucHienStaging"/>
-                <column property="trangThai"/>
-                <column property="updatedAt"/>
-                <column property="updatedById"/>
-            </columns>
-        </dataGrid>
-        <simplePagination id="pagination" dataLoader="buoiDieuTrisDl" alignSelf="END"/>
 
-        <hbox id="lookupActions" visible="false">
-            <button id="selectButton" action="selectAction"/>
-            <button id="discardButton" action="discardAction"/>
-        </hbox>
+        <vbox width="100%" alignItems="START" padding="false"
+              spacing="false" classNames="tab-5-grid">
+            <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                  width="100%">
+                <hbox classNames="buttons-panel" width="100%">
+                    <div width="100%" classNames="all-control-auto-pay">
+                        <div classNames="title-grid">
+                            <span text="Thủ thuật"/>
+                        </div>
+                        <div classNames="function-flex-end">
+                            <button id="createButton" classNames="action-button" action="buoiDieuTrisDataGrid.createAction"/>
+                            <button id="refreshButton" classNames="action-button" action="buoiDieuTrisDataGrid.refreshAction"/>
+                        </div>
+                    </div>
+                </hbox>
+            </vbox>
+            <vbox padding="false" classNames="grid-data">
+                <formLayout
+                        css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                    </responsiveSteps>
+                    <dataGrid id="buoiDieuTrisDataGrid"
+                              width="100%"
+                              minHeight="20em"
+                              dataContainer="buoiDieuTrisDc"
+                              columnReorderingAllowed="true">
+                        <emptyStateComponent>
+                            <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                <h2 text="Chưa có dữ liệu"/>
+                            </vbox>
+                        </emptyStateComponent>
+                        <actions>
+                            <action id="createAction" type="list_create" text="Thêm buổi"/>
+                            <action id="editAction" type="list_edit" text="Sửa"/>
+                            <action id="removeAction" type="list_remove" text="Xóa"/>
+                            <action id="refreshAction" type="list_refresh"/>
+                        </actions>
+                        <columns resizable="true">
+                            <column property="ngayThucHien"/>
+                            <column property="gioBatDau"/>
+                            <column property="gioKetThuc"/>
+                            <column property="ca"/>
+                            <column property="idNhanSuStaging"/>
+                            <column property="trangThai"/>
+                        </columns>
+                    </dataGrid>
+                    <simplePagination id="pagination" dataLoader="buoiDieuTrisDl" alignSelf="END"/>
+
+                    <hbox id="lookupActions" visible="false">
+                        <button id="selectButton" action="selectAction"/>
+                        <button id="discardButton" action="discardAction"/>
+                    </hbox>
+                </formLayout>
+            </vbox>
+        </vbox>
+
     </layout>
 </view>

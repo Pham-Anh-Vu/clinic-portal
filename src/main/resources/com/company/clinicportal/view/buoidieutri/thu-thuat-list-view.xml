@@ -2,7 +2,7 @@
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
       title="msg://thuThuatListView.title"
-      focusComponent="buoiDieuTrisDataGrid">
+      focusComponent="thuThuatsDataGrid">
     <data>
         <collection id="buoiDieuTrisDc"
                     class="com.company.clinicportal.entity.BuoiDieuTri">
@@ -73,10 +73,10 @@
                         <properties include=".*"/>
                     </genericFilter>
                     <hbox id="buttonsPanel" classNames="buttons-panel">
-                        <button id="editButton" action="buoiDieuTrisDataGrid.editAction"/>
-                        <button id="removeButton" action="buoiDieuTrisDataGrid.removeAction"/>
+                        <button id="editButton" action="thuThuatsDataGrid.editAction"/>
+                        <button id="removeButton" action="thuThuatsDataGrid.removeAction"/>
                     </hbox>
-                    <dataGrid id="buoiDieuTrisDataGrid"
+                    <dataGrid id="thuThuatsDataGrid"
                               width="100%"
                               minHeight="20em"
                               dataContainer="buoiDieuTrisDc"
@@ -118,10 +118,10 @@
                         <properties include=".*"/>
                     </genericFilter>
                     <hbox id="buttonsPanel2" classNames="buttons-panel">
-                        <button id="editButton2" action="buoiDieuTrisDataGrid2.editAction2"/>
-                        <button id="removeButton2" action="buoiDieuTrisDataGrid2.removeAction2"/>
+                        <button id="editButton2" action="thuThuatsDataGrid2.editAction2"/>
+                        <button id="removeButton2" action="thuThuatsDataGrid2.removeAction2"/>
                     </hbox>
-                    <dataGrid id="buoiDieuTrisDataGrid2"
+                    <dataGrid id="thuThuatsDataGrid2"
                               width="100%"
                               minHeight="20em"
                               dataContainer="buoiDieuTrisDc_1"
