@@ -174,7 +174,7 @@
   color: #e60073;                   /* chữ hồng đậm */
   border: 1px solid #ff80b3;        /* viền hồng */
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
@@ -186,7 +186,7 @@
   color: #009900;                   /* chữ xanh đậm */
   border: 1px solid #66cc66;        /* viền xanh nhạt */
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
@@ -198,7 +198,7 @@
   color: #e60000;                   /* chữ đỏ đậm */
   border: 1px solid #ff6666;        /* viền đỏ nhạt */
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
@@ -210,7 +210,7 @@
   color: #b36b00;                   /* chữ vàng nâu */
   border: 1px solid #ffd966;        /* viền vàng nhạt */
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
@@ -222,7 +222,7 @@
   color: #009933;                   /* chữ xanh lá đậm */
   border: 1px solid #66cc66;        /* viền xanh nhạt */
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
@@ -234,7 +234,7 @@
   color: #008c99;                   /* chữ xanh đậm */
   border: 1px solid #4dd0e1;        /* viền xanh nhạt */
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
@@ -246,7 +246,7 @@
   color: #005ce6;                   /* chữ xanh lam đậm */
   border: 1px solid #99b3ff;        /* viền xanh lam nhạt */
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
@@ -264,4 +264,43 @@
 
 .jmix-list-menu .jmix-menubar-item:is(.menu-lv1, .menu-lv2, .menu-lv3)[class*="module-"] .jmix-menubar-summary-icon-container vaadin-icon.prefix-component{
     color: var(--menu-color);
+}
+
+/* ĐANG ĐIỀU TRỊ */
+.DANG_DT {
+    background-color: #e9f8f1;       /* xanh ngọc nhạt */
+    color: #2e7d32;                  /* xanh lá tươi */
+    border: 1px solid #b7e4c7;       /* viền xanh lá nhạt */
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* ĐÃ ĐIỀU TRỊ */
+.DA_DT {
+    background-color: #eaf3ff;       /* xanh dương nhạt */
+    color: #1a73e8;                  /* xanh dương tươi */
+    border: 1px solid #b6d4fe;       /* viền xanh dương nhạt */
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* KHÔNG ĐIỀU TRỊ */
+.KHONG_DT {
+    background-color: #f5f5f5;       /* xám rất nhạt */
+    color: #757575;                  /* xám trung bình */
+    border: 1px solid #dcdcdc;       /* viền xám nhạt */
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-block;
+    text-align: center;
 }

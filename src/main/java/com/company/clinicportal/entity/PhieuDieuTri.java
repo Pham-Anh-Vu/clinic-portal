@@ -1,5 +1,6 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.TrangThaiPhieuDT;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -83,12 +84,12 @@ public class PhieuDieuTri {
         this.updatedAt = updatedAt;
     }
 
-    public String getTrangThai() {
-        return trangThai;
+    public TrangThaiPhieuDT getTrangThai() {
+        return trangThai == null ? null : TrangThaiPhieuDT.fromId(trangThai);
     }
 
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
+    public void setTrangThai(TrangThaiPhieuDT trangThai) {
+        this.trangThai = trangThai == null ? null : trangThai.getId();
     }
 
     public Date getThoiGianTaiKham() {

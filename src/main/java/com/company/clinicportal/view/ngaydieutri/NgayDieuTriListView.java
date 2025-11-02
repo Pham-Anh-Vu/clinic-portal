@@ -3,17 +3,23 @@ package com.company.clinicportal.view.ngaydieutri;
 import com.company.clinicportal.entity.NgayDieuTri;
 import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
+import io.jmix.core.Messages;
+import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Optional;
 
 
 @Route(value = "ngay-dieu-tris", layout = MainView.class)
@@ -28,6 +34,10 @@ public class NgayDieuTriListView extends StandardListView<NgayDieuTri> {
     private DataGrid<NgayDieuTri> ngayDieuTrisDataGrid;
     @Autowired
     private DataManager dataManager;
+    @Autowired
+    private UiComponents uiComponents;
+    @Autowired
+    private Messages messages;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -44,22 +54,58 @@ public class NgayDieuTriListView extends StandardListView<NgayDieuTri> {
         }).setHeader("Chuẩn đoán");
 
         ngayDieuTrisDataGrid.addColumn(lh -> {
-            var bn = lh.getIdBenhNhan();
-            if (bn == null) return null;
-            return dataManager.loadValue(
-                    "select p.ngayKham from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc",
-                    Date.class
-            ).parameter("bn", bn).maxResults(1).optional().orElse(null);
-        }).setHeader("Ngày khám");
+                    var bn = lh.getIdBenhNhan();
+                    if (bn == null) return null;
+
+                    Date ngayKham = dataManager.loadValue(
+                                    "select p.ngayKham from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc",
+                                    Date.class
+                            ).parameter("bn", bn)
+                            .maxResults(1)
+                            .optional()
+                            .orElse(null);
+
+                    if (ngayKham == null) {
+                        return "";
+                    }
+
+                    // Format về dd/MM/yyyy
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    return sdf.format(ngayKham);
+                })
+                .setHeader("Ngày khám bệnh")
+                .setAutoWidth(true);
+
+        ngayDieuTrisDataGrid.addComponentColumn(lh -> {
+                    var bn = lh.getIdBenhNhan();
+                    if (bn == null) return uiComponents.create(Span.class);
+
+                    Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
+                            .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
+                            .parameter("bn", bn)
+                            .maxResults(1)
+                            .optional();
+
+                    Span span = uiComponents.create(Span.class);
+
+                    if (phieuDieuTri.isPresent()) {
+                        var trangThai = phieuDieuTri.get().getTrangThai(); // Enum hoặc String
+                        span.setText(messages.getMessage(trangThai));
+                        span.addClassName(trangThai.toString()); // Gán class CSS nếu muốn
+                    }
+
+                    return span;
+                })
+                .setHeader("Trạng thái")
+                .setAutoWidth(true);
 
         ngayDieuTrisDataGrid.addColumn(lh -> {
-            var bn = lh.getIdBenhNhan();
-            if (bn == null) return "";
-            return dataManager.loadValue(
-                    "select p.trangThai from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc",
-                    String.class
-            ).parameter("bn", bn).maxResults(1).optional().orElse("");
-        }).setHeader("Trạng thái");
+                    Date today = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    return sdf.format(today);
+                })
+                .setHeader("Ngày")
+                .setAutoWidth(true);
     }
 
     @Subscribe

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
-      title="msg://ngayDieuTriListView.title"
+      title="LỊCH ĐIỀU TRỊ HÔM NAY"
       focusComponent="ngayDieuTrisDataGrid">
     <data>
         <collection id="ngayDieuTrisDc"
@@ -38,10 +38,8 @@
                        dataLoader="ngayDieuTrisDl" opened="false">
             <properties include=".*"/>
         </genericFilter>
-        <hbox id="buttonsPanel" classNames="buttons-panel" alignSelf="END">
-            <button id="createButton" action="ngayDieuTrisDataGrid.createAction"/>
-            <button id="editButton" action="ngayDieuTrisDataGrid.editAction"/>
-            <button id="removeButton" action="ngayDieuTrisDataGrid.removeAction"/>
+        <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END">
+            <button id="refreshButton" action="ngayDieuTrisDataGrid.refreshAction"/>
         </hbox>
         <dataGrid id="ngayDieuTrisDataGrid"
                   width="100%"
@@ -55,19 +53,16 @@
                 </vbox>
             </emptyStateComponent>
             <actions>
-                <action id="createAction" type="list_create"/>
-                <action id="editAction" type="list_edit"/>
-                <action id="removeAction" type="list_remove"/>
+                <action id="refreshAction" type="list_refresh"/>
             </actions>
             <columns resizable="true">
-                <column property="idBenhNhan.hoVaTen"/>
+                <column property="idBenhNhan.hoVaTen" header="Bệnh nhân"/>
                 <column property="idBenhNhan.ngaySinh"/>
                 <column property="idBenhNhan.diaChi"/>
-                <column property="soBuoi"/>
                 <column property="gioHen"/>
             </columns>
         </dataGrid>
-        <simplePagination id="pagination" dataLoader="ngayDieuTrisDl"/>
+        <simplePagination id="pagination" dataLoader="ngayDieuTrisDl" alignSelf="END"/>
 
         <hbox id="lookupActions" visible="false">
             <button id="selectButton" action="selectAction"/>
