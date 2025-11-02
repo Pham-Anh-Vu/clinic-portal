@@ -2,7 +2,7 @@
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
       title="msg://thuThuatListView.title"
-      focusComponent="thuThuatsDataGrid">
+      focusComponent="buoiDieuTrisDataGrid">
     <data>
         <collection id="buoiDieuTrisDc"
                     class="com.company.clinicportal.entity.BuoiDieuTri">
@@ -72,11 +72,10 @@
                                    dataLoader="buoiDieuTrisDl" opened="false">
                         <properties include=".*"/>
                     </genericFilter>
-                    <hbox id="buttonsPanel" classNames="buttons-panel">
-                        <button id="editButton" action="thuThuatsDataGrid.editAction"/>
-                        <button id="removeButton" action="thuThuatsDataGrid.removeAction"/>
+                    <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END">
+                        <button id="refreshButton" action="buoiDieuTrisDataGrid.refreshAction"/>
                     </hbox>
-                    <dataGrid id="thuThuatsDataGrid"
+                    <dataGrid id="buoiDieuTrisDataGrid"
                               width="100%"
                               minHeight="20em"
                               dataContainer="buoiDieuTrisDc"
@@ -88,13 +87,13 @@
                             </vbox>
                         </emptyStateComponent>
                         <actions>
-                            <action id="createAction" type="list_create"/>
-                            <action id="editAction" type="list_edit"/>
-                            <action id="removeAction" type="list_remove"/>
+                            <action id="editAction" type="list_edit" text="Cập nhật"/>
+                            <action id="removeAction" type="list_remove" text="Xóa"/>
+                            <action id="refreshAction" type="list_refresh" text="Làm mới"/>
                         </actions>
                         <columns resizable="true">
-                            <column property="idBenhNhan.id"/>
-                            <column property="idBenhNhan.hoVaTen"/>
+                            <column property="idBenhNhan.id" header="Mã BN"/>
+                            <column property="idBenhNhan.hoVaTen" header="Họ tên bệnh nhân"/>
                             <column property="trangThai"/>
                             <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
                             <column property="idNhanSuStaging.hoTen" header="KTV thực hiện"/>
@@ -102,6 +101,7 @@
                             <column property="ngayThucHien"/>
                             <column property="gioBatDau"/>
                             <column property="gioKetThuc"/>
+                            <column property="ca"/>
                         </columns>
                     </dataGrid>
                     <simplePagination id="pagination" dataLoader="buoiDieuTrisDl" alignSelf="END"/>
@@ -118,10 +118,10 @@
                         <properties include=".*"/>
                     </genericFilter>
                     <hbox id="buttonsPanel2" classNames="buttons-panel">
-                        <button id="editButton2" action="thuThuatsDataGrid2.editAction2"/>
-                        <button id="removeButton2" action="thuThuatsDataGrid2.removeAction2"/>
+                        <button id="createButton2" action="buoiDieuTrisDataGrid2.createAction2"/>
+                        <button id="refreshButton2" action="buoiDieuTrisDataGrid2.refreshAction2"/>
                     </hbox>
-                    <dataGrid id="thuThuatsDataGrid2"
+                    <dataGrid id="buoiDieuTrisDataGrid2"
                               width="100%"
                               minHeight="20em"
                               dataContainer="buoiDieuTrisDc_1"
@@ -135,17 +135,21 @@
                         <actions>
                             <action id="editAction2" type="list_edit"/>
                             <action id="removeAction2" type="list_remove"/>
+                            <action id="createAction2" type="list_create"/>
+                            <action id="refreshAction2" type="list_refresh"/>
+
                         </actions>
                         <columns resizable="true">
-                            <column property="idBenhNhan.id"/>
-                            <column property="idBenhNhan.hoVaTen"/>
+                            <column property="idBenhNhan.id" header="Mã BN"/>
+                            <column property="idBenhNhan.hoVaTen" header="Họ tên bệnh nhân"/>
                             <column property="trangThai"/>
                             <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
+                            <column property="ngayThucHien"/>
                             <column property="idNhanSuStaging.hoTen" header="KTV thực hiện"/>
                             <column property="idNhanSu2Staging.hoTen" header="KTV thực hiện 2"/>
-                            <column property="ngayThucHien"/>
                             <column property="gioBatDau"/>
                             <column property="gioKetThuc"/>
+                            <column property="ca"/>
                         </columns>
                     </dataGrid>
                     <simplePagination id="pagination2" dataLoader="buoiDieuTrisDl_1" alignSelf="END"/>

@@ -42,12 +42,12 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <timePicker id="gioBatDauField" property="gioBatDau"/>
-            <timePicker id="gioKetThucField" property="gioKetThuc"/>
-            <datePicker id="ngayThucHienField" property="ngayThucHien"/>
-            <select id="trangThaiField" property="trangThai"/>
             <entityComboBox id="idNhanSuStagingField" property="idNhanSuStaging" itemsContainer="nhanSusDc" label="KTV thực hiện"/>
             <entityComboBox id="idNhanSu2StagingField" property="idNhanSu2Staging" itemsContainer="nhanSusDc" label="KTV thực hiện 2"/>
+            <timePicker id="gioBatDauField" property="gioBatDau"/>
+            <timePicker id="gioKetThucField" property="gioKetThuc"/>
+            <select id="trangThaiField" property="trangThai"/>
+            <datePicker id="ngayThucHienField" property="ngayThucHien"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>

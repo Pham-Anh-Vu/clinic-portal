@@ -63,7 +63,7 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
                 }
             });
             return button;
-        }).setHeader("Thao tác1").setAutoWidth(true);
+        }).setHeader("Thao tác").setAutoWidth(true);
 
         lichSuThanhToansDataGrid.addComponentColumn(lichSuThanhToan -> {
             JmixButton button = uiComponents.create(JmixButton.class);
@@ -75,7 +75,7 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
                 window.open();
             });
             return button;
-        }).setHeader("Thao tác1").setAutoWidth(true);
+        }).setHeader("Thao tác").setAutoWidth(true);
     }
 
 
