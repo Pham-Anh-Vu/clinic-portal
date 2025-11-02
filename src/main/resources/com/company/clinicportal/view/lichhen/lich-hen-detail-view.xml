@@ -56,24 +56,13 @@
             </responsiveSteps>
             <vbox width="100%" alignItems="START" padding="false"
                   spacing="false" classNames="tab-5-grid" colspan="2">
-                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
-                      width="100%">
-                    <hbox classNames="buttons-panel" width="100%">
-                        <div width="100%" classNames="all-control-auto-pay">
-                            <div classNames="title-grid">
-                                <span text="THÔNG TIN CHUNG"/>
-                            </div>
-                        </div>
-                    </hbox>
-                </vbox>
-
                 <vbox padding="false" classNames="grid-data">
                     <formLayout css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px" >
                         <responsiveSteps>
-                            <responsiveStep minWidth="0" columns="4"/>
+                            <responsiveStep minWidth="0" columns="3"/>
                         </responsiveSteps>
-                        <entityPicker id="benhNhanField" property="idBenhNhan" required="true" allowCustomValue="true" colspan="4"
-                                      label="msg:///tenBenhNhan">
+                        <entityPicker id="benhNhanField" property="idBenhNhan" required="true" allowCustomValue="true" colspan="3"
+                                      label="Họ tên bệnh nhân">
                             <actions>
                                 <action id="entityLookup" type="entity_lookup">
                                     <properties>
@@ -83,40 +72,27 @@
                                 <action id="entityClear" type="entity_clear"/>
                             </actions>
                         </entityPicker>
-                        <textField id="ngaySinhField" property="idBenhNhan.ngaySinh" readOnly="true"/>
                         <select id="gioiTinhField" property="idBenhNhan.gioiTinh" readOnly="true"/>
-                        <textField id="dienThoaiField" property="idBenhNhan.dienThoai" readOnly="true"/>
+                        <textField id="ngaySinhField" property="idBenhNhan.ngaySinh" readOnly="true"/>
                         <textField id="tuoiField" property="idBenhNhan.tuoi" readOnly="true"/>
-                        <textField id="diaChiField" property="idBenhNhan.diaChi" readOnly="true" colspan="4"/>
-                        <select id="nguonBenhNhanField" property="idBenhNhan.nguonBenhNhan" readOnly="true" colspan="2"/>
-                        <textField id="nguoigioithieuField" property="idBenhNhan.nguoiGioiThieu" readOnly="true" colspan="2"/>
+                        <textField id="dienThoaiField" property="idBenhNhan.dienThoai" readOnly="true" label="Số điện thoại"/>
+                        <textArea id="diaChiField" height="9.5em" property="idBenhNhan.diaChi" readOnly="true"/>
+                        <select id="nguonBenhNhanField" property="idBenhNhan.nguonBenhNhan" readOnly="true"/>
                         <textField id="hoTenNguoiThanField" property="idBenhNhan.hoTenNguoiThan" readOnly="true"/>
                         <textField id="soDienThoaiNguoiThanField" property="idBenhNhan.sdtNguoiThan" readOnly="true"/>
                         <textField id="quanHeVoiNguoiThanField" property="idBenhNhan.quanHeVoiBenhNhan" readOnly="true"/>
+
+                        <datePicker id="ngayHenField" property="ngayHen" required="true"/>
+                        <timePicker id="thoiGianHenField" property="thoiGianHen" required="true"/>
+                        <textField id="tinhTrangBenhField" property="tinhTrangBenh"/>
+                        <textField id="nhuCauKhachHangField" property="nhuCauKhachHang"/>
+                        <select id="hinhThucField" property="hinhThuc" required="true" itemsEnum="com.company.clinicportal.enumentity.HinhThuc"/>
+                        <entityComboBox id="idBacSiField" property="idBacSi" itemsContainer="nhanSusDc"/>
                     </formLayout>
                 </vbox>
             </vbox>
 
 
-            <vbox width="100%" alignItems="START" padding="false"
-                  spacing="false" classNames="tab-5-grid" colspan="2">
-                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
-                      width="100%">
-                    <hbox classNames="buttons-panel" width="100%">
-                        <div width="100%" classNames="all-control-auto-pay">
-                            <div classNames="title-grid">
-                                <span text="THÔNG TIN CHUNG"/>
-                            </div>
-                        </div>
-                    </hbox>
-                </vbox>
-            </vbox>
-            <datePicker id="ngayHenField" property="ngayHen" required="true"/>
-            <timePicker id="thoiGianHenField" property="thoiGianHen" required="true"/>
-            <textField id="tinhTrangBenhField" property="tinhTrangBenh"/>
-            <textField id="nhuCauKhachHangField" property="nhuCauKhachHang"/>
-            <select id="hinhThucField" property="hinhThuc" required="true" itemsEnum="com.company.clinicportal.enumentity.HinhThuc"/>
-            <entityComboBox id="idBacSiField" property="idBacSi" itemsContainer="nhanSusDc"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

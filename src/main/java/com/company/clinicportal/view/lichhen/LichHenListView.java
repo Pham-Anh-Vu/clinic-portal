@@ -1,14 +1,22 @@
 package com.company.clinicportal.view.lichhen;
 
 import com.company.clinicportal.entity.LichHen;
+import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.Messages;
+import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.action.list.RemoveAction;
+import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +35,18 @@ public class LichHenListView extends StandardListView<LichHen> {
     private CollectionLoader<LichHen> lichHensDl;
     @Autowired
     private Messages messages;
+    @ViewComponent
+    private DataGrid<LichHen> lichHensDataGrid;
+    @Autowired
+    private DialogWindows dialogWindows;
+    @ViewComponent("lichHensDataGrid.removeAction")
+    private RemoveAction<LichHen> lichHensDataGridRemoveAction;
+    @ViewComponent
+    private DataGrid<LichHen> lichHensDataGrid2;
+    @ViewComponent("lichHensDataGrid2.removeAction")
+    private RemoveAction<LichHen> lichHensDataGrid2RemoveAction;
+    @ViewComponent
+    private CollectionLoader<LichHen> lichHensDl_1;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -37,13 +57,89 @@ public class LichHenListView extends StandardListView<LichHen> {
     @Autowired
     private UiComponents uiComponents;
 
+    @Subscribe
+    public void onInit(InitEvent event) {
+        lichHensDataGrid.addComponentColumn(lichHen -> {
+                    // Tạo layout chứa hai nút
+                    HorizontalLayout actionsLayout = uiComponents.create(HorizontalLayout.class);
+
+                    // Nút Sửa
+                    JmixButton editButton = uiComponents.create(JmixButton.class);
+                    editButton.setText("Sửa");
+                    editButton.addClickListener(e -> {
+                        DialogWindow<LichHenDetailView> window = dialogWindows.detail(this, LichHen.class)
+                                .editEntity(lichHen) // chỉnh sửa entity hiện tại
+                                .withViewClass(LichHenDetailView.class)
+                                .build();
+                        window.addAfterCloseListener(e1 -> {
+                            lichHensDl.setParameter("currentDate", new Date());
+                            lichHensDl.load();
+                        });
+                        window.open();
+                    });
+
+                    // Nút Xóa
+                    JmixButton deleteButton = uiComponents.create(JmixButton.class);
+                    deleteButton.setText("Xóa");
+                    deleteButton.addClickListener(e -> {
+                        lichHensDataGrid.select(lichHen);
+                        lichHensDataGridRemoveAction.execute();
+                    });
+
+                    // Thêm 2 nút vào layout
+                    actionsLayout.add(editButton);
+                    actionsLayout.add(deleteButton);
+
+                    return actionsLayout;
+                })
+                .setHeader("Thao tác")
+                .setAutoWidth(true);
+
+
+        lichHensDataGrid2.addComponentColumn(lichHen -> {
+                    // Tạo layout chứa hai nút
+                    HorizontalLayout actionsLayout = uiComponents.create(HorizontalLayout.class);
+
+                    // Nút Sửa
+                    JmixButton editButton = uiComponents.create(JmixButton.class);
+                    editButton.setText("Sửa");
+                    editButton.addClickListener(e -> {
+                        DialogWindow<LichHenDetailView> window = dialogWindows.detail(this, LichHen.class)
+                                .editEntity(lichHen) // chỉnh sửa entity hiện tại
+                                .withViewClass(LichHenDetailView.class)
+                                .build();
+                        window.addAfterCloseListener(e1 -> {
+                            lichHensDl_1.load();
+                        });
+                        window.open();
+                    });
+
+                    // Nút Xóa
+                    JmixButton deleteButton = uiComponents.create(JmixButton.class);
+                    deleteButton.setText("Xóa");
+                    deleteButton.addClickListener(e -> {
+                        lichHensDataGrid2.select(lichHen);
+                        lichHensDataGrid2RemoveAction.execute();
+                    });
+
+                    // Thêm 2 nút vào layout
+                    actionsLayout.add(editButton);
+                    actionsLayout.add(deleteButton);
+
+                    return actionsLayout;
+                })
+                .setHeader("Thao tác")
+                .setAutoWidth(true);
+    }
+
+
     @Supply(to = "lichHensDataGrid.hinhThuc", subject = "renderer")
     private Renderer<LichHen> lichHensDataGridHinhThucRenderer() {
         return new ComponentRenderer<>(lichhen -> {
             // TODO: create suitable component
             Span span = uiComponents.create(Span.class);
             if (lichhen.getHinhThuc()!=null) {
-                span.setText(messages.getMessage(lichhen.getHinhThuc()));
+                span.setText(messages.getMessage(lichhen.getHinhThuc().getId()));
                 span.addClassName(lichhen.getHinhThuc().toString());
             }
             span.getElement().getThemeList().add("badge");
@@ -51,18 +147,20 @@ public class LichHenListView extends StandardListView<LichHen> {
         }); 
     }
 
+
+
     @Supply(to = "lichHensDataGrid2.hinhThuc", subject = "renderer")
     private Renderer<LichHen> lichHensDataGrid2HinhThucRenderer() {
         return new ComponentRenderer<>(lichhen -> {
             Span span = uiComponents.create(Span.class);
             if (lichhen.getHinhThuc()!=null) {
-                span.setText(messages.getMessage(lichhen.getHinhThuc()));
+                span.setText(messages.getMessage(lichhen.getHinhThuc().getId()));
                 span.addClassName(lichhen.getHinhThuc().toString());
             }
             span.getElement().getThemeList().add("badge");
             return span;
         });
     }
-    
-    
+
+
 }

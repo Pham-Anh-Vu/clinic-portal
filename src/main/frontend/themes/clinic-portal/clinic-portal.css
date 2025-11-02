@@ -53,24 +53,23 @@
 }
 
 
-.dat_lich {
+.DAT_LICH {
   color: #0a9700;              /* Chữ xanh lá */
   background-color: #eaffea;   /* Nền xanh nhạt */
   border: 1px solid #8ae08a;   /* Viền nhạt */
   border-radius: 6px;
-  padding: 2px 8px;
+  padding: 6px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
 }
 
-/* Dành cho enum KHAM_TRUC_TIEP */
-.kham_truc_tiep {
+.KHAM_TRUC_TIEP {
   color: #6a0dad;              /* Chữ tím */
   background-color: #ffffff;   /* Nền trắng */
   border: 1px solid #b98ee7;   /* Viền tím nhạt */
   border-radius: 6px;
-  padding: 2px 8px;
+  padding: 6px 10px;
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
