@@ -32,10 +32,9 @@
                        dataLoader="benhNhansDl" opened="false">
             <properties include=".*"/>
         </genericFilter>
-        <hbox id="buttonsPanel" classNames="buttons-panel">
+        <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END">
             <button id="createButton" action="benhNhansDataGrid.createAction"/>
-            <button id="editButton" action="benhNhansDataGrid.editAction"/>
-            <button id="removeButton" action="benhNhansDataGrid.removeAction"/>
+            <button id="refreshButton" action="benhNhansDataGrid.refreshAction"/>
         </hbox>
         <dataGrid id="benhNhansDataGrid"
                   width="100%"
@@ -49,21 +48,31 @@
                 </vbox>
             </emptyStateComponent>
             <actions>
-                <action id="createAction" type="list_create">
+                <action id="createAction" type="list_create" text="Thêm bệnh nhân">
                     <properties>
                         <property name="openMode" value="DIALOG"/>
                     </properties>
                 </action>
-                <action id="editAction" type="list_edit"/>
-                <action id="removeAction" type="list_remove"/>
+                <action id="editAction" type="list_edit" text="Sửa">
+                    <properties>
+                        <property name="openMode" value="DIALOG"/>
+                    </properties>
+                </action>
+                <action id="removeAction" type="list_remove" text="Xóa"/>
+                <action id="refreshAction" type="list_refresh"/>
+                <action id="readAction" type="list_read" text="Chi tiết">
+                    <properties>
+                        <property name="openMode" value="DIALOG"/>
+                    </properties>
+                </action>
+
             </actions>
             <columns resizable="true">
-                <column property="id"/>
-                <column property="hoVaTen"/>
+                <column property="id" header="Mã BN"/>
+                <column property="hoVaTen" header="Họ tên bệnh nhân"/>
                 <column property="gioiTinh"/>
                 <column property="ngaySinh"/>
-                <column property="dienThoai"/>
-                <column property="nguonBenhNhan"/>
+                <column property="dienThoai" header="Số điện thoại"/>
             </columns>
         </dataGrid>
         <simplePagination id="pagination" dataLoader="benhNhansDl" alignSelf="END"/>
