@@ -82,6 +82,5 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
             formCreate.setVisible(false);
             formRead.setVisible(true);
         }
-
     }
 }

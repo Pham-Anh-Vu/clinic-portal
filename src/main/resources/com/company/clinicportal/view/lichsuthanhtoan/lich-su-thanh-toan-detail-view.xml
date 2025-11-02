@@ -24,8 +24,8 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <textField id="daThanhToanField" property="daThanhToan"/>
-            <dateTimePicker id="thanhToanLucField" property="thanhToanLuc"/>
+            <textField id="daThanhToanField" property="daThanhToan" required="true"/>
+            <dateTimePicker id="thanhToanLucField" property="thanhToanLuc" required="true"/>
             <textArea id="ghiChuField" height="9.5em" property="ghiChu"/>
             <textField id="hoTenNguoiNopTienField" property="hoTenNguoiNopTien"/>
             <textField id="soDienThoaiField" property="soDienThoai"/>

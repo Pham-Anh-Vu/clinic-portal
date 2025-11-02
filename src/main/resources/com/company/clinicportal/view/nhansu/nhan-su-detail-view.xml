@@ -67,12 +67,12 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="4"/>
                         </responsiveSteps>
-                        <textField label="Thông tin nhân sự" id="hoTenField" property="hoTen"/>
+                        <textField label="Thông tin nhân sự" id="hoTenField" property="hoTen" required="true"/>
                         <datePicker id="ngaySinhField" property="ngaySinh"/>
-                        <select id="gioiTinhField" property="gioiTinh"/>
+                        <select id="gioiTinhField" property="gioiTinh" required="true"/>
                         <textField id="dienThoaiField" property="dienThoai"/>
                         <datePicker id="ngayVaoLamField" property="ngayVaoLam"/>
-                        <select id="chucVuField" property="chucVu"/>
+                        <select id="chucVuField" property="chucVu" required="true"/>
                         <textField id="luongCoBanField" property="luongCoBan"/>
                         <textField id="diaChiField" property="diaChi"/>
                         <textField id="maNhanSuField" property="maNhanSu"/>

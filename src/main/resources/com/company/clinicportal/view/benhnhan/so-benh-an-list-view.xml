@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://soBenhAnListView.title"
+      focusComponent="benhNhansDataGrid">
+    <data>
+        <collection id="benhNhansDc"
+                    class="com.company.clinicportal.entity.BenhNhan">
+            <fetchPlan>
+                <property name="diaChi"/>
+                <property name="dienThoai"/>
+                <property name="gioiTinh"/>
+                <property name="hoVaTen"/>
+                <property name="ngaySinh"/>
+                <property name="tuoi"/>
+            </fetchPlan>
+            <loader id="benhNhansDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BenhNhan e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="benhNhansDl" opened="false">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END">
+            <button id="createButton" action="benhNhansDataGrid.createAction"/>
+            <button id="refreshButton" action="benhNhansDataGrid.refreshAction"/>
+        </hbox>
+        <dataGrid id="benhNhansDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="benhNhansDc"
+                  columnReorderingAllowed="true">
+            <emptyStateComponent>
+                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                    <h2 text="Chưa có dữ liệu"/>
+                </vbox>
+            </emptyStateComponent>
+            <actions>
+                <action id="createAction" type="list_create" text="Tạo sổ">
+                    <properties>
+                        <property name="viewId" value="ThemSoBenhAn.detail"/>
+                        <property name="openMode" value="DIALOG"/>
+                    </properties>
+                </action>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+                <action id="refreshAction" type="list_refresh"/>
+            </actions>
+            <columns resizable="true">
+                <column property="id" header="Mã BN"/>
+                <column property="hoVaTen" header="Họ tên bệnh nhân"/>
+                <column property="ngaySinh"/>
+                <column property="tuoi"/>
+                <column property="dienThoai" header="SĐT liên lạc"/>
+            </columns>
+        </dataGrid>
+        <simplePagination id="pagination" dataLoader="benhNhansDl" alignSelf="END"/>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

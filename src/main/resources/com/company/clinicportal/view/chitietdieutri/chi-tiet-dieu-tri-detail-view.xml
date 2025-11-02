@@ -50,7 +50,7 @@
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout
+                    <formLayout dataContainer="chiTietDieuTriDc"
                             css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="4"/>
@@ -140,12 +140,12 @@
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout
+                    <formLayout dataContainer="chiTietDieuTriDc"
                             css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="2"/>
                         </responsiveSteps>
-                        <textField id="tinhKpiField" property="tinhKpi" colspan="2"/>
+                        <textField id="tinhKpiField" property="tinhKpi" colspan="2" required="true"/>
                         <textField id="trongSoDienTriLieuField" property="trongSoDienTriLieu"/>
                         <textField id="trongSoKeoGianField" property="trongSoKeoGian"/>
                         <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
@@ -167,7 +167,7 @@
                     </hbox>
                 </vbox>
                 <vbox padding="false" classNames="grid-data">
-                    <formLayout
+                    <formLayout dataContainer="chiTietDieuTriDc"
                             css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="6"/>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://soBenhAnDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="benhNhanDc"
+                  class="com.company.clinicportal.entity.BenhNhan">
+            <fetchPlan extends="_base"/>
+            <loader id="benhNhanDl"/>
+        </instance>
+        <collection id="chiTietDieuTrisDc" class="com.company.clinicportal.entity.ChiTietDieuTri">
+            <loader id="chiTietDieuTrisDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from ChiTietDieuTri e where e.idBenhNhan = :idBenhNhan]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base">
+                <property name="idNhanSu" fetchPlan="_base"/>
+            </fetchPlan>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="benhNhanDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+            </responsiveSteps>
+
+            <vbox width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="THÔNG TIN BỆNH NHÂN"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
+                <vbox padding="false" classNames="grid-data">
+                    <formLayout
+                            css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="4"/>
+                        </responsiveSteps>
+                        <textField id="idBenhNhanField" property="hoVaTen" readOnly="true" label="Họ tên bệnh nhân"/>
+                        <textField id="gioiTinhField" property="gioiTinh" readOnly="true"/>
+                        <textField id="ngaySinhField" property="ngaySinh" readOnly="true"/>
+                        <textField id="tuoiField" property="tuoi" readOnly="true"/>
+                        <textField id="dienThoaiField" property="dienThoai" readOnly="true" label="Số điện thoại"/>
+                        <textArea id="diaChiField" height="9.5em" property="diaChi" readOnly="true"/>
+                        <hbox id="trangThaiBox"
+                              alignItems="CENTER"
+                              spacing="true"/>
+                        <hbox id="ngayKhamBenhBox"
+                              alignItems="CENTER"
+                              spacing="true"/>
+                        <hbox id="thoiGianTaiKhamBox"
+                              alignItems="CENTER"
+                              spacing="true"/>
+                    </formLayout>
+                </vbox>
+            </vbox>
+
+            <vbox width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="THÔNG TIN NGƯỜI THÂN"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
+                <vbox padding="false" classNames="grid-data">
+                    <formLayout
+                            css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="3"/>
+                        </responsiveSteps>
+                        <textField id="hoTenNguoiThanField2" property="hoTenNguoiThan" readOnly="true"/>
+                        <textField id="sdtNguoiThanField2" property="sdtNguoiThan" readOnly="true"/>
+                        <textField id="quanHeVoiBenhNhanField2" property="quanHeVoiBenhNhan" readOnly="true"/>
+                    </formLayout>
+                </vbox>
+            </vbox>
+
+            <vbox width="100%" alignItems="START" padding="false"
+                  spacing="false" classNames="tab-5-grid">
+                <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                      width="100%">
+                    <hbox classNames="buttons-panel" width="100%">
+                        <div width="100%" classNames="all-control-auto-pay">
+                            <div classNames="title-grid">
+                                <span text="LỊCH SỬ KHÁM BỆNH"/>
+                            </div>
+                            <div classNames="function-flex-end">
+                                <button action="chiTietDieuTrisDataGrid.create"
+                                        classNames="action-button create"/>
+                            </div>
+                        </div>
+                    </hbox>
+                </vbox>
+                <vbox padding="false" classNames="grid-data">
+                    <dataGrid id="chiTietDieuTrisDataGrid" dataContainer="chiTietDieuTrisDc"
+                              width="100%">
+                        <actions>
+                            <action id="create" type="list_create" text="Thêm phiếu">
+                            </action>
+                        </actions>
+                        <columns>
+                            <column property="tenPhieuDieuTri"/>
+                            <column property="ngayBatDau"/>
+                            <column property="ngayKetThuc"/>
+                            <column property="ngayChiDinh"/>
+                            <column property="idNhanSu" header="BS. chỉ định"/>
+                            <column property="tongTien" header="Đơn giá"/>
+                            <column property="daThanhToan"/>
+                            <column property="phaiDong"/>
+                        </columns>
+                    </dataGrid>
+                </vbox>
+            </vbox>
+
+        </formLayout>
+       <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

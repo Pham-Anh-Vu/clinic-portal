@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://themSoBenhAnDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="benhNhanDc"
+                  class="com.company.clinicportal.entity.BenhNhan">
+            <fetchPlan extends="_base"/>
+            <loader id="benhNhanDl"/>
+        </instance>
+        <collection id="benhNhansDc" class="com.company.clinicportal.entity.BenhNhan">
+            <loader id="benhNhansDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BenhNhan e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="benhNhanDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+            </responsiveSteps>
+            <entityComboBox id="benhNhanField" metaClass="BenhNhan" itemsContainer="benhNhansDc" label="Thêm bệnh nhân" required="true"/>
+        </formLayout>
+       <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

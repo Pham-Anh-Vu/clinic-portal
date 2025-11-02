@@ -1,47 +1,49 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
-    <menu id="application" title="msg://com.company.clinicportal/menu.application.title" opened="true" >
-        <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar"/>
-        <item view="NgayDieuTri.list"
-              title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"
-              icon="vaadin:plus-square-o" />
-        <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title" icon="vaadin:user"/>
+    <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar"/>
+    <item view="NgayDieuTri.list"
+          title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"
+          icon="vaadin:plus-square-o" />
+    <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title" icon="vaadin:user"/>
 
 
-        <menu id="indication" description="msg://fis.pbcap.finexbackoffice/menu_config.indication.description"
-              icon="vaadin:clipboard-text"
-             title="msg://fis.pbcap.finexbackoffice/menu_config.indication.title">
-            <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title" icon="vaadin:file-text"/>
-            <item view="ThuThuat.list" title="msg://com.company.clinicportal.view.buoidieutri/thuThuatListView.title" icon="vaadin:wrench"/>
-            <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title" icon="vaadin:list"/>
-        </menu>
-
-        <menu id="patient" description="msg://fis.pbcap.finexbackoffice/menu_config.patient.description"
-              icon="vaadin:users"
-             title="msg://fis.pbcap.finexbackoffice/menu_config.patient.title">
-            <item view="BenhNhan.list" title="msg://com.company.clinicportal.view.benhnhan/benhNhanListView.title" icon="vaadin:users"/>
-            <item id="soBenhAn" view="PhieuChiDinh.list" title="Sổ bệnh án" icon="vaadin:book"/>
-        </menu>
-
-
-<!--        <item view="ChiTietDichVu.list"-->
-<!--              title="msg://com.company.clinicportal.view.chitietdichvu/chiTietDichVuListView.title"/>-->
-<!--        <item view="ChiTietDieuTri.list"-->
-<!--              title="msg://com.company.clinicportal.view.chitietdieutri/chiTietDieuTriListView.title"/>-->
-<!--        <item view="GiaKpi.list" title="msg://com.company.clinicportal.view.giakpi/giaKpiListView.title"/>-->
-<!--        <item view="LichSuThanhToan.list"-->
-<!--              title="msg://com.company.clinicportal.view.lichsuthanhtoan/lichSuThanhToanListView.title"/>-->
-<!--        <item view="LuongThang.list" title="msg://com.company.clinicportal.view.luongthang/luongThangListView.title"/>-->
-
-<!--        <item view="PhieuChi.list" title="msg://com.company.clinicportal.view.phieuchi/phieuChiListView.title"/>-->
-<!--        <item view="PhieuDieuTri.list"-->
-<!--              title="msg://com.company.clinicportal.view.phieudieutri/phieuDieuTriListView.title"/>-->
-<!--        <item view="SoQuy.list" title="msg://com.company.clinicportal.view.soquy/soQuyListView.title"/>-->
-<!--        <item view="TblKhachhang.list"-->
-<!--              title="msg://com.company.clinicportal.view.tblkhachhang/tblKhachhangListView.title"/>-->
-<!--        <item view="TinhKpi.list" title="msg://com.company.clinicportal.view.tinhkpi/tinhKpiListView.title"/>-->
-<!--        <item view="TrongSoKpiDichVu.list"-->
-<!--              title="msg://com.company.clinicportal.view.trongsokpidichvu/trongSoKpiDichVuListView.title"/>-->
+    <menu id="indication" description="msg://fis.pbcap.finexbackoffice/menu_config.indication.description"
+          icon="vaadin:clipboard-text"
+          title="msg://fis.pbcap.finexbackoffice/menu_config.indication.title">
+        <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title" icon="vaadin:file-text"/>
+        <item view="ThuThuat.list" title="msg://com.company.clinicportal.view.buoidieutri/thuThuatListView.title" icon="vaadin:wrench"/>
+        <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title" icon="vaadin:list"/>
     </menu>
+
+    <menu id="patient" description="msg://fis.pbcap.finexbackoffice/menu_config.patient.description"
+          icon="vaadin:users"
+          title="msg://fis.pbcap.finexbackoffice/menu_config.patient.title">
+        <item view="BenhNhan.list" title="msg://com.company.clinicportal.view.benhnhan/benhNhanListView.title" icon="vaadin:users"/>
+        <item view="SoBenhAn.list" icon="vaadin:book" title="Sổ bệnh án"/>
+    </menu>
+
+<!--    <menu id="application" title="msg://com.company.clinicportal/menu.application.title" opened="true" >-->
+<!--        -->
+
+
+<!--        &lt;!&ndash;        <item view="ChiTietDichVu.list"&ndash;&gt;-->
+<!--&lt;!&ndash;              title="msg://com.company.clinicportal.view.chitietdichvu/chiTietDichVuListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="ChiTietDieuTri.list"&ndash;&gt;-->
+<!--&lt;!&ndash;              title="msg://com.company.clinicportal.view.chitietdieutri/chiTietDieuTriListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="GiaKpi.list" title="msg://com.company.clinicportal.view.giakpi/giaKpiListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="LichSuThanhToan.list"&ndash;&gt;-->
+<!--&lt;!&ndash;              title="msg://com.company.clinicportal.view.lichsuthanhtoan/lichSuThanhToanListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="LuongThang.list" title="msg://com.company.clinicportal.view.luongthang/luongThangListView.title"/>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <item view="PhieuChi.list" title="msg://com.company.clinicportal.view.phieuchi/phieuChiListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="PhieuDieuTri.list"&ndash;&gt;-->
+<!--&lt;!&ndash;              title="msg://com.company.clinicportal.view.phieudieutri/phieuDieuTriListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="SoQuy.list" title="msg://com.company.clinicportal.view.soquy/soQuyListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="TblKhachhang.list"&ndash;&gt;-->
+<!--&lt;!&ndash;              title="msg://com.company.clinicportal.view.tblkhachhang/tblKhachhangListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="TinhKpi.list" title="msg://com.company.clinicportal.view.tinhkpi/tinhKpiListView.title"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item view="TrongSoKpiDichVu.list"&ndash;&gt;-->
+<!--&lt;!&ndash;              title="msg://com.company.clinicportal.view.trongsokpidichvu/trongSoKpiDichVuListView.title"/>&ndash;&gt;-->
+<!--    </menu>-->
 
 </menu-config>

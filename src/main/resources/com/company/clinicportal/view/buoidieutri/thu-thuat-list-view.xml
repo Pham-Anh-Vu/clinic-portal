@@ -117,7 +117,7 @@
                                    dataLoader="buoiDieuTrisDl_1" opened="false">
                         <properties include=".*"/>
                     </genericFilter>
-                    <hbox id="buttonsPanel2" classNames="buttons-panel">
+                    <hbox id="buttonsPanel2" classNames="buttons-panel" justifyContent="END">
                         <button id="createButton2" action="buoiDieuTrisDataGrid2.createAction2"/>
                         <button id="refreshButton2" action="buoiDieuTrisDataGrid2.refreshAction2"/>
                     </hbox>
@@ -133,10 +133,8 @@
                             </vbox>
                         </emptyStateComponent>
                         <actions>
-                            <action id="editAction2" type="list_edit"/>
-                            <action id="removeAction2" type="list_remove"/>
-                            <action id="createAction2" type="list_create"/>
-                            <action id="refreshAction2" type="list_refresh"/>
+                            <action id="createAction2" type="list_create" text="Tạo mới"/>
+                            <action id="refreshAction2" type="list_refresh" text="Xóa"/>
 
                         </actions>
                         <columns resizable="true">

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ViewController(id = "NhanSu.detail")
 @ViewDescriptor(path = "nhan-su-detail-view.xml")
 @EditedEntityContainer("nhanSuDc")
+@DialogMode(height = "100%", width = "80%")
 public class NhanSuDetailView extends StandardDetailView<NhanSu> {
     @ViewComponent
     private CollectionLoader<TinhKpi> tinhKpisDl;

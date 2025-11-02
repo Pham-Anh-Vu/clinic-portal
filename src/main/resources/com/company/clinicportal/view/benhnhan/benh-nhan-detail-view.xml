@@ -24,11 +24,11 @@
                     <responsiveStep minWidth="0" columns="1"/>
                     <responsiveStep minWidth="40em" columns="4"/>
                 </responsiveSteps>
-                <textField id="hoVaTenField" property="hoVaTen" label="Họ tên bệnh nhân"/>
-                <datePicker id="ngaySinhField" property="ngaySinh"/>
-                <select id="gioiTinhField" property="gioiTinh"/>
-                <textField id="dienThoaiField" property="dienThoai" label="Số điện thoại"/>
-                <textArea id="diaChiField" height="9.5em" property="diaChi" colspan="4"/>
+                <textField id="hoVaTenField" property="hoVaTen" label="Họ tên bệnh nhân" required="true"/>
+                <datePicker id="ngaySinhField" property="ngaySinh" required="true"/>
+                <select id="gioiTinhField" property="gioiTinh" required="true"/>
+                <textField id="dienThoaiField" property="dienThoai" label="Số điện thoại" required="true"/>
+                <textArea id="diaChiField" height="9.5em" property="diaChi" colspan="4" required="true"/>
                 <select id="nguonBenhNhanField" property="nguonBenhNhan" colspan="4"/>
                 <textField id="nguoiGioiThieuField" property="nguoiGioiThieu"/>
                 <textField id="hoTenNguoiThanField" property="hoTenNguoiThan"/>

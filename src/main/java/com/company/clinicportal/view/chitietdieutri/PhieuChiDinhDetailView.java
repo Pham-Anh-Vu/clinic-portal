@@ -16,6 +16,7 @@ import java.util.Date;
 @ViewController(id = "PhieuChiDinh.detail")
 @ViewDescriptor(path = "phieu-chi-dinh-detail-view.xml")
 @EditedEntityContainer("chiTietDieuTriDc")
+@DialogMode(width = "80%", height = "100%")
 public class PhieuChiDinhDetailView extends StandardDetailView<ChiTietDieuTri> {
     @ViewComponent
     private TypedDateTimePicker<Date> ngayChiDinhField;

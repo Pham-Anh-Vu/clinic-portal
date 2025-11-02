@@ -1,37 +1,36 @@
 package com.company.clinicportal.view.chitietdieutri;
 
+import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.LichSuThanhToan;
-import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
-import io.jmix.core.DataManager;
-import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
+import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Optional;
 
-@Route(value = "chi-tiet-dieu-tris/:id", layout = MainView.class)
-@ViewController(id = "ChiTietDieuTri.detail")
-@ViewDescriptor(path = "chi-tiet-dieu-tri-detail-view.xml")
+@Route(value = "chi-tiet-dieu-tri-sbas/:id", layout = MainView.class)
+@ViewController(id = "ChiTietDieuTriSBA.detail")
+@ViewDescriptor(path = "chi-tiet-dieu-tri-sba-detail-view.xml")
 @EditedEntityContainer("chiTietDieuTriDc")
-@DialogMode(width = "80%", height = "100%")
-public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri> {
+@DialogMode(height = "100%", width = "80%")
+public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuTri> {
+    private BenhNhan idBenhNhan = null;
+    @ViewComponent
+    private InstanceLoader<ChiTietDieuTri> chiTietDieuTriDl;
     @ViewComponent
     private DataGrid<ChiTietDichVu> chiTietDichVusDataGrid;
     @Autowired
@@ -39,15 +38,9 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
     @Autowired
     private DialogWindows dialogWindows;
     @ViewComponent
+    private DataGrid<Object> lichSuThanhToansDataGrid;
+    @ViewComponent
     private CollectionLoader<LichSuThanhToan> lichSuThanhToansDl;
-    @Autowired
-    private DataManager dataManager;
-    @Autowired
-    private Messages messages;
-    @ViewComponent
-    private HorizontalLayout trangThaiBox;
-    @ViewComponent
-    private DataGrid<LichSuThanhToan> lichSuThanhToansDataGrid;
     @ViewComponent
     private TypedTextField<Long> tongTienField;
     @ViewComponent
@@ -59,8 +52,18 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
     @ViewComponent
     private TypedTextField<Integer> phaiDongField;
 
+    public void setIdBenhNhan(BenhNhan idBenhNhan) {
+        this.idBenhNhan = idBenhNhan;
+    }
+
     @Subscribe
-    public void onInit(InitEvent event) {
+    public void onBeforeShow(final BeforeShowEvent event) {
+        chiTietDieuTriDl.setParameter("idBenhNhan", idBenhNhan);
+        chiTietDieuTriDl.load();
+
+        lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
+        lichSuThanhToansDl.load();
+
         chiTietDichVusDataGrid.addComponentColumn(chiTietDichVu -> {
             JmixButton button = uiComponents.create(JmixButton.class);
             button.setText("Chi tiết");
@@ -89,34 +92,6 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
             });
             return button;
         }).setHeader("Thao tác").setAutoWidth(true);
-    }
-
-
-
-    @Subscribe
-    public void onBeforeShow(final BeforeShowEvent event) {
-        lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
-        lichSuThanhToansDl.load();
-
-        Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
-                .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
-                .parameter("bn", getEditedEntity().getIdBenhNhan())
-                .maxResults(1)
-                .optional();
-        Span span = uiComponents.create(Span.class);
-
-        if (phieuDieuTri.isPresent()) {
-            var trangThai = phieuDieuTri.get().getTrangThai();
-            span.setText(messages.getMessage(trangThai));
-            span.addClassName(trangThai.toString()); // gán class CSS (VD: DANG_DT, DA_DT, KHONG_DT)
-        }
-
-        Span label = uiComponents.create(Span.class);
-        label.setText("Trạng thái: ");
-        label.addClassName("trang-thai-label");
-
-        trangThaiBox.removeAll();
-        trangThaiBox.add(label, span);
     }
 
     @Subscribe("khuyenMaiField")

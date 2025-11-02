@@ -25,11 +25,11 @@
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
             <textField id="tenDichVuField" property="tenDichVu"/>
-            <select id="nhomDichVuField" property="nhomDichVu"/>
+            <select id="nhomDichVuField" property="nhomDichVu" required="true"/>
             <textArea id="moTaField" height="9.5em" property="moTa" colspan="2"/>
             <textField id="giaField" property="gia"/>
-            <textField id="giaKpiSangField" property="giaKpiSang"/>
-            <textField id="giaKpiToiField" property="giaKpiToi"/>
+            <textField id="giaKpiSangField" property="giaKpiSang" required="true"/>
+            <textField id="giaKpiToiField" property="giaKpiToi" required="true"/>
             <textField id="donViTinhField" property="donViTinh"/>
 
 
