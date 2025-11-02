@@ -73,12 +73,12 @@
                             </vbox>
                         </emptyStateComponent>
                         <actions>
-                            <action id="createAction" type="list_create">
+                            <action id="createAction" type="list_create" text="Thêm lịch">
                                 <properties><property name="openMode" value="DIALOG"/></properties>
                             </action>
-                            <action id="editAction" type="list_edit"/>
-                            <action id="removeAction" type="list_remove"/>
-                            <action id="refreshAction" type="list_refresh"/>
+                            <action id="editAction" type="list_edit" text="Sửa"/>
+                            <action id="removeAction" type="list_remove" text="Xóa"/>
+                            <action id="refreshAction" type="list_refresh" text="Làm mới"/>
                         </actions>
                         <columns resizable="true">
                             <column property="idBenhNhan.hoVaTen" header="Họ tên bệnh nhân"/>
