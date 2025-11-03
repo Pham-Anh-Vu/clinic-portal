@@ -35,6 +35,14 @@
             </loader>
             <fetchPlan extends="_base">
                 <property name="idBenhNhan" fetchPlan="_base"/>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                    <property name="idDichVu" fetchPlan="_base">
+                        <property name="tenDichVu"/>
+                    </property>
+                    <property name="idChiTietPhieuDieuTri" fetchPlan="_base">
+                        <property name="tenPhieuDieuTri"/>
+                    </property>
+                </property>
             </fetchPlan>
         </collection>
 
@@ -98,7 +106,7 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="2"/>
                         </responsiveSteps>
-                        <dataGrid id="buoiDieuTrisDataGrid" dataContainer="buoiDieuTrisDc" minWidth="100px" width="100%" colspan="2">
+                        <dataGrid id="buoiDieuTrisDataGrid" dataContainer="buoiDieuTrisDc" minWidth="100px" width="100%" colspan="2" columnReorderingAllowed="true">
                             <emptyStateComponent>
                                 <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
                                     <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
@@ -110,9 +118,12 @@
                                 <action id="edit" type="list_edit"/>
                                 <action id="remove" type="list_remove"/>
                             </actions>
-                            <columns>
+                            <columns resizable="true">
                                 <column property="trangThai"/>
-                                <column property="idBenhNhan.hoVaTen"/>
+                                <column property="idBenhNhan.hoVaTen" header="Họ và tên bệnh nhân"/>
+                                <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
+                                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.tenPhieuDieuTri"/>
+                                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.trongSoKpi"/>
                                 <column property="ngayThucHien"/>
                                 <column property="gioBatDau"/>
                                 <column property="gioKetThuc"/>
@@ -153,7 +164,7 @@
                                 <action id="edit" type="list_edit"/>
                                 <action id="remove" type="list_remove"/>
                             </actions>
-                            <columns>
+                            <columns resizable="true">
                                 <column property="thang"/>
                                 <column property="kpiSang"/>
                                 <column property="kpiToi"/>

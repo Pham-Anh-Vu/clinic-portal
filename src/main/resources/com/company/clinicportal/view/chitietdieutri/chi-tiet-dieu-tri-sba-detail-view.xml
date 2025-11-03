@@ -190,7 +190,7 @@
                                         <action id="refresh" type="list_refresh"/>
                                     </actions>
 
-                                    <columns>
+                                    <columns resizable="true">
                                         <column property="idDichVu.tenDichVu"/>
                                         <column property="idDichVu.nhomDichVu"/>
                                         <column property="idDichVu.gia"/>
@@ -266,7 +266,7 @@
                                         <action id="remove" type="list_remove" text="Xóa"/>
                                         <action id="refresh" type="list_refresh"/>
                                     </actions>
-                                    <columns>
+                                    <columns resizable="true">
                                         <column property="thanhToanLuc"/>
                                         <column property="daThanhToan"/>
                                         <column property="ghiChu"/>

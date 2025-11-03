@@ -121,7 +121,7 @@
                             <action id="runListEntityReport" type="report_runListEntityReport" text="In phiếu báo cáo">
                             </action>
                         </actions>
-                        <columns>
+                        <columns resizable="true">
                             <column property="tenPhieuDieuTri"/>
                             <column property="ngayBatDau"/>
                             <column property="ngayKetThuc"/>
