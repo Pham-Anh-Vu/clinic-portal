@@ -1,0 +1,482 @@
+
+/*Browser Scroll*/
+/* width */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 10px;
+}
+/*Document Commited state*/
+.committed{
+    color: var(--lumo-success-color);
+}
+.uncommitted{
+    color: var( --lumo-secondary-color);
+}
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #fde9e9;
+}
+/*Edit form*/
+.screen-view {
+    overflow-y:auto;
+}
+
+/*Folder item in Tree datagrid*/
+.folder-item {
+    color: #cccc00;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.folder-text {
+    flex: 1 1 auto; /* Chiếm phần còn lại, có thể co */
+    overflow: hidden; /* Ẩn nội dung tràn */
+    text-overflow: ellipsis; /* Hiện dấu ... */
+    white-space: nowrap; /* Không xuống dòng */
+}
+/**/
+.icon-tab {
+    margin-right: 8px;
+}
+
+/*Edit view styles*/
+.edit-view-title {
+    font-size: 24px;
+    font-weight: 700;
+}
+.edit-view-header-container{
+    /*background: #fdf7ef;*/
+}
+/*Menu Icons styles*/
+.menu-icon .purple {
+    color: rgb(147 51 234 / var(--tw-text-opacity, 1));
+}
+
+/*Folder item in Tree datagrid*/
+.set-item {
+    color: var(--lumo-primary-color);
+}
+
+.field-item {
+    color: var(--lumo-primary-color);
+}
+
+.field-item-link {
+    color: #df0070;
+}
+.header-column{
+    border-bottom: solid 1px var(--lumo-shade-10pct);
+    text-align: center;
+}
+.header-group{
+    font-weight: 700;
+    text-align: center;
+    align-self: center;
+}
+
+/*multiSelectComboBox*/
+vaadin-multi-select-combo-box-chip.pink{
+    background:  var(--lumo-primary-color-10pct);
+    color:  var(--lumo-primary-color);
+    border-radius: 8px;
+
+}
+
+/*Định dạng số*/
+vaadin-integer-field input[type="number"] {
+    text-align: end;
+    --_lumo-text-field-overflow-mask-image:null;
+}
+vaadin-big-decimal-field input[type="text"] {
+    text-align: end;
+    --_lumo-text-field-overflow-mask-image:null;
+}
+
+
+.badge-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.filter-count-badge {
+    position: absolute;
+    top: -12px;
+    right: -8px;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 10px;
+    width: 30px;
+    height: 30px;
+}
+
+/*Action bar for wizard*/
+.hbox-actions {
+    position: absolute;
+    bottom: 0px;
+}
+
+/*TAB badge*/
+.tab-count-badge {
+    /*position: absolute;*/
+    /*top: -4px;*/
+    /*right: -12px;*/
+    /*font-weight: bold;*/
+    /*border-radius: 50%;*/
+    /*padding: 0px;*/
+    /*margin: 10px;*/
+    /*width: 16px;*/
+    /*height: 16px;*/
+    /*background: var(--lumo-primary-color-30pct);*/
+    /*color: var(--lumo-primary-color);*/
+
+    display: inline-flex
+;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0.4em calc(0.5em + var(--lumo-border-radius-s) / 4);
+    color: var(--lumo-primary-text-color);
+    background-color: var(--lumo-primary-color-10pct);
+    /*border-radius: var(--lumo-border-radius-s);*/
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
+    line-height: 1;
+    /*font-weight: 500;*/
+    text-transform: initial;
+    letter-spacing: initial;
+    min-width: calc(var(--lumo-line-height-xs) * 1em + 0.45em);
+    flex-shrink: 0;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+
+
+
+/* Define your styles here */
+
+.grid-data::part(cell) {
+    margin-left: 7px;
+    font-size: 14px;
+    font-family: "Be VietNam Pro", sans-serif;
+    font-weight: 400;
+}
+
+.grid-data::part(header-cell) {
+    font-size: 16px;
+    font-family: "Be VietNam Pro", sans-serif;
+    font-weight: 600;
+    background-color: #FFFFFF;
+    margin-left: 7px;
+    text-align: start;
+}
+
+.tab-5-grid{
+    margin-top: 16px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.header-grid-auto-pay{
+    height: 40px;
+    border: 1px #BFBFBF solid;
+    background-color: #F6F9FB;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.all-control-auto-pay{
+    display: flex;
+    justify-content: space-between;
+    height: 40px;
+}
+
+.title-grid {
+    /*margin-top: 10px;*/
+    margin-left: 24px;
+    flex: 1;
+    /*height: 56px;*/
+    font-family: "Be VietNam Pro", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    align-content: center;
+}
+
+.function-flex-end {
+    height: auto;
+    margin-right: 24px;
+}
+
+
+.DAT_LICH {
+    color: #0a9700;              /* Chữ xanh lá */
+    background-color: #eaffea;   /* Nền xanh nhạt */
+    border: 1px solid #8ae08a;   /* Viền nhạt */
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.KHAM_TRUC_TIEP {
+    color: #6a0dad;              /* Chữ tím */
+    background-color: #ffffff;   /* Nền trắng */
+    border: 1px solid #b98ee7;   /* Viền tím nhạt */
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.gioi_tinh{
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 14px;
+    color: #333;
+    cursor: default;
+    text-align: center;
+    min-width: 50px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Kiểu chung cho tất cả các nhãn chức vụ */
+.BS,
+.KTV,
+.HCNV,
+.MKT {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 90px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Bác sĩ - màu đỏ */
+.BS {
+    color: #d63031;
+    background-color: #ffe6e6;
+    border-color: #ff9999;
+}
+
+/* Kỹ thuật viên - màu xanh lá */
+.KTV {
+    color: #27ae60;
+    background-color: #e6ffe6;
+    border-color: #a6f0a6;
+}
+
+/* Hành chính - nhân sự - màu vàng cam */
+.HCNV {
+    color: #d68910;
+    background-color: #fff8e6;
+    border-color: #ffdd99;
+}
+
+/* Marketing - màu xanh dương */
+.MKT {
+    color: #2980b9;
+    background-color: #e6f0ff;
+    border-color: #99c2ff;
+}
+
+/* Kiểu chung cho cả hai loại */
+.FT,
+.PT {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 80px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Full time - màu đỏ */
+.FT {
+    color: #d63031;
+    background-color: #ffe6e6;
+    border-color: #ff9999;
+}
+
+/* Part time - màu xanh lá */
+.PT {
+    color: #27ae60;
+    background-color: #e6ffe6;
+    border-color: #a6f0a6;
+}
+
+.action-button{
+    height: 28px;
+    margin: 5px;
+}
+
+.chua_thuc_hien {
+    background-color: #ffe6f0;        /* hồng nhạt nền */
+    color: #e60073;                   /* chữ hồng đậm */
+    border: 1px solid #ff80b3;        /* viền hồng */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.da_thuc_hien {
+    background-color: #e6ffe6;        /* xanh lá nhạt nền */
+    color: #009900;                   /* chữ xanh đậm */
+    border: 1px solid #66cc66;        /* viền xanh nhạt */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.da_huy {
+    background-color: #ffe6e6;        /* đỏ nhạt nền */
+    color: #e60000;                   /* chữ đỏ đậm */
+    border: 1px solid #ff6666;        /* viền đỏ nhạt */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.dien_tri_lieu {
+    background-color: #fff2cc;        /* vàng nhạt nền */
+    color: #b36b00;                   /* chữ vàng nâu */
+    border: 1px solid #ffd966;        /* viền vàng nhạt */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.keo_gian {
+    background-color: #e6ffe6;        /* xanh lá nhạt nền */
+    color: #009933;                   /* chữ xanh lá đậm */
+    border: 1px solid #66cc66;        /* viền xanh nhạt */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.van_dong_tri_lieu {
+    background-color: #e0f7fa;        /* xanh dương ngọc nhạt nền */
+    color: #008c99;                   /* chữ xanh đậm */
+    border: 1px solid #4dd0e1;        /* viền xanh nhạt */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.tap_phcn {
+    background-color: #e6f0ff;        /* xanh lam nhạt nền */
+    color: #005ce6;                   /* chữ xanh lam đậm */
+    border: 1px solid #99b3ff;        /* viền xanh lam nhạt */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.jmix-list-menu .jmix-menubar-item:is(.menu-lv1, .menu-lv2, .menu-lv3) .jmix-menubar-summary-icon-container vaadin-icon.prefix-component {
+    width: var(--icon-size);
+    height: var(--icon-size);
+}
+
+.jmix-list-menu .jmix-menubar-item.menu-lv1 {
+    --icon-size: 2rem;
+}
+
+.jmix-list-menu .jmix-menubar-item:is(.menu-lv1, .menu-lv2, .menu-lv3)[class*="module-"] .jmix-menubar-summary-icon-container vaadin-icon.prefix-component{
+    color: var(--menu-color);
+}
+
+/* ĐANG ĐIỀU TRỊ */
+.DANG_DT {
+    background-color: #e9f8f1;       /* xanh ngọc nhạt */
+    color: #2e7d32;                  /* xanh lá tươi */
+    border: 1px solid #b7e4c7;       /* viền xanh lá nhạt */
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* ĐÃ ĐIỀU TRỊ */
+.DA_DT {
+    background-color: #eaf3ff;       /* xanh dương nhạt */
+    color: #1a73e8;                  /* xanh dương tươi */
+    border: 1px solid #b6d4fe;       /* viền xanh dương nhạt */
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* KHÔNG ĐIỀU TRỊ */
+.KHONG_DT {
+    background-color: #f5f5f5;       /* xám rất nhạt */
+    color: #757575;                  /* xám trung bình */
+    border: 1px solid #dcdcdc;       /* viền xám nhạt */
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-block;
+    text-align: center;
+}
+
+.benh-nhan-box {
+    background-color: #fafafa;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 10px 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.benh-nhan-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
