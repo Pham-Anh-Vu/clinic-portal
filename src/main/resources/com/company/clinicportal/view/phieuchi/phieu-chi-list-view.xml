@@ -11,7 +11,7 @@
             </fetchPlan>
             <loader id="phieuChisDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from PhieuChi e]]>
+                    <![CDATA[select e from PhieuChi e order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>

@@ -17,7 +17,7 @@
             </fetchPlan>
             <loader id="ngayDieuTrisDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from NgayDieuTri e where e.ngay = :currentDate]]>
+                    <![CDATA[select e from NgayDieuTri e where e.ngay = :currentDate order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>

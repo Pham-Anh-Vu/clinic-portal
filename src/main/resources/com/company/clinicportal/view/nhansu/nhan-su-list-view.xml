@@ -11,7 +11,7 @@
             </fetchPlan>
             <loader id="nhanSusDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from NhanSu e]]>
+                    <![CDATA[select e from NhanSu e order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>

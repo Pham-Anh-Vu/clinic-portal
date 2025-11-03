@@ -11,7 +11,7 @@
             </fetchPlan>
             <loader id="luongThangsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from LuongThang e]]>
+                    <![CDATA[select e from LuongThang e order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>

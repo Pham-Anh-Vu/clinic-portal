@@ -21,14 +21,14 @@
             </fetchPlan>
             <loader id="buoiDieuTrisDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from BuoiDieuTri e where e.ngayThucHien = :ngayThucHien]]>
+                    <![CDATA[select e from BuoiDieuTri e where e.ngayThucHien = :ngayThucHien order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>
         <collection id="buoiDieuTrisDc_1" class="com.company.clinicportal.entity.BuoiDieuTri">
             <loader id="buoiDieuTrisDl_1" readOnly="true">
                 <query>
-                    <![CDATA[select e from BuoiDieuTri e]]>
+                    <![CDATA[select e from BuoiDieuTri e order by e.createdAt desc]]>
                 </query>
             </loader>
             <fetchPlan extends="_base">

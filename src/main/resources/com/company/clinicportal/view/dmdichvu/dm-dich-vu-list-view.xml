@@ -11,7 +11,7 @@
             </fetchPlan>
             <loader id="dmDichVusDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from DmDichVu e]]>
+                    <![CDATA[select e from DmDichVu e order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>
