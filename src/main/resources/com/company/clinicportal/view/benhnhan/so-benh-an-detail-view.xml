@@ -106,6 +106,8 @@
                             <div classNames="function-flex-end">
                                 <button action="chiTietDieuTrisDataGrid.create"
                                         classNames="action-button create"/>
+                                <button id="runBtn" action="chiTietDieuTrisDataGrid.runListEntityReport" classNames="action-button create"/>
+
                             </div>
                         </div>
                     </hbox>
@@ -115,6 +117,8 @@
                               width="100%">
                         <actions>
                             <action id="create" type="list_create" text="Thêm phiếu">
+                            </action>
+                            <action id="runListEntityReport" type="report_runListEntityReport" text="In phiếu báo cáo">
                             </action>
                         </actions>
                         <columns>

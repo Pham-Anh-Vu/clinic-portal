@@ -105,7 +105,7 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
                 .optional();
         Span span = uiComponents.create(Span.class);
 
-        if (phieuDieuTri.isPresent()) {
+        if (phieuDieuTri.isPresent() && phieuDieuTri.get().getTrangThai() != null) {
             var trangThai = phieuDieuTri.get().getTrangThai();
             span.setText(messages.getMessage(trangThai));
             span.addClassName(trangThai.toString()); // gán class CSS (VD: DANG_DT, DA_DT, KHONG_DT)

@@ -35,6 +35,7 @@
     </actions>
     <layout>
         <tabSheet width="100%" id="tabSheet" classNames="styled-tabs">
+
             <tab id="tab1" label="CHI TIẾT PHIẾU ĐIỀU TRỊ">
                 <vbox>
                     <vbox width="100%" alignItems="START" padding="false"
@@ -306,8 +307,6 @@
                                 <textArea id="huongDieuTriField" height="9.5em" property="huongDieuTri" colspan="2" label="Hướng điều trị và các chế độ tiếp theo"/>
                                 <textField id="ngayBatDauField" property="ngayBatDau" label="Ngày bắt đầu"/>
                                 <textField id="ngayKetThucField" property="ngayKetThuc" label="Ngày kết thúc"/>
-                                <properties>
-                                </properties>
                             </formLayout>
                         </vbox>
                     </vbox>
@@ -316,8 +315,7 @@
         </tabSheet>
 
 
-
-       <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>

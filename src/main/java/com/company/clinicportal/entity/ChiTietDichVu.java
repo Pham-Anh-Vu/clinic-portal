@@ -25,8 +25,9 @@ public class ChiTietDichVu {
     @Column(name = "\"createdById\"")
     private Long createdById;
 
-    @Column(name = "id_bac_si")
-    private Long idBacSi;
+    @JoinColumn(name = "ID_BAC_SI")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private NhanSu idBacSi;
 
     @JoinColumn(name = "ID_CHI_TIET_PHIEU_DIEU_TRI")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,6 +53,14 @@ public class ChiTietDichVu {
 
     @Column(name = "\"updatedById\"")
     private Long updatedById;
+
+    public void setIdBacSi(NhanSu idBacSi) {
+        this.idBacSi = idBacSi;
+    }
+
+    public NhanSu getIdBacSi() {
+        return idBacSi;
+    }
 
     public void setIdDichVu(DmDichVu idDichVu) {
         this.idDichVu = idDichVu;
@@ -107,14 +116,6 @@ public class ChiTietDichVu {
 
     public void setKhoangCachBuoiDieuTri(Long khoangCachBuoiDieuTri) {
         this.khoangCachBuoiDieuTri = khoangCachBuoiDieuTri;
-    }
-
-    public Long getIdBacSi() {
-        return idBacSi;
-    }
-
-    public void setIdBacSi(Long idBacSi) {
-        this.idBacSi = idBacSi;
     }
 
     public Long getCreatedById() {
