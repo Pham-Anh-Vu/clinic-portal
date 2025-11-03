@@ -9,6 +9,7 @@ import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -38,7 +39,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     @Autowired
     private DialogWindows dialogWindows;
     @ViewComponent
-    private DataGrid<Object> lichSuThanhToansDataGrid;
+    private DataGrid<LichSuThanhToan> lichSuThanhToansDataGrid;
     @ViewComponent
     private CollectionLoader<LichSuThanhToan> lichSuThanhToansDl;
     @ViewComponent
@@ -51,6 +52,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private TypedTextField<Long> tongTienSauKhuyenMaiField;
     @ViewComponent
     private TypedTextField<Integer> phaiDongField;
+    @Autowired
+    private Metadata metadata;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -61,8 +64,10 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         chiTietDieuTriDl.setParameter("idBenhNhan", idBenhNhan);
         chiTietDieuTriDl.load();
 
-        lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
-        lichSuThanhToansDl.load();
+        if(getEditedEntity().getIdPhieuDieuTri() != null){
+            lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
+            lichSuThanhToansDl.load();
+        }
 
         chiTietDichVusDataGrid.addComponentColumn(chiTietDichVu -> {
             JmixButton button = uiComponents.create(JmixButton.class);
@@ -86,8 +91,15 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             button.setText("Chi tiết");
             button.addClickListener(e -> {
                 DialogWindow<LichSuThanhToanDetailView> window =
-                        dialogWindows.view(this, LichSuThanhToanDetailView.class)
+                        dialogWindows.detail(this, LichSuThanhToan.class)
+                                .withViewClass(LichSuThanhToanDetailView.class)
+                                .editEntity(lichSuThanhToan)
                                 .build();
+                window.addAfterCloseListener(eTT -> {
+                    lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
+                    lichSuThanhToansDl.load();
+                });
+                window.getView().setPhieuDieuTri(getEditedEntity().getIdPhieuDieuTri());
                 window.open();
             });
             return button;
@@ -121,5 +133,12 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         // Cập nhật lại các field hiển thị
         tongTienSauKhuyenMaiField.setValue(tongSauKM.toString());
         phaiDongField.setValue(phaiDong.toString());
+    }
+
+    @Install(to = "lichSuThanhToansDataGrid.create", subject = "newEntitySupplier")
+    private LichSuThanhToan lichSuThanhToansDataGridCreateNewEntitySupplier() {
+        LichSuThanhToan lichSuThanhToan = metadata.create(LichSuThanhToan.class);
+        lichSuThanhToan.setIdPhieuDieuTri(getEditedEntity().getIdPhieuDieuTri());
+        return lichSuThanhToan;
     }
 }

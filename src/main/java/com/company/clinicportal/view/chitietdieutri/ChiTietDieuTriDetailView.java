@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -58,6 +59,8 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
     private TypedTextField<Long> tongTienSauKhuyenMaiField;
     @ViewComponent
     private TypedTextField<Integer> phaiDongField;
+    @Autowired
+    private Metadata metadata;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -83,8 +86,15 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
             button.setText("Chi tiết");
             button.addClickListener(e -> {
                 DialogWindow<LichSuThanhToanDetailView> window =
-                        dialogWindows.view(this, LichSuThanhToanDetailView.class)
+                        dialogWindows.detail(this, LichSuThanhToan.class)
+                                .withViewClass(LichSuThanhToanDetailView.class)
+                                .editEntity(lichSuThanhToan)
                                 .build();
+                window.addAfterCloseListener(eTT -> {
+                    lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
+                    lichSuThanhToansDl.load();
+                });
+                window.getView().setPhieuDieuTri(getEditedEntity().getIdPhieuDieuTri());
                 window.open();
             });
             return button;
@@ -95,8 +105,10 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
-        lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
-        lichSuThanhToansDl.load();
+        if(getEditedEntity().getIdPhieuDieuTri() != null){
+            lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
+            lichSuThanhToansDl.load();
+        }
 
         Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
                 .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
@@ -146,5 +158,12 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
         // Cập nhật lại các field hiển thị
         tongTienSauKhuyenMaiField.setValue(tongSauKM.toString());
         phaiDongField.setValue(phaiDong.toString());
+    }
+
+    @Install(to = "lichSuThanhToansDataGrid.create", subject = "newEntitySupplier")
+    private LichSuThanhToan lichSuThanhToansDataGridCreateNewEntitySupplier() {
+        LichSuThanhToan lichSuThanhToan = metadata.create(LichSuThanhToan.class);
+        lichSuThanhToan.setIdPhieuDieuTri(getEditedEntity().getIdPhieuDieuTri());
+        return lichSuThanhToan;
     }
 }
