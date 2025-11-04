@@ -13,6 +13,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import io.jmix.chartsflowui.component.Chart;
+import com.company.clinicportal.view.benhnhan.dto.StatusCount;
+import io.jmix.flowui.model.CollectionContainer;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
@@ -36,6 +39,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Route(value = "benh-nhans/:id", layout = MainView.class)
@@ -61,6 +67,10 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
     private HorizontalLayout thoiGianTaiKhamField;
     @ViewComponent
     private DataGrid<BuoiDieuTri> buoiDieuTrisDataGrid;
+    @ViewComponent
+    private Chart statusChart;
+    @ViewComponent
+    private CollectionContainer<StatusCount> statusCountsDc;
     @Autowired
     private DialogWindows dialogWindows;
     @ViewComponent
@@ -203,6 +213,8 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
         if (this.isReadOnly()) {
             buoiDieuTrisDl.setParameter("idBenhNhan", getEditedEntity());
             buoiDieuTrisDl.load();
+            // render chart after data is available
+            renderStatusChart();
 
             benhNhanField.setText("Bệnh nhân: " + getEditedEntity().getInstanceName(metadataTools));
 
@@ -245,5 +257,33 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
             formCreate.setVisible(false);
             formRead.setVisible(true);
         }
+    }
+
+    @Subscribe(id = "buoiDieuTrisDl", target = Target.DATA_LOADER)
+    public void onBuoiDieuTrisLoaded(CollectionLoader.PostLoadEvent<BuoiDieuTri> event) {
+        renderStatusChart();
+    }
+
+    private void renderStatusChart() {
+        if (statusCountsDc == null) {
+            return;
+        }
+
+        List<BuoiDieuTri> items = buoiDieuTrisDataGrid != null && buoiDieuTrisDataGrid.getItems() != null
+                ? buoiDieuTrisDataGrid.getItems().getItems().stream().toList()
+                : List.of();
+
+        Map<String, Integer> statusToCount = new LinkedHashMap<>();
+        for (BuoiDieuTri bdt : items) {
+            String key = bdt.getTrangThai() == null ? "Chưa xác định" : messages.getMessage(bdt.getTrangThai());
+            statusToCount.merge(key, 1, Integer::sum);
+        }
+
+        List<StatusCount> grouped = new java.util.ArrayList<>();
+        for (Map.Entry<String, Integer> e : statusToCount.entrySet()) {
+            grouped.add(new StatusCount(e.getKey(), e.getValue()));
+        }
+
+        statusCountsDc.setItems(grouped);
     }
 }

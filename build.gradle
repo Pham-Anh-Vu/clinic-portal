@@ -35,6 +35,7 @@ dependencies {
     implementation 'io.jmix.datatools:jmix-datatools-flowui-starter'
     implementation 'io.jmix.reports:jmix-reports-starter'
     implementation 'io.jmix.reports:jmix-reports-flowui-starter'
+    implementation 'io.jmix.charts:jmix-charts-flowui-starter'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
 

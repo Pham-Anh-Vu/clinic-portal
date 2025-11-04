@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:charts="http://jmix.io/schema/charts/ui"
       title="msg://benhNhanDetailView.title">
     <data>
         <instance id="benhNhanDc"
@@ -15,6 +16,10 @@
                     <![CDATA[select e from BuoiDieuTri e where e.idBenhNhan = :idBenhNhan]]>
                 </query>
             </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+
+        <collection id="statusCountsDc" class="com.company.clinicportal.view.benhnhan.dto.StatusCount">
             <fetchPlan extends="_base"/>
         </collection>
 
@@ -178,6 +183,23 @@
                                 </formLayout>
                             </vbox>
                         </vbox>
+                        <charts:chart id="statusChart" width="100%" height="400px">
+                            <charts:title text="Trạng thái buổi điều trị"/>
+                            <charts:tooltip trigger="ITEM"/>
+                            <charts:legend/>
+                            <charts:dataSet>
+                                <charts:source dataContainer="statusCountsDc" categoryField="trangThai" valueFields="soLuong"/>
+                            </charts:dataSet>
+                            <charts:xAxes>
+                                <charts:xAxis/>
+                            </charts:xAxes>
+                            <charts:yAxes>
+                                <charts:yAxis/>
+                            </charts:yAxes>
+                            <charts:series>
+                                <charts:bar name="Số buổi"/>
+                            </charts:series>
+                        </charts:chart>
 
                     </vbox>
                 </tab>
