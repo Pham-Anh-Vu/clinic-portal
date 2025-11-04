@@ -67,7 +67,7 @@
 
         <tabSheet width="100%" id="tabSheet" classNames="styled-tabs">
             <tab id="tab1" label="Mới">
-                <vbox width="100%">
+                <vbox width="100%" height="100%">
                     <genericFilter id="genericFilter"
                                    dataLoader="buoiDieuTrisDl" opened="false">
                         <properties include=".*"/>
@@ -78,6 +78,7 @@
                     <dataGrid id="buoiDieuTrisDataGrid"
                               width="100%"
                               minHeight="20em"
+                              height="100%"
                               dataContainer="buoiDieuTrisDc"
                               columnReorderingAllowed="true">
                         <emptyStateComponent>
@@ -112,7 +113,7 @@
                 </vbox>
             </tab>
             <tab id="tab2" label="Tất cả">
-                <vbox width="100%">
+                <vbox width="100%" height="100%">
                     <genericFilter id="genericFilter2"
                                    dataLoader="buoiDieuTrisDl_1" opened="false">
                         <properties include=".*"/>
@@ -123,6 +124,7 @@
                     </hbox>
                     <dataGrid id="buoiDieuTrisDataGrid2"
                               width="100%"
+                              height="100%"
                               minHeight="20em"
                               dataContainer="buoiDieuTrisDc_1"
                               columnReorderingAllowed="true">

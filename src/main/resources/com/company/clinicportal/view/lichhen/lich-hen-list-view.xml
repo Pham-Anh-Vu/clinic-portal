@@ -52,7 +52,7 @@
     <layout>
         <tabSheet width="100%" id="tabSheet" classNames="styled-tabs">
             <tab id="tab1" label="Lịch hẹn mới">
-                <vbox>
+                <vbox height="100%">
                     <genericFilter id="genericFilter"
                                    dataLoader="lichHensDl" opened="false">
                         <properties include=".*"/>
@@ -64,6 +64,7 @@
                     <dataGrid id="lichHensDataGrid"
                               width="100%"
                               minHeight="20em"
+                              height="100%"
                               dataContainer="lichHensDc"
                               columnReorderingAllowed="true">
                         <emptyStateComponent>
@@ -97,7 +98,7 @@
                 </vbox>
             </tab>
             <tab id="tab2" label="Toàn bộ">
-                <vbox>
+                <vbox height="100%">
                     <genericFilter id="genericFilter2"
                                    dataLoader="lichHensDl_1" opened="false">
                         <properties include=".*"/>
@@ -105,6 +106,7 @@
                     <dataGrid id="lichHensDataGrid2"
                               width="100%"
                               minHeight="20em"
+                              height="100%"
                               dataContainer="lichHensDc_1"
                               columnReorderingAllowed="true">
                         <emptyStateComponent>
