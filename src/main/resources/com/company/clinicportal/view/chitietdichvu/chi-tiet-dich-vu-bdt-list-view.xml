@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://chiTietDichVuBDTListView.title"
+      focusComponent="chiTietDichVusDataGrid">
+    <data>
+        <collection id="chiTietDichVusDc"
+                    class="com.company.clinicportal.entity.ChiTietDichVu">
+            <fetchPlan extends="_base"/>
+            <loader id="chiTietDichVusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from ChiTietDichVu e where e.idChiTietPhieuDieuTri = :idChiTietPhieuDieuTri and e.ngayBatDau = :ngayBatDau]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="chiTietDichVusDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="refreshButton" action="chiTietDichVusDataGrid.refreshAction"/>
+            <simplePagination id="pagination" dataLoader="chiTietDichVusDl"/>
+        </hbox>
+        <dataGrid id="chiTietDichVusDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="chiTietDichVusDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="refreshAction" type="list_refresh"/>
+            </actions>
+            <columns resizable="true">
+                <column property="ngayBatDau" />
+
+                <column property="createdAt"/>
+                <column property="createdById"/>
+                <column property="khoangCachBuoiDieuTri"/>
+                <column property="soLuong"/>
+                <column property="updatedAt"/>
+                <column property="updatedById"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

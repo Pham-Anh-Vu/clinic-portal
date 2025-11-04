@@ -38,10 +38,10 @@
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
             <textField id="tenPhieuDieuTriField" property="tenPhieuDieuTri" required="true"/>
-            <entityComboBox id="idNhanSuField" property="idNhanSu"  itemsContainer="nhanSusDc" required="true"/>
+            <entityComboBox id="idNhanSuField" property="idNhanSu"  itemsContainer="nhanSusDc" required="true" label="Bác sĩ chỉ định"/>
             <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh" required="true"/>
             <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
-            <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2" required="true"/>
+<!--            <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2" required="true"/>-->
             <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2" required="true"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://danhSachDichVuTrong1BListView.title"
+      focusComponent="buoiDieuTrisDataGrid">
+    <data>
+        <collection id="buoiDieuTrisDc"
+                    class="com.company.clinicportal.entity.BuoiDieuTri">
+            <fetchPlan>
+                <property name="trangThai"/>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                    <property name="idDichVu" fetchPlan="_base">
+                        <property name="tenDichVu"/>
+                    </property>
+                    <property name="idChiTietPhieuDieuTri" fetchPlan="_base">
+                        <property name="tenPhieuDieuTri"/>
+                    </property>
+                </property>
+                <property name="ngayThucHien"/>
+                <property name="gioBatDau"/>
+                <property name="gioKetThuc"/>
+                <property name="ca"/>
+                <property name="idNhanSuStaging" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="buoiDieuTrisDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BuoiDieuTri e where e.ngayThucHien = :ngayThucHien and e.idBenhNhan = :idBenhNhan]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="buoiDieuTrisDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END">
+            <button id="refreshButton" action="buoiDieuTrisDataGrid.refreshAction"/>
+        </hbox>
+        <dataGrid id="buoiDieuTrisDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="buoiDieuTrisDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="refreshAction" type="list_refresh"/>
+            </actions>
+            <columns resizable="true">
+                <column property="ngayThucHien"/>
+                <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
+                <column property="trangThai"/>
+                <column property="gioBatDau"/>
+                <column property="gioKetThuc"/>
+                <column property="ca"/>
+                <column property="idNhanSuStaging" header="KTV thực hiện"/>
+                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.tenPhieuDieuTri"/>
+            </columns>
+        </dataGrid>
+        <simplePagination id="pagination" dataLoader="buoiDieuTrisDl" alignSelf="END"/>
+
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

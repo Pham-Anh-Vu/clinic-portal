@@ -7,6 +7,7 @@ import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
@@ -47,6 +48,16 @@ public class ThuThuatListView extends StandardListView<BuoiDieuTri> {
     private DataGrid<BuoiDieuTri> buoiDieuTrisDataGrid2;
     @ViewComponent("buoiDieuTrisDataGrid2.removeAction2")
     private RemoveAction<BuoiDieuTri> buoiDieuTrisDataGrid2RemoveAction2;
+    @ViewComponent("tabSheet.tab1")
+    private Tab tabSheetTab1;
+    @ViewComponent("tabSheet.tab2")
+    private Tab tabSheetTab2;
+
+    public void hienListThuThuatTheoNgay(Boolean check){
+        if(check){
+            tabSheetTab2.setVisible(false);
+        }
+    }
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
