@@ -1,10 +1,12 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.CaLamViec;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @DdlGeneration(value = DdlGeneration.DbScriptGenerationMode.DISABLED)
@@ -83,6 +85,14 @@ public class BuoiDieuTri {
 
     @Column(name = "\"updatedById\"")
     private Long updatedById;
+
+    public Date getGioKetThuc() {
+        return gioKetThuc;
+    }
+
+    public void setGioKetThuc(Date gioKetThuc) {
+        this.gioKetThuc = gioKetThuc;
+    }
 
     public void setIdNhanSu2Staging(NhanSu idNhanSu2Staging) {
         this.idNhanSu2Staging = idNhanSu2Staging;
@@ -172,13 +182,7 @@ public class BuoiDieuTri {
         this.idNgayDieuTri = idNgayDieuTri;
     }
 
-    public Date getGioKetThuc() {
-        return gioKetThuc;
-    }
 
-    public void setGioKetThuc(Date gioKetThuc) {
-        this.gioKetThuc = gioKetThuc;
-    }
 
     public Date getGioBatDauStaging() {
         return gioBatDauStaging;
@@ -220,12 +224,12 @@ public class BuoiDieuTri {
         this.createdAt = createdAt;
     }
 
-    public String getCa() {
-        return ca;
+    public CaLamViec getCa() {
+        return ca == null ? null : CaLamViec.fromId(ca);
     }
 
-    public void setCa(String ca) {
-        this.ca = ca;
+    public void setCa(CaLamViec ca) {
+        this.ca = ca == null ? null : ca.getId();
     }
 
     public Long getId() {

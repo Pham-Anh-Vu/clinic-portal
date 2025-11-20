@@ -7,6 +7,8 @@
                   class="com.company.clinicportal.entity.BuoiDieuTri">
             <fetchPlan extends="_base">
                 <property name="id"/>
+                <property name="idNhanSuStaging" fetchPlan="_base"/>
+                <property name="idNhanSu2Staging" fetchPlan="_base"/>
             </fetchPlan>
             <loader id="buoiDieuTriDl"/>
         </instance>
@@ -35,9 +37,10 @@
             </responsiveSteps>
             <datePicker id="ngayThucHienField" property="ngayThucHien"/>
             <timePicker id="gioBatDauField" property="gioBatDau"/>
-            <timePicker id="gioKetThucField" property="gioKetThuc"/>
-            <entityComboBox id="idNhanSuStagingField" property="idNhanSuStaging" label="Nhân sự" itemsContainer="nhanSusDc"/>
-            <select id="trangThaiField" property="trangThai"/>
+            <timePicker id="gioKetThucField" property="gioKetThuc" required="true"/>
+            <entityComboBox id="idNhanSuStagingField" property="idNhanSuStaging" label="Nhân sự" itemsContainer="nhanSusDc" required="true"/>
+            <entityComboBox id="idNhanSuStaging2Field" property="idNhanSu2Staging" label="Nhân sự thực hiện 2" itemsContainer="nhanSusDc"/>
+            <select id="trangThaiField" property="trangThai" required="true"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>

@@ -4,6 +4,7 @@ import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @DdlGeneration(value = DdlGeneration.DbScriptGenerationMode.DISABLED)
@@ -18,9 +19,8 @@ public class ChiTietDichVu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"createdAt\"")
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "\"createdById\"")
     private Long createdById;
@@ -126,11 +126,11 @@ public class ChiTietDichVu {
         this.createdById = createdById;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

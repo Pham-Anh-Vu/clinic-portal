@@ -1,8 +1,9 @@
 package com.company.clinicportal.view.buoidieutri;
 
-import com.company.clinicportal.entity.BuoiDieuTri;
-import com.company.clinicportal.entity.ChiTietDichVu;
-import com.company.clinicportal.entity.LichHen;
+import com.company.clinicportal.entity.*;
+import com.company.clinicportal.enumentity.CaLamViec;
+import com.company.clinicportal.enumentity.NhomDichVu;
+import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import com.company.clinicportal.view.lichhen.LichHenDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.Component;
@@ -14,6 +15,9 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
+import io.jmix.core.SaveContext;
+import io.jmix.core.querycondition.PropertyCondition;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.action.list.RemoveAction;
@@ -23,6 +27,12 @@ import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -50,10 +60,14 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
     private DialogWindows dialogWindows;
     @ViewComponent("buoiDieuTrisDataGrid.removeAction")
     private RemoveAction<BuoiDieuTri> buoiDieuTrisDataGridRemoveAction;
+    @Autowired
+    private Metadata metadata;
 
     public void setIdChiTietDichVu(Long idChiTietDichVu) {
         this.idChiTietDichVu = idChiTietDichVu;
     }
+
+    private ChiTietDichVu chiTietDichVu = null;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -63,6 +77,7 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
 
                     // Nút Sửa
                     JmixButton editButton = uiComponents.create(JmixButton.class);
+                    if(buoiDieuTri.getTrangThai().equals(TrangThaiBuoiDieuTri.DA_THUC_HIEN))editButton.setEnabled(false);
                     editButton.setText("Sửa");
                     editButton.addClickListener(e -> {
                         DialogWindow<BuoiDieuTriDetailView> window = dialogWindows.detail(this, BuoiDieuTri.class)
@@ -99,9 +114,84 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
         buoiDieuTrisDl.setParameter("idChiTietDichVu", idChiTietDichVu);
         buoiDieuTrisDl.load();
 
-        ChiTietDichVu chiTietDichVu = dataManager.load(ChiTietDichVu.class).id(idChiTietDichVu).optional().orElse(null);
-        if(chiTietDichVu != null) dichVuField.setText("Dịch vụ: " + chiTietDichVu.getIdDichVu().getTenDichVu());
+        chiTietDichVu = dataManager.load(ChiTietDichVu.class).id(idChiTietDichVu).optional().orElse(null);
+        if(chiTietDichVu != null) {
+            dichVuField.setText("Dịch vụ: " + chiTietDichVu.getIdDichVu().getTenDichVu());
+        }
     }
+
+    @Install(to = "buoiDieuTrisDataGrid.createAction", subject = "newEntitySupplier")
+    private BuoiDieuTri buoiDieuTrisDataGridCreateActionNewEntitySupplier() {
+        BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
+        buoiDieuTri.setIdChiTietDichVu(chiTietDichVu);
+        return buoiDieuTri;
+    }
+
+    @Install(to = "buoiDieuTrisDataGrid.createAction", subject = "afterSaveHandler")
+    private void buoiDieuTrisDataGridCreateActionAfterSaveHandler(final BuoiDieuTri buoiDieuTri) {
+        SaveContext saveContext = new SaveContext();
+        Date gioKetThucDate = buoiDieuTri.getGioKetThuc();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(gioKetThucDate);
+
+        int hour = cal.get(Calendar.HOUR_OF_DAY); // giờ 0-23
+
+        if (hour < 12) { // trước 12h trưa là sáng
+            buoiDieuTri.setCa(CaLamViec.SANG);
+        } else { // từ 12h trưa trở đi là tối
+            buoiDieuTri.setCa(CaLamViec.TOI);
+        }
+        saveContext.saving(buoiDieuTri);
+
+        if(buoiDieuTri.getTrangThai().equals(TrangThaiBuoiDieuTri.DA_THUC_HIEN)){
+            if(buoiDieuTri.getIdNhanSuStaging() != null){
+                TinhKpi tinhKpi = dataManager.create(TinhKpi.class);
+                tinhKpi.setIdNhanSu(buoiDieuTri.getIdNhanSuStaging());
+                tinhKpi.setThang(new Date());
+
+                Double sumKpi = tinhTrongSoKpi(buoiDieuTri).toBigInteger().doubleValue();
+                if(buoiDieuTri.getCa().equals(CaLamViec.SANG)){
+                    tinhKpi.setKpiSang(sumKpi);
+                    tinhKpi.setKpiToi((double) 0);
+                    tinhKpi.setKpiTong(sumKpi);
+                }
+                else{
+                    tinhKpi.setKpiToi(sumKpi);
+                    tinhKpi.setKpiSang((double) 0);
+                    tinhKpi.setKpiTong(sumKpi);
+                }
+
+                GiaKpi giaKpi = dataManager.load(GiaKpi.class).condition(PropertyCondition.equal("loai", buoiDieuTri.getCa().getId())).one();
+                tinhKpi.setThanhTien(Math.round(giaKpi.getGia().doubleValue() * tinhKpi.getKpiTong()));
+                saveContext.saving(tinhKpi);
+            }
+
+            if(buoiDieuTri.getIdNhanSu2Staging() != null){
+                TinhKpi tinhKpi = dataManager.create(TinhKpi.class);
+                tinhKpi.setIdNhanSu(buoiDieuTri.getIdNhanSu2Staging());
+                tinhKpi.setThang(new Date());
+
+                Double sumKpi = tinhTrongSoKpi(buoiDieuTri).toBigInteger().doubleValue();
+                if(buoiDieuTri.getCa().equals(CaLamViec.SANG)){
+                    tinhKpi.setKpiSang(sumKpi);
+                    tinhKpi.setKpiToi((double) 0);
+                    tinhKpi.setKpiTong(sumKpi);
+                }
+                else{
+                    tinhKpi.setKpiToi(sumKpi);
+                    tinhKpi.setKpiSang((double) 0);
+                    tinhKpi.setKpiTong(sumKpi);
+                }
+
+                GiaKpi giaKpi = dataManager.load(GiaKpi.class).condition(PropertyCondition.equal("loai", buoiDieuTri.getCa().getId())).one();
+                tinhKpi.setThanhTien(Math.round(giaKpi.getGia().doubleValue() * tinhKpi.getKpiTong()));
+                saveContext.saving(tinhKpi);
+            }
+        }
+
+        dataManager.save(saveContext);
+    }
+        
 
     @Supply(to = "buoiDieuTrisDataGrid.trangThai", subject = "renderer")
     private Renderer<BuoiDieuTri> buoiDieuTrisDataGridTrangThaiRenderer() {
@@ -116,5 +206,45 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
         });
     }
 
+    private BigDecimal tinhTrongSoKpi (BuoiDieuTri buoiDieuTri){
+        BigDecimal totalTrongSoKpi = BigDecimal.ONE;
+        totalTrongSoKpi = totalTrongSoKpi.multiply(BigDecimal.valueOf(buoiDieuTri.getIdChiTietDichVu().getIdChiTietPhieuDieuTri().getTrongSoKpi()));
 
+        if (buoiDieuTri != null
+                && buoiDieuTri.getIdChiTietDichVu() != null
+                && buoiDieuTri.getIdChiTietDichVu().getIdDichVu() != null
+                && buoiDieuTri.getIdChiTietDichVu().getIdDichVu().getNhomDichVu() != null
+                && buoiDieuTri.getIdChiTietDichVu().getIdChiTietPhieuDieuTri() != null) {
+
+            NhomDichVu nhom = buoiDieuTri.getIdChiTietDichVu().getIdDichVu().getNhomDichVu();
+            var chiTietPhieu = buoiDieuTri.getIdChiTietDichVu().getIdChiTietPhieuDieuTri();
+            BigDecimal trongSo = null;
+
+            switch (nhom) {
+                case  KEO_GIAN:
+                    if(chiTietPhieu.getTrongSoKeoGian() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoKeoGian());
+                    break;
+                case VAN_DONG_TRI_LIEU:
+                    if(chiTietPhieu.getTrongSoVanDongTriLieu() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoVanDongTriLieu());
+                    break;
+                case TAP_PHCN:
+                    if(chiTietPhieu.getTrongSoTapPhcn() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoTapPhcn());
+                    break;
+                case DIEN_TRI_LIEU:
+                    if(chiTietPhieu.getTrongSoDienTriLieu() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoDienTriLieu());
+                    break;
+                default:
+                    break;
+            }
+
+            // Kiểm tra trongSo null trước khi nhân
+            if (trongSo != null) {
+                totalTrongSoKpi = totalTrongSoKpi.multiply(trongSo);
+            }
+        }
+
+        if(buoiDieuTri.getIdNhanSu2Staging() != null && buoiDieuTri.getIdNhanSuStaging() != null)   totalTrongSoKpi = totalTrongSoKpi.multiply(BigDecimal.valueOf(0.5));
+
+        return totalTrongSoKpi;
+    }
 }

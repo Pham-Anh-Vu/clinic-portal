@@ -279,6 +279,24 @@
                             </formLayout>
                         </vbox>
                     </vbox>
+
+                    <vbox width="100%" alignItems="START" padding="false"
+                          spacing="false" classNames="tab-5-grid">
+                        <vbox padding="false" classNames="grid-data">
+                            <formLayout dataContainer="chiTietDieuTriDc"
+                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                                <responsiveSteps>
+                                    <responsiveStep minWidth="0" columns="2"/>
+                                </responsiveSteps>
+                                <textField id="trongSoKPIField" property="trongSoKpi" colspan="2"/>
+                                <textField id="trongSoDieuTriField" property="trongSoDienTriLieu"/>
+                                <textField id="trongSoKeoGianField" property="trongSoKeoGian"/>
+                                <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
+                                <textField id="trongSoTapPHCNField" property="trongSoTapPhcn"/>
+                            </formLayout>
+                        </vbox>
+                    </vbox>
+
                 </vbox>
             </tab>
             <tab id="tab2" label="TỔNG KẾT ĐIỀU TRỊ">

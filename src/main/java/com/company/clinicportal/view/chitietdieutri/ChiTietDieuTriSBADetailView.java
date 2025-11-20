@@ -5,23 +5,28 @@ import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.LichSuThanhToan;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
+import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
+import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 
 @Route(value = "chi-tiet-dieu-tri-sbas/:id", layout = MainView.class)
 @ViewController(id = "ChiTietDieuTriSBA.detail")
@@ -54,6 +59,10 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private TypedTextField<Integer> phaiDongField;
     @Autowired
     private Metadata metadata;
+    @Autowired
+    private DataManager dataManager;
+    @ViewComponent
+    private CollectionPropertyContainer<ChiTietDichVu> chiTietDichVuDc;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -104,6 +113,26 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             });
             return button;
         }).setHeader("Thao tác").setAutoWidth(true);
+    }
+
+    @Subscribe("chiTietDichVusDataGrid.create")
+    public void onChiTietDichVusDataGridCreate(final ActionPerformedEvent event) {
+        DialogWindow<ChiTietDichVuDetailView> window =
+                dialogWindows.detail(this, ChiTietDichVu.class)
+                        .withViewClass(ChiTietDichVuDetailView.class)
+                        .newEntity()
+                        .build();
+
+        window.addAfterCloseListener(event1 -> {
+            if (event1.closedWith(StandardOutcome.SAVE)) {
+                ChiTietDichVu saved = event1.getView().getEditedEntity();
+                saved.setIdChiTietPhieuDieuTri(getEditedEntity());
+                saved.setCreatedAt(LocalDateTime.now());
+                dataManager.save(saved);
+                chiTietDieuTriDl.load();
+            }
+        });
+        window.open();
     }
 
     @Subscribe("khuyenMaiField")

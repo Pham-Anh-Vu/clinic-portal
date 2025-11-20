@@ -23,7 +23,6 @@ import io.jmix.flowui.view.*;
 import io.jmix.flowui.model.CollectionLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
 
 
 @Route(value = "chi-tiet-dieu-tris", layout = MainView.class)
