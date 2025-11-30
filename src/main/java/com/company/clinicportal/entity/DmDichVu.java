@@ -185,8 +185,8 @@ public class DmDichVu {
     }
 
     @InstanceName
-    @DependsOnProperties({"id", "tenDichVu"})
+    @DependsOnProperties({"tenDichVu"})
     public String getDisplayName() {
-        return String.format("%s %s", id, tenDichVu);
+        return String.format("%s", tenDichVu);
     }
 }

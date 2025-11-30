@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
     <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar"/>
-    <item view="NgayDieuTri.list"
+    <item view="LichDieuTri.list"
           title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"
           icon="vaadin:plus-square-o" />
     <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title" icon="vaadin:user"/>

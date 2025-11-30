@@ -124,6 +124,7 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
     private BuoiDieuTri buoiDieuTrisDataGridCreateActionNewEntitySupplier() {
         BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
         buoiDieuTri.setIdChiTietDichVu(chiTietDichVu);
+        buoiDieuTri.setIdBenhNhan(chiTietDichVu.getIdChiTietPhieuDieuTri().getIdBenhNhan());
         return buoiDieuTri;
     }
 
@@ -247,4 +248,6 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
 
         return totalTrongSoKpi;
     }
+
+
 }
