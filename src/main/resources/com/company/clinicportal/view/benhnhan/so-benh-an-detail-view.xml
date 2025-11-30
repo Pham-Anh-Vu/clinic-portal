@@ -41,6 +41,10 @@
                             <div classNames="title-grid">
                                 <span text="THÔNG TIN BỆNH NHÂN"/>
                             </div>
+
+                            <div classNames="function-flex-end">
+                                <button id="editBN" text="Cập nhật"/>
+                            </div>
                         </div>
                     </hbox>
                 </vbox>

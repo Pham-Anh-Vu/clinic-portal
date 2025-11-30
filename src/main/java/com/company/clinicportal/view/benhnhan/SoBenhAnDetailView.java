@@ -3,6 +3,7 @@ package com.company.clinicportal.view.benhnhan;
 import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.PhieuDieuTri;
+import com.company.clinicportal.enumentity.TrangThaiPhieuDT;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriSBADetailView;
 import com.company.clinicportal.view.chitietdieutri.PhieuChiDinhDetailView;
@@ -12,8 +13,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
+import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.app.inputdialog.DialogActions;
+import io.jmix.flowui.app.inputdialog.DialogOutcome;
+import io.jmix.flowui.app.inputdialog.InputParameter;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -49,8 +54,14 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     private DataGrid<ChiTietDieuTri> chiTietDieuTrisDataGrid;
     @Autowired
     private DialogWindows dialogWindows;
+    @Autowired
+    private Dialogs dialogs;
     @ViewComponent
     private InstanceLoader<BenhNhan> benhNhanDl;
+    @ViewComponent
+    private JmixButton editBN;
+
+    private PhieuDieuTri currentPhieuDieuTri = null;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -69,30 +80,34 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
         chiTietDieuTrisDl.load();
 
-        Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
+        Optional<PhieuDieuTri> phieuDieuTriOpt = dataManager.load(PhieuDieuTri.class)
                 .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
                 .parameter("bn", idBenhNhan)
                 .maxResults(1)
                 .optional();
+
+        currentPhieuDieuTri = phieuDieuTriOpt.orElse(null);
+
         Span span = uiComponents.create(Span.class);
         Span spanTG = uiComponents.create(Span.class);
         Span spanNK = uiComponents.create(Span.class);
 
-        if (phieuDieuTri.isPresent()) {
-            if(phieuDieuTri.get().getTrangThai() != null){
-                var trangThai = phieuDieuTri.get().getTrangThai();
+        if (phieuDieuTriOpt.isPresent()) {
+            PhieuDieuTri phieuDieuTri = phieuDieuTriOpt.get();
+            if(phieuDieuTri.getTrangThai() != null){
+                var trangThai = phieuDieuTri.getTrangThai();
                 span.setText(messages.getMessage(trangThai));
                 span.addClassName(trangThai.toString()); // gán class CSS (VD: DANG_DT, DA_DT, KHONG_DT)
             }
 
-            if(phieuDieuTri.get().getThoiGianTaiKham() != null){
+            if(phieuDieuTri.getThoiGianTaiKham() != null){
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                spanTG.setText(sdf.format(phieuDieuTri.get().getThoiGianTaiKham()));
+                spanTG.setText(sdf.format(phieuDieuTri.getThoiGianTaiKham()));
             }
 
-            if(phieuDieuTri.get().getNgayKham() != null){
+            if(phieuDieuTri.getNgayKham() != null){
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                spanNK.setText(sdf.format(phieuDieuTri.get().getNgayKham()));
+                spanNK.setText(sdf.format(phieuDieuTri.getNgayKham()));
             }
         }
 
@@ -148,5 +163,51 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         });
 
         dialogWindow.open();
+    }
+
+    @Subscribe("editBN")
+    public void onEditBNClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+        if (currentPhieuDieuTri == null) {
+            dialogs.createMessageDialog()
+                    .withHeader("Thông báo")
+                    .withText("Không tìm thấy phiếu điều trị để cập nhật trạng thái.")
+                    .open();
+            return;
+        }
+
+        dialogs.createInputDialog(this)
+                .withHeader("Cập nhật trạng thái")
+                .withParameters(
+                        InputParameter.enumParameter("trangThai", TrangThaiPhieuDT.class)
+                                .withLabel("Trạng thái")
+                                .withDefaultValue(currentPhieuDieuTri.getTrangThai())
+                                .withRequired(true)
+                )
+                .withActions(DialogActions.OK_CANCEL)
+                .withCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(DialogOutcome.OK)) {
+                        TrangThaiPhieuDT newTrangThai = closeEvent.getValue("trangThai");
+                        if (newTrangThai != null) {
+                            currentPhieuDieuTri.setTrangThai(newTrangThai);
+                            dataManager.save(currentPhieuDieuTri);
+                            updateTrangThaiBox(newTrangThai);
+                        }
+                    }
+                })
+                .open();
+    }
+
+    private void updateTrangThaiBox(TrangThaiPhieuDT trangThai) {
+        trangThaiBox.removeAll();
+
+        Span label = uiComponents.create(Span.class);
+        label.setText("Trạng thái: ");
+        label.addClassName("trang-thai-label");
+
+        Span span = uiComponents.create(Span.class);
+        span.setText(messages.getMessage(trangThai));
+        span.addClassName(trangThai.toString());
+
+        trangThaiBox.add(label, span);
     }
 }
