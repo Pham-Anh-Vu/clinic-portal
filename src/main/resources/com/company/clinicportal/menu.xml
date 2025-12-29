@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
+    <item view="PhieuThuThap.list1"
+          title="msg://com.company.clinicportal.view.phieuthuthap/phieuThuThapListView1.title"/>
     <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar"/>
     <item view="LichDieuTri.list"
           title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"
@@ -13,6 +15,8 @@
         <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title" icon="vaadin:file-text"/>
         <item view="ThuThuat.list" title="msg://com.company.clinicportal.view.buoidieutri/thuThuatListView.title" icon="vaadin:wrench"/>
         <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title" icon="vaadin:list"/>
+
+
     </menu>
 
     <menu id="patient" description="msg://fis.pbcap.finexbackoffice/menu_config.patient.description"
