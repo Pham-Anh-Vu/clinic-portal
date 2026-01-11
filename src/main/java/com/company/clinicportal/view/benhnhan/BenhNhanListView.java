@@ -2,12 +2,15 @@ package com.company.clinicportal.view.benhnhan;
 
 import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.BuoiDieuTri;
+import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.view.buoidieutri.ThuThuatDetailView;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -15,6 +18,7 @@ import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.action.list.ReadAction;
 import io.jmix.flowui.action.list.RemoveAction;
@@ -51,6 +55,10 @@ public class BenhNhanListView extends StandardListView<BenhNhan> {
     private RemoveAction<BenhNhan> benhNhansDataGridRemoveAction;
     @ViewComponent("benhNhansDataGrid.readAction")
     private ReadAction<BenhNhan> benhNhansDataGridReadAction;
+    @Autowired
+    private Notifications notifications;
+    @ViewComponent
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -122,8 +130,17 @@ public class BenhNhanListView extends StandardListView<BenhNhan> {
             JmixButton deleteButton = uiComponents.create(JmixButton.class);
             deleteButton.setText("Xóa");
             deleteButton.addClickListener(e -> {
-                benhNhansDataGrid.select(benhNhan);
-                benhNhansDataGridRemoveAction.execute();
+                Optional<ChiTietDieuTri> chiTietDieuTri = dataManager.load(ChiTietDieuTri.class).query("select e from ChiTietDieuTri e where e.idBenhNhan = :idBenhNhan")
+                                .parameter("idBenhNhan", benhNhan).optional();
+                if(chiTietDieuTri.isPresent()){
+                    notifications.create("Không thể xóa. Khách hàng đã được lập phiếu chỉ định.")
+                            .withThemeVariant(NotificationVariant.LUMO_WARNING)
+                            .withPosition(Notification.Position.TOP_END)
+                            .show();
+                }else{
+                    benhNhansDataGrid.select(benhNhan);
+                    benhNhansDataGridRemoveAction.execute();
+                }
             });
 
             // Thêm 3 nút vào layout

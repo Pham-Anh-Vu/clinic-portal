@@ -16,7 +16,7 @@
             </fetchPlan>
             <loader id="benhNhansDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from BenhNhan e]]>
+                    <![CDATA[select e from BenhNhan e order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>
@@ -38,7 +38,7 @@
             <properties include=".*"/>
         </genericFilter>
         <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END">
-            <button id="createButton" action="benhNhansDataGrid.createAction"/>
+<!--            <button id="createButton" action="benhNhansDataGrid.createAction"/>-->
             <button id="refreshButton" action="benhNhansDataGrid.refreshAction"/>
         </hbox>
         <dataGrid id="benhNhansDataGrid"
