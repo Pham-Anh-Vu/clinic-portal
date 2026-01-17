@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1" author="clinic-portal">
+        <dropUniqueConstraint constraintName="applicationPlugins_name_key" tableName="applicationPlugins"/>
+    </changeSet>
+    <changeSet id="2" author="clinic-portal">
+        <dropUniqueConstraint constraintName="applicationPlugins_packageName_key" tableName="applicationPlugins"/>
+    </changeSet>
+    <changeSet id="3" author="clinic-portal">
+        <dropUniqueConstraint constraintName="applications_cname_key" tableName="applications"/>
+    </changeSet>
+    <changeSet id="4" author="clinic-portal">
+        <dropUniqueConstraint constraintName="authenticators_name_key" tableName="authenticators"/>
+    </changeSet>
+    <changeSet id="5" author="clinic-portal">
+        <dropUniqueConstraint constraintName="collections_name_key" tableName="collections"/>
+    </changeSet>
+    <changeSet id="6" author="clinic-portal">
+        <dropUniqueConstraint constraintName="executions_eventKey_key" tableName="executions"/>
+    </changeSet>
+    <changeSet id="7" author="clinic-portal">
+        <dropUniqueConstraint constraintName="graphPositions_collectionName_key" tableName="graphPositions"/>
+    </changeSet>
+    <changeSet id="8" author="clinic-portal">
+        <dropUniqueConstraint constraintName="publicForms_key_key" tableName="publicForms"/>
+    </changeSet>
+    <changeSet id="9" author="clinic-portal">
+        <dropUniqueConstraint constraintName="roles_title_key" tableName="roles"/>
+    </changeSet>
+    <changeSet id="10" author="clinic-portal">
+        <dropUniqueConstraint constraintName="storages_name_key" tableName="storages"/>
+    </changeSet>
+    <changeSet id="11" author="clinic-portal">
+        <dropUniqueConstraint constraintName="uiButtonSchemasRoles_uid_roleName_key" tableName="uiButtonSchemasRoles"/>
+    </changeSet>
+    <changeSet id="12" author="clinic-portal">
+        <dropUniqueConstraint constraintName="userDataSyncSources_name_key" tableName="userDataSyncSources"/>
+    </changeSet>
+    <changeSet id="13" author="clinic-portal">
+        <dropUniqueConstraint constraintName="userDataSyncTasks_batch_key" tableName="userDataSyncTasks"/>
+    </changeSet>
+    <changeSet id="14" author="clinic-portal">
+        <dropUniqueConstraint constraintName="users_email_key" tableName="users"/>
+    </changeSet>
+    <changeSet id="15" author="clinic-portal">
+        <dropUniqueConstraint constraintName="users_phone_key" tableName="users"/>
+    </changeSet>
+    <changeSet id="16" author="clinic-portal">
+        <dropUniqueConstraint constraintName="users_resetToken_key" tableName="users"/>
+    </changeSet>
+    <changeSet id="17" author="clinic-portal">
+        <dropUniqueConstraint constraintName="users_username_key" tableName="users"/>
+    </changeSet>
+    <changeSet id="18" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="apiKeys"/>
+    </changeSet>
+    <changeSet id="19" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="applicationPlugins"/>
+    </changeSet>
+    <changeSet id="20" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="applicationVersion"/>
+    </changeSet>
+    <changeSet id="21" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="applications"/>
+    </changeSet>
+    <changeSet id="22" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="attachments"/>
+    </changeSet>
+    <changeSet id="23" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="authenticators"/>
+    </changeSet>
+    <changeSet id="24" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="collectionCategories"/>
+    </changeSet>
+    <changeSet id="25" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="collectionCategory"/>
+    </changeSet>
+    <changeSet id="26" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="collections"/>
+    </changeSet>
+    <changeSet id="27" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="customRequests"/>
+    </changeSet>
+    <changeSet id="28" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="customRequestsRoles"/>
+    </changeSet>
+    <changeSet id="29" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="dataSources"/>
+    </changeSet>
+    <changeSet id="30" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="dataSourcesCollections"/>
+    </changeSet>
+    <changeSet id="31" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="dataSourcesFields"/>
+    </changeSet>
+    <changeSet id="32" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="dataSourcesRoles"/>
+    </changeSet>
+    <changeSet id="33" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="dataSourcesRolesResources"/>
+    </changeSet>
+    <changeSet id="34" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="dataSourcesRolesResourcesActions"/>
+    </changeSet>
+    <changeSet id="35" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="dataSourcesRolesResourcesScopes"/>
+    </changeSet>
+    <changeSet id="36" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="departments"/>
+    </changeSet>
+    <changeSet id="37" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="departmentsRoles"/>
+    </changeSet>
+    <changeSet id="38" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="departmentsUsers"/>
+    </changeSet>
+    <changeSet id="39" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="desktopRoutes"/>
+    </changeSet>
+    <changeSet id="40" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="environmentVariables"/>
+    </changeSet>
+    <changeSet id="41" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="executions"/>
+    </changeSet>
+    <changeSet id="42" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="fields"/>
+    </changeSet>
+    <changeSet id="43" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="flow_nodes"/>
+    </changeSet>
+    <changeSet id="44" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="graphPositions"/>
+    </changeSet>
+    <changeSet id="45" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="iframeHtml"/>
+    </changeSet>
+    <changeSet id="46" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="issuedTokens"/>
+    </changeSet>
+    <changeSet id="47" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="jobs"/>
+    </changeSet>
+    <changeSet id="48" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="llmServices"/>
+    </changeSet>
+    <changeSet id="49" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="main_departments_path"/>
+    </changeSet>
+    <changeSet id="50" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="main_desktopRoutes_path"/>
+    </changeSet>
+    <changeSet id="51" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="main_mobileRoutes_path"/>
+    </changeSet>
+    <changeSet id="52" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="migrations"/>
+    </changeSet>
+    <changeSet id="53" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="mobileRoutes"/>
+    </changeSet>
+    <changeSet id="54" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="notificationChannels"/>
+    </changeSet>
+    <changeSet id="55" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="notificationInAppMessages"/>
+    </changeSet>
+    <changeSet id="56" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="notificationSendLogs"/>
+    </changeSet>
+    <changeSet id="57" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="publicForms"/>
+    </changeSet>
+    <changeSet id="58" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="roles"/>
+    </changeSet>
+    <changeSet id="59" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="rolesDesktopRoutes"/>
+    </changeSet>
+    <changeSet id="60" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="rolesMobileRoutes"/>
+    </changeSet>
+    <changeSet id="61" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="rolesResources"/>
+    </changeSet>
+    <changeSet id="62" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="rolesResourcesActions"/>
+    </changeSet>
+    <changeSet id="63" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="rolesResourcesScopes"/>
+    </changeSet>
+    <changeSet id="64" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="rolesUischemas"/>
+    </changeSet>
+    <changeSet id="65" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="rolesUsers"/>
+    </changeSet>
+    <changeSet id="66" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="sequences"/>
+    </changeSet>
+    <changeSet id="67" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="storages"/>
+    </changeSet>
+    <changeSet id="68" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="systemSettings"/>
+    </changeSet>
+    <changeSet id="69" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="t_9m0g14k998x"/>
+    </changeSet>
+    <changeSet id="70" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="t_a0z7bo39rma"/>
+    </changeSet>
+    <changeSet id="71" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="t_q9vw7qooqw9"/>
+    </changeSet>
+    <changeSet id="72" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="t_s3jd7l0h0wl"/>
+    </changeSet>
+    <changeSet id="73" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="t_wknzauilw4l"/>
+    </changeSet>
+    <changeSet id="74" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="t_x0b725fy9js"/>
+    </changeSet>
+    <changeSet id="75" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="themeConfig"/>
+    </changeSet>
+    <changeSet id="76" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="tokenBlacklist"/>
+    </changeSet>
+    <changeSet id="77" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="tokenControlConfig"/>
+    </changeSet>
+    <changeSet id="78" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="uiButtonSchemasRoles"/>
+    </changeSet>
+    <changeSet id="79" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="uiSchemaServerHooks"/>
+    </changeSet>
+    <changeSet id="80" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="uiSchemaTemplates"/>
+    </changeSet>
+    <changeSet id="81" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="uiSchemaTreePath"/>
+    </changeSet>
+    <changeSet id="82" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="uiSchemas"/>
+    </changeSet>
+    <changeSet id="83" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="userDataSyncRecords"/>
+    </changeSet>
+    <changeSet id="84" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="userDataSyncRecordsResources"/>
+    </changeSet>
+    <changeSet id="85" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="userDataSyncSources"/>
+    </changeSet>
+    <changeSet id="86" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="userDataSyncTasks"/>
+    </changeSet>
+    <changeSet id="87" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="users"/>
+    </changeSet>
+    <changeSet id="88" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="usersAuthenticators"/>
+    </changeSet>
+    <changeSet id="89" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="verifications"/>
+    </changeSet>
+    <changeSet id="90" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="verifications_providers"/>
+    </changeSet>
+    <changeSet id="91" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="workflowManualTasks"/>
+    </changeSet>
+    <changeSet id="92" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="workflowTasks"/>
+    </changeSet>
+    <changeSet id="93" author="clinic-portal">
+        <dropTable cascadeConstraints="true" tableName="workflows"/>
+    </changeSet>
+</databaseChangeLog>
