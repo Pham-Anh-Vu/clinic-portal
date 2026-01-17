@@ -24,12 +24,8 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <dateTimePicker id="createdAtField" property="createdAt"/>
-            <textField id="createdByIdField" property="createdById"/>
+            <select id="loaiField" property="loai"/>
             <textField id="giaField" property="gia"/>
-            <textField id="loaiField" property="loai"/>
-            <dateTimePicker id="updatedAtField" property="updatedAt"/>
-            <textField id="updatedByIdField" property="updatedById"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>

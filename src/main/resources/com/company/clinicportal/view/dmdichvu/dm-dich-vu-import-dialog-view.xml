@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="Import bảng giá dịch vụ">
+    <data>
+        <collection id="previewDc"
+                    class="com.company.clinicportal.service.DmDichVuPreviewItem">
+        </collection>
+    </data>
+    <layout>
+        <vbox spacing="true" padding="true" width="100%" height="100%">
+            <h3 text="Chọn file Excel để import"/>
+            <upload id="upload"/>
+            <h4 text="Danh sách dữ liệu sắp được import:"/>
+            <dataGrid id="previewDataGrid"
+                      width="100%"
+                      minHeight="20em"
+                      maxHeight="30em"
+                      dataContainer="previewDc"
+                      columnReorderingAllowed="true">
+                <emptyStateComponent>
+                    <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                        <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                        <h2 text="Chưa có dữ liệu. Vui lòng tải lên file Excel."/>
+                    </vbox>
+                </emptyStateComponent>
+                <columns resizable="true">
+                </columns>
+            </dataGrid>
+            <hbox spacing="true" justifyContent="END" width="100%">
+                <button id="cancelButton" text="Hủy"/>
+                <button id="importButton" text="Import"/>
+            </hbox>
+        </vbox>
+    </layout>
+</view>
+
