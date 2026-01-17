@@ -172,7 +172,7 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="6"/>
                         </responsiveSteps>
-                        <textField id="tongTienField" property="tongTien" readOnly="true"/>
+                        <textField id="tongTienField" property="tongTien"/>
                         <textField id="khuyenMaiField" property="khuyenMai"/>
                         <textField id="tongTienSauKhuyenMaiField" property="tongTienSauKhuyenMai" readOnly="true"/>
                         <textField id="daThanhToanField" property="daThanhToan" readOnly="true"/>
