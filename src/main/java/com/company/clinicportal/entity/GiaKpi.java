@@ -1,5 +1,6 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.LoaiGiaKPI;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -52,12 +53,12 @@ public class GiaKpi {
         this.updatedAt = updatedAt;
     }
 
-    public String getLoai() {
-        return loai;
+    public LoaiGiaKPI getLoai() {
+        return loai == null ? null : LoaiGiaKPI.fromId(loai);
     }
 
-    public void setLoai(String loai) {
-        this.loai = loai;
+    public void setLoai(LoaiGiaKPI loai) {
+        this.loai = loai == null ? null : loai.getId();
     }
 
     public Long getGia() {

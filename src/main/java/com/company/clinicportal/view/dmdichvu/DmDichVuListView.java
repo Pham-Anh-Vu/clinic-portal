@@ -2,6 +2,7 @@ package com.company.clinicportal.view.dmdichvu;
 
 import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.DmDichVu;
+import com.company.clinicportal.entity.GiaKpi;
 import com.company.clinicportal.view.buoidieutri.ThuThuatDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.Component;
@@ -9,6 +10,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
@@ -31,6 +33,7 @@ import java.util.Date;
 public class DmDichVuListView extends StandardListView<DmDichVu> {
     @Autowired
     private UiComponents uiComponents;
+
     @Autowired
     private Messages messages;
     @ViewComponent
@@ -41,19 +44,6 @@ public class DmDichVuListView extends StandardListView<DmDichVu> {
     private CollectionLoader<DmDichVu> dmDichVusDl;
     @ViewComponent("dmDichVusDataGrid.removeAction")
     private RemoveAction<DmDichVu> dmDichVusDataGridRemoveAction;
-
-    @Supply(to = "dmDichVusDataGrid.nhomDichVu", subject = "renderer")
-    private Renderer<DmDichVu> dmDichVusDataGridNhomDichVuRenderer() {
-        return new ComponentRenderer<>(dmdichvu -> {
-            // TODO: create suitable component
-            Span span = uiComponents.create(Span.class);
-            if (dmdichvu.getNhomDichVu()!=null) {
-                span.setText(messages.getMessage(dmdichvu.getNhomDichVu()));
-                span.addClassName(dmdichvu.getNhomDichVu().getId());
-            }
-            return span;
-        });
-    }
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -91,5 +81,44 @@ public class DmDichVuListView extends StandardListView<DmDichVu> {
                 })
                 .setHeader("Thao tác")
                 .setAutoWidth(true);
+    }
+
+
+    @Supply(to = "giaKpiDataGrid.loai", subject = "renderer")
+    private Renderer<GiaKpi> giaKpiDataGridLoaiRenderer() {
+        return new TextRenderer<>(giaKpi -> {
+            if ("toi".equalsIgnoreCase(giaKpi.getLoai().getId())) {
+                return "Tối";
+            }
+            if ("sang".equalsIgnoreCase(giaKpi.getLoai().getId())) {
+                return "Sáng";
+            }
+            return "";
+        });
+    }
+
+
+    @Supply(to = "dmDichVusDataGrid.nhomDichVu", subject = "renderer")
+    private Renderer<DmDichVu> dmDichVusDataGridNhomDichVuRenderer() {
+        return new ComponentRenderer<>(dmdichvu -> {
+            // TODO: create suitable component
+            Span span = uiComponents.create(Span.class);
+            if (dmdichvu.getNhomDichVu()!=null) {
+                span.setText(messages.getMessage(dmdichvu.getNhomDichVu()));
+                span.addClassName(dmdichvu.getNhomDichVu().getId());
+            }
+            return span;
+        });
+    }
+
+    @Subscribe("importButton")
+    public void onImportButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+        DialogWindow<DmDichVuImportDialogView> dialogWindow =
+                dialogWindows.view(this, DmDichVuImportDialogView.class)
+                .build();
+        dialogWindow.addAfterCloseListener(e -> {
+            dmDichVusDl.load();
+        });
+        dialogWindow.open();
     }
 }
