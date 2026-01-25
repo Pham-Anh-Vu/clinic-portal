@@ -366,7 +366,7 @@ vaadin-big-decimal-field input[type="text"] {
     text-align: center;
 }
 
-.dien_tri_lieu {
+.vat_ly_tri_lieu {
     background-color: #fff2cc;        /* vàng nhạt nền */
     color: #b36b00;                   /* chữ vàng nâu */
     border: 1px solid #ffd966;        /* viền vàng nhạt */
@@ -378,7 +378,7 @@ vaadin-big-decimal-field input[type="text"] {
     text-align: center;
 }
 
-.keo_gian {
+.keo_nan_tri_lieu {
     background-color: #e6ffe6;        /* xanh lá nhạt nền */
     color: #009933;                   /* chữ xanh lá đậm */
     border: 1px solid #66cc66;        /* viền xanh nhạt */
@@ -402,10 +402,22 @@ vaadin-big-decimal-field input[type="text"] {
     text-align: center;
 }
 
-.tap_phcn {
+.xoa_bop_tri_lieu {
     background-color: #e6f0ff;        /* xanh lam nhạt nền */
     color: #005ce6;                   /* chữ xanh lam đậm */
     border: 1px solid #99b3ff;        /* viền xanh lam nhạt */
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+}
+
+.kham_luong_gia {
+    background-color: #f3e6ff;        /* tím nhạt nền */
+    color: #6a00b3;                   /* chữ tím đậm */
+    border: 1px solid #c699ff;        /* viền tím nhạt */
     border-radius: 8px;
     padding: 3px 10px;
     font-size: 13px;

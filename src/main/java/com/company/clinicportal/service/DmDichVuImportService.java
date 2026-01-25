@@ -145,7 +145,7 @@ public class DmDichVuImportService {
         String nhomDichVuStr = getCellValueAsString(nhomDichVuCell).trim();
         NhomDichVu nhomDichVu = mapNhomDichVu(nhomDichVuStr);
         if (nhomDichVu == null) {
-            throw new Exception("Nhóm dịch vụ không hợp lệ: " + nhomDichVuStr + ". Các giá trị hợp lệ: Điện trị liệu, Kéo giãn (hoặc Kéo giãn, kéo nắn), Vận động trị liệu, Tập phục hồi chức năng (hoặc Tập PHCN)");
+            throw new Exception("Nhóm dịch vụ không hợp lệ: " + nhomDichVuStr + ". Các giá trị hợp lệ: Vật lý trị liệu, Vận động trị liệu, Kéo nắn trị liệu, Xoa bóp trị liệu, Khám, lượng giá");
         }
         entity.setNhomDichVu(nhomDichVu);
         
@@ -203,21 +203,33 @@ public class DmDichVuImportService {
         String normalized = value.trim().toLowerCase();
         
         // Map Vietnamese names to enum
-        // DIEN_TRI_LIEU = "Điện trị liệu"
-        if (normalized.contains("điện trị liệu") || normalized.contains("dien_tri_lieu") || normalized.equals("điện trị liệu")) {
-            return NhomDichVu.DIEN_TRI_LIEU;
-        } 
-        // KEO_GIAN = "Kéo giãn, kéo nắn"
-        else if (normalized.contains("kéo giãn") || normalized.contains("keo_gian") || normalized.contains("kéo nắn")) {
-            return NhomDichVu.KEO_GIAN;
+        // VAT_LY_TRI_LIEU = "Vật lý trị liệu"
+        if (normalized.contains("vật lý trị liệu") || normalized.contains("vat_ly_tri_lieu") || 
+            normalized.contains("vật lý") || normalized.equals("vat ly tri lieu")) {
+            return NhomDichVu.VAT_LY_TRI_LIEU;
         } 
         // VAN_DONG_TRI_LIEU = "Vận động trị liệu"
-        else if (normalized.contains("vận động trị liệu") || normalized.contains("van_dong_tri_lieu") || normalized.equals("vận động trị liệu")) {
+        else if (normalized.contains("vận động trị liệu") || normalized.contains("van_dong_tri_lieu") || 
+                 normalized.contains("vận động") || normalized.equals("van dong tri lieu")) {
             return NhomDichVu.VAN_DONG_TRI_LIEU;
         } 
-        // TAP_PHCN = "Tập phục hồi chức năng"
-        else if (normalized.contains("tập phcn") || normalized.contains("tap_phcn") || normalized.contains("tập phục hồi chức năng") || normalized.contains("phục hồi chức năng")) {
-            return NhomDichVu.TAP_PHCN;
+        // KEO_NAN_TRI_LIEU = "Kéo nắn trị liệu"
+        else if (normalized.contains("kéo nắn trị liệu") || normalized.contains("keo_nan_tri_lieu") || 
+                 normalized.contains("kéo nắn") || normalized.contains("keo nan") || 
+                 normalized.equals("keo nan tri lieu")) {
+            return NhomDichVu.KEO_NAN_TRI_LIEU;
+        } 
+        // XOA_BOP_TRI_LIEU = "Xoa bóp trị liệu"
+        else if (normalized.contains("xoa bóp trị liệu") || normalized.contains("xoa_bop_tri_lieu") || 
+                 normalized.contains("xoa bóp") || normalized.contains("xoa bop") || 
+                 normalized.equals("xoa bop tri lieu")) {
+            return NhomDichVu.XOA_BOP_TRI_LIEU;
+        }
+        // KHAM_LUONG_GIA = "Khám, lượng giá"
+        else if (normalized.contains("khám, lượng giá") || normalized.contains("kham_luong_gia") || 
+                 normalized.contains("khám lượng giá") || normalized.contains("kham luong gia") ||
+                 normalized.contains("khám lượng") || normalized.equals("kham luong gia")) {
+            return NhomDichVu.KHAM_LUONG_GIA;
         }
         
         return null;
