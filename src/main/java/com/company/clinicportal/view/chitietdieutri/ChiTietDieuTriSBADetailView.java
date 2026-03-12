@@ -4,6 +4,8 @@ import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.LichSuThanhToan;
+import com.company.clinicportal.entity.BuoiDieuTri;
+import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
@@ -12,6 +14,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
+import io.jmix.core.SaveContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -27,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 
 @Route(value = "chi-tiet-dieu-tri-sbas/:id", layout = MainView.class)
 @ViewController(id = "ChiTietDieuTriSBA.detail")
@@ -128,7 +133,39 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                 ChiTietDichVu saved = event1.getView().getEditedEntity();
                 saved.setIdChiTietPhieuDieuTri(getEditedEntity());
                 saved.setCreatedAt(LocalDateTime.now());
-                dataManager.save(saved);
+                ChiTietDichVu persisted = dataManager.save(saved);
+
+                Long soLuong = persisted.getSoLuong();
+                Date ngayBatDau = persisted.getNgayBatDau();
+                Long khoangCachBuoiDieuTri = persisted.getKhoangCachBuoiDieuTri();
+
+                if (soLuong != null && soLuong > 0
+                        && ngayBatDau != null
+                        && khoangCachBuoiDieuTri != null && khoangCachBuoiDieuTri > 0
+                        && persisted.getIdChiTietPhieuDieuTri() != null
+                        && persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan() != null) {
+
+                    SaveContext saveContext = new SaveContext();
+
+                    for (int i = 0; i < soLuong; i++) {
+                        BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
+                        buoiDieuTri.setIdChiTietDichVu(persisted);
+                        buoiDieuTri.setIdBenhNhan(persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan());
+
+                        Calendar ngayThucHienCal = Calendar.getInstance();
+                        ngayThucHienCal.setTime(ngayBatDau);
+                        ngayThucHienCal.add(Calendar.DAY_OF_MONTH, (int) (khoangCachBuoiDieuTri * i));
+                        buoiDieuTri.setNgayThucHien(ngayThucHienCal.getTime());
+                        buoiDieuTri.setTrangThai(TrangThaiBuoiDieuTri.CHUA_THUC_HIEN);
+
+                        saveContext.saving(buoiDieuTri);
+                    }
+
+                    if (!saveContext.getEntitiesToSave().isEmpty()) {
+                        dataManager.save(saveContext);
+                    }
+                }
+
                 chiTietDieuTriDl.load();
             }
         });
