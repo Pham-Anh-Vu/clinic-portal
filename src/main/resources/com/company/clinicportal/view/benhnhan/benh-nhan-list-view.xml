@@ -11,7 +11,7 @@
             </fetchPlan>
             <loader id="benhNhansDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from BenhNhan e order by e.createdAt desc]]>
+                    <![CDATA[select e from BenhNhan e order by e.id desc]]>
                 </query>
             </loader>
         </collection>
@@ -69,7 +69,7 @@
             </actions>
             <columns resizable="true">
                 <column property="id" header="Mã BN"/>
-                <column property="hoVaTen" header="Họ tên bệnh nhân"/>
+                <column property="hoVaTen" header="Họ tên bệnh nhân" width="320px" flexGrow="1"/>
                 <column property="gioiTinh"/>
                 <column property="ngaySinh"/>
                 <column property="dienThoai" header="Số điện thoại"/>
