@@ -10,6 +10,9 @@ import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -210,6 +213,35 @@ public class BenhNhan {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void recalculateTuoi() {
+        this.tuoi = calculateTuoi(this.ngaySinh);
+    }
+
+    public static String calculateTuoi(Date ngaySinh) {
+        if (ngaySinh == null) {
+            return null;
+        }
+
+        LocalDate birthDate = ngaySinh.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        LocalDate today = LocalDate.now();
+
+        if (birthDate.isAfter(today)) {
+            return null;
+        }
+
+        long months = ChronoUnit.MONTHS.between(birthDate, today);
+        if (months < 72) {
+            return months + " tháng";
+        }
+
+        long years = ChronoUnit.YEARS.between(birthDate, today);
+        return years + " tuổi";
     }
 
     @InstanceName

@@ -20,6 +20,7 @@ import io.jmix.flowui.app.inputdialog.DialogActions;
 import io.jmix.flowui.app.inputdialog.DialogOutcome;
 import io.jmix.flowui.app.inputdialog.InputParameter;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
@@ -60,6 +61,8 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     private InstanceLoader<BenhNhan> benhNhanDl;
     @ViewComponent
     private JmixButton editBN;
+    @ViewComponent
+    private TypedTextField<String> tuoiField;
 
     private PhieuDieuTri currentPhieuDieuTri = null;
 
@@ -79,6 +82,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
         chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
         chiTietDieuTrisDl.load();
+        tuoiField.setValue(BenhNhan.calculateTuoi(getEditedEntity().getNgaySinh()));
 
         Optional<PhieuDieuTri> phieuDieuTriOpt = dataManager.load(PhieuDieuTri.class)
                 .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")

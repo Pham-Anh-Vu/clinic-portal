@@ -5,6 +5,8 @@ import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
@@ -98,5 +100,14 @@ public class SoBenhAnListView extends StandardListView<BenhNhan> {
             });
             return button;
         }).setHeader("Thao tác").setAutoWidth(true);
+    }
+
+    @Supply(to = "benhNhansDataGrid.tuoi", subject = "renderer")
+    private Renderer<BenhNhan> benhNhansDataGridTuoiRenderer() {
+        return new ComponentRenderer<>(benhNhan -> {
+            Span span = uiComponents.create(Span.class);
+            span.setText(BenhNhan.calculateTuoi(benhNhan != null ? benhNhan.getNgaySinh() : null));
+            return span;
+        });
     }
 }

@@ -6,6 +6,7 @@ import com.company.clinicportal.view.buoidieutri.ThuThuatListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuBDTListView;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
@@ -26,6 +27,7 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.exception.ValidationException;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
@@ -79,6 +81,10 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
     private Notifications notifications;
     @ViewComponent
     private H3 benhNhanField;
+    @ViewComponent
+    private TypedDatePicker<Date> ngaySinhFieldRead;
+    @ViewComponent
+    private TypedTextField<String> tuoiFieldRead;
     @Autowired
     private MetadataTools metadataTools;
 
@@ -211,6 +217,7 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
         if (this.isReadOnly()) {
+            tuoiFieldRead.setValue(BenhNhan.calculateTuoi(ngaySinhFieldRead.getTypedValue()));
             buoiDieuTrisDl.setParameter("idBenhNhan", getEditedEntity());
             buoiDieuTrisDl.load();
             // render chart after data is available
@@ -257,6 +264,11 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
             formCreate.setVisible(false);
             formRead.setVisible(true);
         }
+    }
+
+    @Subscribe("ngaySinhFieldRead")
+    public void onNgaySinhFieldReadValueChange(final HasValue.ValueChangeEvent<Date> event) {
+        tuoiFieldRead.setValue(BenhNhan.calculateTuoi(event.getValue()));
     }
 
     @Subscribe(id = "buoiDieuTrisDl", target = Target.DATA_LOADER)
