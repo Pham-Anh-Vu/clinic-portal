@@ -11,13 +11,13 @@
             </fetchPlan>
             <loader id="lichSuThanhToansDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from LichSuThanhToan e order by e.createdAt desc]]>
+                    <![CDATA[select e from LichSuThanhToan e where e.idPhieuDieuTri.idBenhNhan = :idBenhNhan order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>
     </data>
     <facets>
-        <dataLoadCoordinator auto="true"/>
+        <dataLoadCoordinator auto="false"/>
         <urlQueryParameters>
             <genericFilter component="genericFilter"/>
             <pagination component="pagination"/>

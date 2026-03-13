@@ -5,8 +5,11 @@ import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
+import io.jmix.core.EntityStates;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 @Route(value = "lich-su-thanh-toans/:id", layout = MainView.class)
 @ViewController(id = "LichSuThanhToan.detail")
@@ -16,9 +19,19 @@ public class LichSuThanhToanDetailView extends StandardDetailView<LichSuThanhToa
     private PhieuDieuTri phieuDieuTri;
     @Autowired
     private DataManager dataManager;
+    @Autowired
+    private EntityStates entityStates;
 
     public void setPhieuDieuTri(PhieuDieuTri phieuDieuTri) {
         this.phieuDieuTri = phieuDieuTri;
+    }
+
+    @Subscribe
+    public void onBeforeShow(final BeforeShowEvent event) {
+        if (entityStates.isNew(getEditedEntity())
+                && getEditedEntity().getThanhToanLuc() == null) {
+            getEditedEntity().setThanhToanLuc(new Date());
+        }
     }
 
     @Subscribe

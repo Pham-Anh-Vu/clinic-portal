@@ -282,6 +282,16 @@
 
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
+                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                              width="100%">
+                            <hbox classNames="buttons-panel" width="100%">
+                                <div width="100%" classNames="all-control-auto-pay">
+                                    <div classNames="title-grid">
+                                        <span text="KPI &amp; TRỌNG SỐ"/>
+                                    </div>
+                                </div>
+                            </hbox>
+                        </vbox>
                         <vbox padding="false" classNames="grid-data">
                             <formLayout dataContainer="chiTietDieuTriDc"
                                     css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
