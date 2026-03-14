@@ -11,7 +11,7 @@
             </fetchPlan>
             <loader id="lichSuThanhToansDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from LichSuThanhToan e where e.idPhieuDieuTri.idBenhNhan = :idBenhNhan order by e.createdAt desc]]>
+                    <![CDATA[select e from LichSuThanhToan e where e.idChiTietDieuTri.idBenhNhan = :idBenhNhan order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>
@@ -60,7 +60,7 @@
                 <column property="daThanhToan"/>
                 <column property="ghiChu"/>
                 <column property="hoTenNguoiNopTien"/>
-                <column property="idPhieuDieuTri"/>
+                <column property="idChiTietDieuTri"/>
                 <column property="idSoQuyThang"/>
                 <column property="soDienThoai"/>
                 <column property="thanhToanLuc"/>

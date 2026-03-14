@@ -1,10 +1,9 @@
 package com.company.clinicportal.view.lichsuthanhtoan;
 
 import com.company.clinicportal.entity.LichSuThanhToan;
-import com.company.clinicportal.entity.PhieuDieuTri;
+import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.router.Route;
-import io.jmix.core.DataManager;
 import io.jmix.core.EntityStates;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +15,12 @@ import java.util.Date;
 @ViewDescriptor(path = "lich-su-thanh-toan-detail-view.xml")
 @EditedEntityContainer("lichSuThanhToanDc")
 public class LichSuThanhToanDetailView extends StandardDetailView<LichSuThanhToan> {
-    private PhieuDieuTri phieuDieuTri;
-    @Autowired
-    private DataManager dataManager;
+    private ChiTietDieuTri chiTietDieuTri;
     @Autowired
     private EntityStates entityStates;
 
-    public void setPhieuDieuTri(PhieuDieuTri phieuDieuTri) {
-        this.phieuDieuTri = phieuDieuTri;
+    public void setChiTietDieuTri(ChiTietDieuTri chiTietDieuTri) {
+        this.chiTietDieuTri = chiTietDieuTri;
     }
 
     @Subscribe
@@ -32,10 +29,15 @@ public class LichSuThanhToanDetailView extends StandardDetailView<LichSuThanhToa
                 && getEditedEntity().getThanhToanLuc() == null) {
             getEditedEntity().setThanhToanLuc(new Date());
         }
+        if (entityStates.isNew(getEditedEntity()) && chiTietDieuTri != null) {
+            getEditedEntity().setIdChiTietDieuTri(chiTietDieuTri);
+        }
     }
 
     @Subscribe
     public void onBeforeSave(final BeforeSaveEvent event) {
-        if(phieuDieuTri != null) getEditedEntity().setIdPhieuDieuTri(phieuDieuTri);
+        if (chiTietDieuTri != null) {
+            getEditedEntity().setIdChiTietDieuTri(chiTietDieuTri);
+        }
     }
 }

@@ -23,12 +23,16 @@ import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 @Route(value = "so-benh-ans/:id", layout = MainView.class)
@@ -72,6 +76,8 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
     @ViewComponent
     private CollectionLoader<ChiTietDieuTri> chiTietDieuTrisDl;
+    @ViewComponent
+    private CollectionContainer<ChiTietDieuTri> chiTietDieuTrisDc;
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
@@ -82,6 +88,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
         chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
         chiTietDieuTrisDl.load();
+        applyPaymentSummaryForList();
         tuoiField.setValue(BenhNhan.calculateTuoi(getEditedEntity().getNgaySinh()));
 
         Optional<PhieuDieuTri> phieuDieuTriOpt = dataManager.load(PhieuDieuTri.class)
@@ -148,6 +155,51 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         }).setHeader("Thao tác").setAutoWidth(true);
     }
 
+    private void applyPaymentSummaryForList() {
+        for (ChiTietDieuTri chiTietDieuTri : chiTietDieuTrisDc.getItems()) {
+            Number tongTienNumber = dataManager.loadValue(
+                            "select coalesce(sum(dv.idDichVu.gia * dv.soLuong), 0) from ChiTietDichVu dv where dv.idChiTietPhieuDieuTri = :ctdt",
+                            Number.class
+                    )
+                    .parameter("ctdt", chiTietDieuTri)
+                    .one();
+
+            long tongTien = tongTienNumber != null ? tongTienNumber.longValue() : 0L;
+            double khuyenMaiPercent = chiTietDieuTri.getKhuyenMai() != null ? chiTietDieuTri.getKhuyenMai() : 0D;
+            long daThanhToan = dataManager.loadValue(
+                            "select coalesce(sum(e.daThanhToan), 0) from LichSuThanhToan e where e.idChiTietDieuTri = :ctdt",
+                            Long.class
+                    )
+                    .parameter("ctdt", chiTietDieuTri)
+                    .one();
+            Date ngayThanhToanCuoi = dataManager.loadValue(
+                            "select max(e.thanhToanLuc) from LichSuThanhToan e where e.idChiTietDieuTri = :ctdt",
+                            Date.class
+                    )
+                    .parameter("ctdt", chiTietDieuTri)
+                    .optional()
+                    .orElse(null);
+
+            BigDecimal tongTienBd = BigDecimal.valueOf(tongTien);
+            long tongSauKhuyenMai = tongTienBd.subtract(
+                            tongTienBd.multiply(BigDecimal.valueOf(khuyenMaiPercent))
+                                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                    )
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .longValue();
+            int phaiDong = BigDecimal.valueOf(tongSauKhuyenMai)
+                    .subtract(BigDecimal.valueOf(daThanhToan))
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .intValue();
+
+            chiTietDieuTri.setTongTien(tongTien);
+            chiTietDieuTri.setTongTienSauKhuyenMai(tongSauKhuyenMai);
+            chiTietDieuTri.setDaThanhToan(daThanhToan);
+            chiTietDieuTri.setPhaiDong(phaiDong);
+            chiTietDieuTri.setNgayThanhToan(ngayThanhToanCuoi);
+        }
+    }
+
     @Subscribe("chiTietDieuTrisDataGrid.create")
     public void onChiTietDieuTrisDataGridCreate(final ActionPerformedEvent event) {
         DialogWindow<PhieuChiDinhDetailView> dialogWindow =  dialogWindows.detail(this, ChiTietDieuTri.class)
@@ -163,6 +215,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
             if(idBenhNhan != null){
                 chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
                 chiTietDieuTrisDl.load();
+                applyPaymentSummaryForList();
             }
         });
 

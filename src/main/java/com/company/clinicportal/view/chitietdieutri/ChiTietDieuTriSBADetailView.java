@@ -10,8 +10,6 @@ import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import io.jmix.core.DataManager;
@@ -20,6 +18,7 @@ import io.jmix.core.SaveContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.SupportsTypedValue;
+import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -66,12 +65,16 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private TypedTextField<Long> tongTienSauKhuyenMaiField;
     @ViewComponent
     private TypedTextField<Integer> phaiDongField;
+    @ViewComponent
+    private TypedDatePicker<Date> ngayThanhToanField;
     @Autowired
     private Metadata metadata;
     @Autowired
     private DataManager dataManager;
     @ViewComponent
     private CollectionPropertyContainer<ChiTietDichVu> chiTietDichVuDc;
+    @ViewComponent
+    private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -79,11 +82,12 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
+        khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
         chiTietDieuTriDl.setParameter("idBenhNhan", idBenhNhan);
         chiTietDieuTriDl.load();
 
-        if(getEditedEntity().getIdPhieuDieuTri() != null){
-            lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
+        if (getEditedEntity().getId() != null) {
+            lichSuThanhToansDl.setParameter("idChiTietDieuTri", getEditedEntity());
             lichSuThanhToansDl.load();
         }
 
@@ -114,10 +118,12 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                                 .editEntity(lichSuThanhToan)
                                 .build();
                 window.addAfterCloseListener(eTT -> {
-                    lichSuThanhToansDl.setParameter("idPhieuDieuTri", getEditedEntity().getIdPhieuDieuTri());
-                    lichSuThanhToansDl.load();
+                    if (getEditedEntity().getId() != null) {
+                        lichSuThanhToansDl.setParameter("idChiTietDieuTri", getEditedEntity());
+                        lichSuThanhToansDl.load();
+                    }
                 });
-                window.getView().setPhieuDieuTri(getEditedEntity().getIdPhieuDieuTri());
+                window.getView().setChiTietDieuTri(lichSuThanhToan.getIdChiTietDieuTri());
                 window.open();
             });
             return button;
@@ -179,13 +185,14 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         window.open();
     }
 
-    @Subscribe("khuyenMaiField")
-    public void onKhuyenMaiFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<TypedTextField<Double>, Double> event) {
-        recalculatePaymentFields();
-    }
 
     @Subscribe("khuyenMaiField")
     public void onKhuyenMaiFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<Double>, Double> event) {
+        recalculatePaymentFields();
+    }
+
+    @Subscribe(id = "lichSuThanhToansDc", target = Target.DATA_CONTAINER)
+    public void onLichSuThanhToansDcCollectionChange(final CollectionContainer.CollectionChangeEvent<LichSuThanhToan> event) {
         recalculatePaymentFields();
     }
 
@@ -203,9 +210,16 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         BigDecimal khuyenMaiPercent = BigDecimal.valueOf(
                 khuyenMaiField.getTypedValue() != null ? khuyenMaiField.getTypedValue() : 0D
         );
-        BigDecimal daThanhToan = BigDecimal.valueOf(
-                daThanhToanField.getTypedValue() != null ? daThanhToanField.getTypedValue() : 0L
-        );
+        long daThanhToanTong = 0L;
+        Date ngayThanhToanCuoi = null;
+        for (LichSuThanhToan lichSuThanhToan : lichSuThanhToansDc.getItems()) {
+            daThanhToanTong += lichSuThanhToan.getDaThanhToan() != null ? lichSuThanhToan.getDaThanhToan() : 0L;
+            if (lichSuThanhToan.getThanhToanLuc() != null
+                    && (ngayThanhToanCuoi == null || lichSuThanhToan.getThanhToanLuc().after(ngayThanhToanCuoi))) {
+                ngayThanhToanCuoi = lichSuThanhToan.getThanhToanLuc();
+            }
+        }
+        BigDecimal daThanhToan = BigDecimal.valueOf(daThanhToanTong);
 
         BigDecimal tongSauKhuyenMaiBd = tongTienBd.subtract(
                 tongTienBd.multiply(khuyenMaiPercent)
@@ -219,17 +233,21 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
         getEditedEntity().setTongTien(tongTien);
         getEditedEntity().setTongTienSauKhuyenMai(tongSauKhuyenMai);
+        getEditedEntity().setDaThanhToan(daThanhToanTong);
         getEditedEntity().setPhaiDong(phaiDong);
+        getEditedEntity().setNgayThanhToan(ngayThanhToanCuoi);
 
         tongTienField.setTypedValue(tongTien);
         tongTienSauKhuyenMaiField.setTypedValue(tongSauKhuyenMai);
+        daThanhToanField.setTypedValue(daThanhToanTong);
         phaiDongField.setTypedValue(phaiDong);
+        ngayThanhToanField.setTypedValue(ngayThanhToanCuoi);
     }
 
     @Install(to = "lichSuThanhToansDataGrid.create", subject = "newEntitySupplier")
     private LichSuThanhToan lichSuThanhToansDataGridCreateNewEntitySupplier() {
         LichSuThanhToan lichSuThanhToan = metadata.create(LichSuThanhToan.class);
-        lichSuThanhToan.setIdPhieuDieuTri(getEditedEntity().getIdPhieuDieuTri());
+        lichSuThanhToan.setIdChiTietDieuTri(getEditedEntity());
         return lichSuThanhToan;
     }
 }

@@ -35,9 +35,9 @@ public class LichSuThanhToan {
     @Column(name = "ho_ten_nguoi_nop_tien")
     private String hoTenNguoiNopTien;
 
-    @JoinColumn(name = "ID_PHIEU_DIEU_TRI")
+    @JoinColumn(name = "ID_CHI_TIET_DIEU_TRI")
     @ManyToOne(fetch = FetchType.LAZY)
-    private PhieuDieuTri idPhieuDieuTri;
+    private ChiTietDieuTri idChiTietDieuTri;
 
     @Column(name = "id_so_quy_thang")
     private Long idSoQuyThang;
@@ -60,12 +60,12 @@ public class LichSuThanhToan {
     @Column(name = "\"updatedById\"")
     private Long updatedById;
 
-    public void setIdPhieuDieuTri(PhieuDieuTri idPhieuDieuTri) {
-        this.idPhieuDieuTri = idPhieuDieuTri;
+    public void setIdChiTietDieuTri(ChiTietDieuTri idChiTietDieuTri) {
+        this.idChiTietDieuTri = idChiTietDieuTri;
     }
 
-    public PhieuDieuTri getIdPhieuDieuTri() {
-        return idPhieuDieuTri;
+    public ChiTietDieuTri getIdChiTietDieuTri() {
+        return idChiTietDieuTri;
     }
 
     public Long getUpdatedById() {

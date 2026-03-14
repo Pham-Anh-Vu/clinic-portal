@@ -8,6 +8,7 @@
                     class="com.company.clinicportal.entity.ChiTietDieuTri">
             <fetchPlan extends="_base">
                 <property name="id"/>
+                <property name="idPhieuDieuTri" fetchPlan="_base"/>
                 <property name="idBenhNhan" fetchPlan="_base">
                     <property name="hoVaTen"/>
                 </property>

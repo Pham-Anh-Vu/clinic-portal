@@ -20,7 +20,8 @@
         <collection id="lichSuThanhToansDc" class="com.company.clinicportal.entity.LichSuThanhToan">
             <loader id="lichSuThanhToansDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from LichSuThanhToan e where e.idPhieuDieuTri = :idPhieuDieuTri]]>
+                    <![CDATA[select e from LichSuThanhToan e
+                              where e.idChiTietDieuTri = :idChiTietDieuTri]]>
                 </query>
             </loader>
             <fetchPlan extends="_base"/>
