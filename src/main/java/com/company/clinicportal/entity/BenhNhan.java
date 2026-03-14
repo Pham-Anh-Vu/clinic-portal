@@ -226,9 +226,14 @@ public class BenhNhan {
             return null;
         }
 
-        LocalDate birthDate = ngaySinh.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
+        LocalDate birthDate;
+        if (ngaySinh instanceof java.sql.Date sqlDate) {
+            birthDate = sqlDate.toLocalDate();
+        } else {
+            birthDate = ngaySinh.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+        }
         LocalDate today = LocalDate.now();
 
         if (birthDate.isAfter(today)) {

@@ -299,10 +299,11 @@
                                     <responsiveStep minWidth="0" columns="2"/>
                                 </responsiveSteps>
                                 <textField id="trongSoKPIField" property="trongSoKpi" colspan="2"/>
-                                <textField id="trongSoDieuTriField" property="trongSoDienTriLieu"/>
-                                <textField id="trongSoKeoGianField" property="trongSoKeoGian"/>
+                                <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
                                 <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
-                                <textField id="trongSoTapPHCNField" property="trongSoTapPhcn"/>
+                                <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>
+                                <textField id="trongSoXoaBopTriLieuField" property="trongSoXoaBopTriLieu"/>
+                                <textField id="trongSoKhamLuongGiaField" property="trongSoKhamLuongGia"/>
                             </formLayout>
                         </vbox>
                     </vbox>

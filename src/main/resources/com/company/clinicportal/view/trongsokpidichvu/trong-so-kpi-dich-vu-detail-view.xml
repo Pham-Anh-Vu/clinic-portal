@@ -27,10 +27,11 @@
             <dateTimePicker id="createdAtField" property="createdAt"/>
             <textField id="createdByIdField" property="createdById"/>
             <textField id="idPhieuDieuTriField" property="idPhieuDieuTri"/>
-            <textField id="trongSoDienTriLieuField" property="trongSoDienTriLieu"/>
-            <textField id="trongSoKeoGianField" property="trongSoKeoGian"/>
-            <textField id="trongSoTapPhcnField" property="trongSoTapPhcn"/>
+            <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
             <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
+            <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>
+            <textField id="trongSoXoaBopTriLieuField" property="trongSoXoaBopTriLieu"/>
+            <textField id="trongSoKhamLuongGiaField" property="trongSoKhamLuongGia"/>
             <dateTimePicker id="updatedAtField" property="updatedAt"/>
             <textField id="updatedByIdField" property="updatedById"/>
         </formLayout>

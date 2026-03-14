@@ -39,10 +39,11 @@
 
     <w:p><w:r><w:t>KPI và trọng số</w:t></w:r></w:p>
     <w:p><w:r><w:t>Tính KPI: ${detail.tinhKpi}</w:t></w:r></w:p>
-    <w:p><w:r><w:t>Trọng số điện trị liệu: ${detail.trongSoDienTriLieu}</w:t></w:r></w:p>
-    <w:p><w:r><w:t>Trọng số kéo giãn: ${detail.trongSoKeoGian}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số vật lý trị liệu: ${detail.trongSoVatLyTriLieu}</w:t></w:r></w:p>
     <w:p><w:r><w:t>Trọng số vận động trị liệu: ${detail.trongSoVanDongTriLieu}</w:t></w:r></w:p>
-    <w:p><w:r><w:t>Trọng số tập PHCN: ${detail.trongSoTapPhcn}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số kéo nắn trị liệu: ${detail.trongSoKeoNanTriLieu}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số xoa bóp trị liệu: ${detail.trongSoXoaBopTriLieu}</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Trọng số khám, lượng giá: ${detail.trongSoKhamLuongGia}</w:t></w:r></w:p>
     <w:p><w:r><w:t>Trọng số KPI: ${detail.trongSoKpi}</w:t></w:r></w:p>
 
     <w:p><w:r><w:t>Thanh toán tổng hợp</w:t></w:r></w:p>

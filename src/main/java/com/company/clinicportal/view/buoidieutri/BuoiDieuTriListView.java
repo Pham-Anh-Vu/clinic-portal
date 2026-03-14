@@ -223,19 +223,19 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
 
             switch (nhom) {
                 case VAT_LY_TRI_LIEU:
-                    if(chiTietPhieu.getTrongSoDienTriLieu() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoDienTriLieu());
+                    if(chiTietPhieu.getTrongSoVatLyTriLieu() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoVatLyTriLieu());
                     break;
                 case VAN_DONG_TRI_LIEU:
                     if(chiTietPhieu.getTrongSoVanDongTriLieu() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoVanDongTriLieu());
                     break;
                 case KEO_NAN_TRI_LIEU:
-                    if(chiTietPhieu.getTrongSoKeoGian() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoKeoGian());
+                    if(chiTietPhieu.getTrongSoKeoNanTriLieu() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoKeoNanTriLieu());
                     break;
                 case XOA_BOP_TRI_LIEU:
-                    // No corresponding trongSo field, use null or default
+                    if(chiTietPhieu.getTrongSoXoaBopTriLieu() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoXoaBopTriLieu());
                     break;
                 case KHAM_LUONG_GIA:
-                    // No corresponding trongSo field, use null or default
+                    if(chiTietPhieu.getTrongSoKhamLuongGia() != null)trongSo = BigDecimal.valueOf(chiTietPhieu.getTrongSoKhamLuongGia());
                     break;
                 default:
                     break;

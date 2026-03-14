@@ -146,10 +146,11 @@
                             <responsiveStep minWidth="0" columns="2"/>
                         </responsiveSteps>
                         <textField id="tinhKpiField" property="tinhKpi" colspan="2" required="true"/>
-                        <textField id="trongSoDienTriLieuField" property="trongSoDienTriLieu"/>
-                        <textField id="trongSoKeoGianField" property="trongSoKeoGian"/>
+                        <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
                         <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
-                        <textField id="trongSoTapPhcnField" property="trongSoTapPhcn"/>
+                        <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>
+                        <textField id="trongSoXoaBopTriLieuField" property="trongSoXoaBopTriLieu"/>
+                        <textField id="trongSoKhamLuongGiaField" property="trongSoKhamLuongGia"/>
                     </formLayout>
                 </vbox>
             </vbox>
@@ -172,7 +173,7 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="6"/>
                         </responsiveSteps>
-                        <textField id="tongTienField" property="tongTien"/>
+                        <textField id="tongTienField" property="tongTien" readOnly="true"/>
                         <textField id="khuyenMaiField" property="khuyenMai"/>
                         <textField id="tongTienSauKhuyenMaiField" property="tongTienSauKhuyenMai" readOnly="true"/>
                         <textField id="daThanhToanField" property="daThanhToan" readOnly="true"/>

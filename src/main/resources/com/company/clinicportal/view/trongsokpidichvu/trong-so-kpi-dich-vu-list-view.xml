@@ -58,10 +58,11 @@
                 <column property="createdAt"/>
                 <column property="createdById"/>
                 <column property="idPhieuDieuTri"/>
-                <column property="trongSoDienTriLieu"/>
-                <column property="trongSoKeoGian"/>
-                <column property="trongSoTapPhcn"/>
+                <column property="trongSoVatLyTriLieu"/>
                 <column property="trongSoVanDongTriLieu"/>
+                <column property="trongSoKeoNanTriLieu"/>
+                <column property="trongSoXoaBopTriLieu"/>
+                <column property="trongSoKhamLuongGia"/>
                 <column property="updatedAt"/>
                 <column property="updatedById"/>
             </columns>

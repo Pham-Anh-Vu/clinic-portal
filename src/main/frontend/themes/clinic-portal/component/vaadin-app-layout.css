@@ -1,6 +1,6 @@
 
 vaadin-app-layout {
-    --_vaadin-app-layout-drawer-width: var(--vaadin-app-layout-drawer-width, 20rem);
-    --_vaadin-app-layout-drawer-offset-size: 20rem;
+    --_vaadin-app-layout-drawer-width: var(--vaadin-app-layout-drawer-width, 15rem);
+    --_vaadin-app-layout-drawer-offset-size: var(--vaadin-app-layout-drawer-width, 15rem);
     --_vaadin-app-layout-navbar-offset-size: 3.5rem !important;
 }

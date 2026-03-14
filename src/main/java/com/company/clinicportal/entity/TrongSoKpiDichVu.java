@@ -26,17 +26,20 @@ public class TrongSoKpiDichVu {
     @Column(name = "id_phieu_dieu_tri")
     private Long idPhieuDieuTri;
 
-    @Column(name = "trong_so_dien_tri_lieu")
-    private Double trongSoDienTriLieu;
+    @Column(name = "trong_so_vat_ly_tri_lieu")
+    private Double trongSoVatLyTriLieu;
 
-    @Column(name = "trong_so_keo_gian")
-    private Double trongSoKeoGian;
+    @Column(name = "trong_so_keo_nan_tri_lieu")
+    private Double trongSoKeoNanTriLieu;
 
-    @Column(name = "trong_so_tap_phcn")
-    private Double trongSoTapPhcn;
+    @Column(name = "trong_so_xoa_bop_tri_lieu")
+    private Double trongSoXoaBopTriLieu;
 
     @Column(name = "trong_so_van_dong_tri_lieu")
     private Double trongSoVanDongTriLieu;
+
+    @Column(name = "trong_so_kham_luong_gia")
+    private Double trongSoKhamLuongGia;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"updatedAt\"")
@@ -69,28 +72,36 @@ public class TrongSoKpiDichVu {
         this.trongSoVanDongTriLieu = trongSoVanDongTriLieu;
     }
 
-    public Double getTrongSoTapPhcn() {
-        return trongSoTapPhcn;
+    public Double getTrongSoKhamLuongGia() {
+        return trongSoKhamLuongGia;
     }
 
-    public void setTrongSoTapPhcn(Double trongSoTapPhcn) {
-        this.trongSoTapPhcn = trongSoTapPhcn;
+    public void setTrongSoKhamLuongGia(Double trongSoKhamLuongGia) {
+        this.trongSoKhamLuongGia = trongSoKhamLuongGia;
     }
 
-    public Double getTrongSoKeoGian() {
-        return trongSoKeoGian;
+    public Double getTrongSoXoaBopTriLieu() {
+        return trongSoXoaBopTriLieu;
     }
 
-    public void setTrongSoKeoGian(Double trongSoKeoGian) {
-        this.trongSoKeoGian = trongSoKeoGian;
+    public void setTrongSoXoaBopTriLieu(Double trongSoXoaBopTriLieu) {
+        this.trongSoXoaBopTriLieu = trongSoXoaBopTriLieu;
     }
 
-    public Double getTrongSoDienTriLieu() {
-        return trongSoDienTriLieu;
+    public Double getTrongSoKeoNanTriLieu() {
+        return trongSoKeoNanTriLieu;
     }
 
-    public void setTrongSoDienTriLieu(Double trongSoDienTriLieu) {
-        this.trongSoDienTriLieu = trongSoDienTriLieu;
+    public void setTrongSoKeoNanTriLieu(Double trongSoKeoNanTriLieu) {
+        this.trongSoKeoNanTriLieu = trongSoKeoNanTriLieu;
+    }
+
+    public Double getTrongSoVatLyTriLieu() {
+        return trongSoVatLyTriLieu;
+    }
+
+    public void setTrongSoVatLyTriLieu(Double trongSoVatLyTriLieu) {
+        this.trongSoVatLyTriLieu = trongSoVatLyTriLieu;
     }
 
     public Long getIdPhieuDieuTri() {
