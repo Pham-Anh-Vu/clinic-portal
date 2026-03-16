@@ -509,4 +509,29 @@ public class ChiTietDieuTri {
         this.id = id;
     }
 
+    @PrePersist
+    private void onCreateAuditFields() {
+        Date now = new Date();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
+        if (createdById == null) {
+            createdById = 0L;
+        }
+        if (updatedById == null) {
+            updatedById = createdById;
+        }
+    }
+
+    @PreUpdate
+    private void onUpdateAuditFields() {
+        updatedAt = new Date();
+        if (updatedById == null) {
+            updatedById = createdById != null ? createdById : 0L;
+        }
+    }
+
 }

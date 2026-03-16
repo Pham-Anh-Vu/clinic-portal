@@ -99,10 +99,6 @@
                             <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
                             <column property="idNhanSuStaging.hoTen" header="KTV thực hiện"/>
                             <column property="idNhanSu2Staging.hoTen" header="KTV thực hiện 2"/>
-                            <column property="ngayThucHien"/>
-                            <column property="gioBatDau"/>
-                            <column property="gioKetThuc"/>
-                            <column property="ca"/>
                         </columns>
                     </dataGrid>
                     <simplePagination id="pagination" dataLoader="buoiDieuTrisDl" alignSelf="END"/>

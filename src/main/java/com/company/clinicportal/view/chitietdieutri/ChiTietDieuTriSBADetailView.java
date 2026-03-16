@@ -10,6 +10,7 @@ import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import io.jmix.core.DataManager;
@@ -132,6 +133,11 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         recalculatePaymentFields();
     }
 
+    @Subscribe(id = "lichSuThanhToansDl", target = Target.DATA_LOADER)
+    public void onLichSuThanhToansDlPostLoad(final CollectionLoader.PostLoadEvent<LichSuThanhToan> event) {
+        recalculatePaymentFields();
+    }
+
     @Subscribe("chiTietDichVusDataGrid.create")
     public void onChiTietDichVusDataGridCreate(final ActionPerformedEvent event) {
         DialogWindow<ChiTietDichVuDetailView> window =
@@ -185,14 +191,13 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         window.open();
     }
 
-
     @Subscribe("khuyenMaiField")
-    public void onKhuyenMaiFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<Double>, Double> event) {
+    public void onKhuyenMaiFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<TypedTextField<Double>, Double> event) {
         recalculatePaymentFields();
     }
 
-    @Subscribe(id = "lichSuThanhToansDc", target = Target.DATA_CONTAINER)
-    public void onLichSuThanhToansDcCollectionChange(final CollectionContainer.CollectionChangeEvent<LichSuThanhToan> event) {
+    @Subscribe("khuyenMaiField")
+    public void onKhuyenMaiFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<Double>, Double> event) {
         recalculatePaymentFields();
     }
 

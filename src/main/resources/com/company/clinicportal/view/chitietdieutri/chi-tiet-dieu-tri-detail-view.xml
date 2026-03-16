@@ -20,10 +20,17 @@
             <loader id="lichSuThanhToansDl" readOnly="true">
                 <query>
                     <![CDATA[select e from LichSuThanhToan e
-                              where e.idChiTietDieuTri = :idChiTietDieuTri]]>
+                              where e.idChiTietDieuTri = :idChiTietDieuTri
+                              order by e.thanhToanLuc desc, e.id desc]]>
                 </query>
             </loader>
-            <fetchPlan extends="_base"/>
+            <fetchPlan>
+                <property name="thanhToanLuc"/>
+                <property name="daThanhToan"/>
+                <property name="ghiChu"/>
+                <property name="hoTenNguoiNopTien"/>
+                <property name="soDienThoai"/>
+            </fetchPlan>
         </collection>
     </data>
     <facets>
@@ -147,7 +154,7 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="2"/>
                         </responsiveSteps>
-                        <textField id="tinhKpiField" property="tinhKpi" colspan="2" required="true"/>
+                        <textField id="trongSoKPIField" property="trongSoKpi" colspan="2" required="true"/>
                         <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
                         <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
                         <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>

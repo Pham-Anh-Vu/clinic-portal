@@ -21,10 +21,17 @@
             <loader id="lichSuThanhToansDl" readOnly="true">
                 <query>
                     <![CDATA[select e from LichSuThanhToan e
-                              where e.idChiTietDieuTri = :idChiTietDieuTri]]>
+                              where e.idChiTietDieuTri = :idChiTietDieuTri
+                              order by e.thanhToanLuc desc, e.id desc]]>
                 </query>
             </loader>
-            <fetchPlan extends="_base"/>
+            <fetchPlan>
+                <property name="thanhToanLuc"/>
+                <property name="daThanhToan"/>
+                <property name="ghiChu"/>
+                <property name="hoTenNguoiNopTien"/>
+                <property name="soDienThoai"/>
+            </fetchPlan>
         </collection>
     </data>
     <facets>
@@ -68,6 +75,34 @@
                                 <textField id="sdtNguoiThanField" property="idBenhNhan.sdtNguoiThan" readOnly="true"/>
                                 <textField id="quanHeVoiBenhNhanField" property="idBenhNhan.quanHeVoiBenhNhan" readOnly="true"/>
                                 <select id="nguonBenhNhanField" property="idBenhNhan.nguonBenhNhan" readOnly="true"/>
+                            </formLayout>
+                        </vbox>
+                    </vbox>
+
+                    <vbox width="100%" alignItems="START" padding="false"
+                          spacing="false" classNames="tab-5-grid">
+                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                              width="100%">
+                            <hbox classNames="buttons-panel" width="100%">
+                                <div width="100%" classNames="all-control-auto-pay">
+                                    <div classNames="title-grid">
+                                        <span text="KPI &amp; TRỌNG SỐ"/>
+                                    </div>
+                                </div>
+                            </hbox>
+                        </vbox>
+                        <vbox padding="false" classNames="grid-data">
+                            <formLayout dataContainer="chiTietDieuTriDc"
+                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                                <responsiveSteps>
+                                    <responsiveStep minWidth="0" columns="2"/>
+                                </responsiveSteps>
+                                <textField id="trongSoKPIField" property="trongSoKpi" colspan="2"/>
+                                <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
+                                <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
+                                <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>
+                                <textField id="trongSoXoaBopTriLieuField" property="trongSoXoaBopTriLieu"/>
+                                <textField id="trongSoKhamLuongGiaField" property="trongSoKhamLuongGia"/>
                             </formLayout>
                         </vbox>
                     </vbox>
@@ -156,7 +191,7 @@
                             <hbox classNames="buttons-panel" width="100%">
                                 <div width="100%" classNames="all-control-auto-pay">
                                     <div classNames="title-grid">
-                                        <span text="CHỈ ĐỊNH"/>
+                                        <span text="CHỈ ĐỊNH DỊCH VỤ"/>
                                     </div>
                                     <div classNames="function-flex-end">
                                         <button action="chiTietDichVusDataGrid.create" text="Thêm dịch vụ"
@@ -277,34 +312,6 @@
                                 </dataGrid>
 
 
-                            </formLayout>
-                        </vbox>
-                    </vbox>
-
-                    <vbox width="100%" alignItems="START" padding="false"
-                          spacing="false" classNames="tab-5-grid">
-                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
-                              width="100%">
-                            <hbox classNames="buttons-panel" width="100%">
-                                <div width="100%" classNames="all-control-auto-pay">
-                                    <div classNames="title-grid">
-                                        <span text="KPI &amp; TRỌNG SỐ"/>
-                                    </div>
-                                </div>
-                            </hbox>
-                        </vbox>
-                        <vbox padding="false" classNames="grid-data">
-                            <formLayout dataContainer="chiTietDieuTriDc"
-                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
-                                <responsiveSteps>
-                                    <responsiveStep minWidth="0" columns="2"/>
-                                </responsiveSteps>
-                                <textField id="trongSoKPIField" property="trongSoKpi" colspan="2"/>
-                                <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
-                                <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
-                                <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>
-                                <textField id="trongSoXoaBopTriLieuField" property="trongSoXoaBopTriLieu"/>
-                                <textField id="trongSoKhamLuongGiaField" property="trongSoKhamLuongGia"/>
                             </formLayout>
                         </vbox>
                     </vbox>

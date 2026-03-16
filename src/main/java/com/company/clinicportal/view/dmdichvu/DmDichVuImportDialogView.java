@@ -4,10 +4,16 @@ import com.company.clinicportal.entity.DmDichVu;
 import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.service.DmDichVuImportService;
 import com.company.clinicportal.service.DmDichVuPreviewItem;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinSession;
 import io.jmix.core.Messages;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
@@ -21,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ViewController("DmDichVuImportDialog")
 @ViewDescriptor("dm-dich-vu-import-dialog-view.xml")
@@ -62,6 +69,7 @@ public class DmDichVuImportDialogView extends StandardView {
         upload.setReceiver(memoryBuffer);
         upload.setAcceptedFileTypes(".xlsx", ".xls");
         upload.setMaxFileSize(10485760); // 10MB
+        upload.addClassName("dmdv-inline-upload");
         
         upload.addSucceededListener(e -> {
             fileUploaded = true;
@@ -79,12 +87,14 @@ public class DmDichVuImportDialogView extends StandardView {
                 
                 // Parse preview
                 ByteArrayInputStream bais = new ByteArrayInputStream(fileBytes);
-                previewItems = importService.parsePreview(bais);
+                List<DmDichVuPreviewItem> rawPreviewItems = importService.parsePreview(bais);
+                previewItems = rawPreviewItems.stream()
+                        .filter(item -> !item.isHasError())
+                        .collect(Collectors.toList());
                 previewDc.setItems(previewItems);
                 
                 // Enable import button if there are valid items
-                long validCount = previewItems.stream().filter(item -> !item.isHasError()).count();
-                importButton.setEnabled(validCount > 0);
+                importButton.setEnabled(!previewItems.isEmpty());
                 
             } catch (Exception ex) {
                 notifications.create("Lỗi khi đọc file: " + ex.getMessage())
@@ -171,25 +181,10 @@ public class DmDichVuImportDialogView extends StandardView {
             InputStream inputStream = new ByteArrayInputStream(fileBytes);
             DmDichVuImportService.ImportResult result = importService.importFromExcel(inputStream);
 
-            if (result.hasErrors()) {
-                StringBuilder errorMessage = new StringBuilder("Import hoàn tất với một số lỗi:\n");
-                errorMessage.append("Đã import thành công: ").append(result.getSuccessCount()).append(" bản ghi.\n\n");
-                if (!result.getErrors().isEmpty()) {
-                    errorMessage.append("Các lỗi:\n");
-                    for (String error : result.getErrors()) {
-                        errorMessage.append("- ").append(error).append("\n");
-                    }
-                }
-
-                notifications.create(errorMessage.toString())
-                        .withType(Notifications.Type.WARNING)
-                        .withDuration(10000)
-                        .show();
-            } else {
-                notifications.create(String.format("Import thành công! Đã import %d bản ghi.", result.getSuccessCount()))
-                        .withType(Notifications.Type.SUCCESS)
-                        .show();
-            }
+            notifications.create(String.format("Import thành công! Đã import %d bản ghi.", result.getSuccessCount()))
+                    .withThemeVariant(NotificationVariant.LUMO_SUCCESS)
+                    .withPosition(Notification.Position.TOP_END)
+                    .show();
 
             // Close dialog and refresh parent view
             close(StandardOutcome.CLOSE);
@@ -204,6 +199,30 @@ public class DmDichVuImportDialogView extends StandardView {
     @Subscribe("cancelButton")
     public void onCancelButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
         close(StandardOutcome.CLOSE);
+    }
+
+    @Subscribe("downloadTemplateButton")
+    public void onDownloadTemplateButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+        try (InputStream templateInputStream = getClass().getResourceAsStream("/reports/dmDichVu.xlsx")) {
+            if (templateInputStream == null) {
+                notifications.create("Không tìm thấy file mẫu dmDichVu.xlsx")
+                        .withType(Notifications.Type.ERROR)
+                        .show();
+                return;
+            }
+
+            byte[] templateBytes = templateInputStream.readAllBytes();
+            StreamResource streamResource = new StreamResource("dmDichVu.xlsx",
+                    () -> new ByteArrayInputStream(templateBytes));
+            StreamRegistration registration = VaadinSession.getCurrent()
+                    .getResourceRegistry()
+                    .registerResource(streamResource);
+            UI.getCurrent().getPage().open(registration.getResourceUri().toString());
+        } catch (Exception ex) {
+            notifications.create("Không thể tải file mẫu: " + ex.getMessage())
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+        }
     }
 }
 

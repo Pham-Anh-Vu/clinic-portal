@@ -492,3 +492,23 @@ vaadin-big-decimal-field input[type="text"] {
     font-size: 14px;
     color: #333;
 }
+
+/* Import dialog: keep upload button and drop text in one row */
+vaadin-upload.dmdv-inline-upload {
+    width: 28rem;
+    max-width: 100%;
+}
+
+vaadin-upload.dmdv-inline-upload::part(drop-label) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: visible;
+}
+
+vaadin-upload.dmdv-inline-upload::part(primary-buttons) {
+    display: inline-flex;
+    margin: 0;
+    flex-shrink: 0;
+}

@@ -137,8 +137,8 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
             editButton.addClickListener(e -> {
                 Dialog dialog = new Dialog();
                 dialog.setHeaderTitle("Sửa giờ hẹn");
-                dialog.setHeight("100%");
-                dialog.setWidth("80%");
+                dialog.setHeight("50%");
+                dialog.setWidth("50%");
 
                 // Tạo layout
                 VerticalLayout layout = new VerticalLayout();
@@ -181,9 +181,13 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
                 btnDong.setText("Đóng");
                 btnDong.addClickListener(eDong -> dialog.close());
 
+                Button btnQuayLai = uiComponents.create(Button.class);
+                btnQuayLai.setText("Quay lại");
+                btnQuayLai.addClickListener(eQuayLai -> dialog.close());
+
                 // Tạo layout ngang cho 2 nút
                 HorizontalLayout buttonsLayout = uiComponents.create(HorizontalLayout.class);
-                buttonsLayout.add(button, btnDong);
+                buttonsLayout.add(button, btnQuayLai, btnDong);
                 buttonsLayout.setWidthFull();
                 buttonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // canh phải (hoặc CENTER nếu muốn giữa)
                 buttonsLayout.setSpacing(true);
@@ -196,7 +200,7 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
 
             // Nút Chi tiết
             JmixButton deleteButton = uiComponents.create(JmixButton.class);
-            deleteButton.setText("Chi Tiết");
+            deleteButton.setText("Chi tiết");
             deleteButton.addClickListener(e -> {
                 DialogWindow<DanhSachDichVuTrong1BListView> windows = dialogWindows.view(this, DanhSachDichVuTrong1BListView.class).build();
                 windows.getView().setIdBenhNhan(buoiDieuTri.getIdBenhNhan());

@@ -39,6 +39,7 @@
     <actions>
         <action id="selectAction" type="lookup_select"/>
         <action id="discardAction" type="lookup_discard"/>
+        <action id="closeAction" type="view_close"/>
     </actions>
     <layout>
         <genericFilter id="genericFilter"
@@ -68,6 +69,9 @@
             </columns>
         </dataGrid>
         <simplePagination id="pagination" dataLoader="buoiDieuTrisDl" alignSelf="END"/>
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+            <button id="closeButton" action="closeAction" text="Quay lại"/>
+        </hbox>
 
         <hbox id="lookupActions" visible="false">
             <button id="selectButton" action="selectAction"/>
