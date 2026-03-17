@@ -10,6 +10,9 @@
                 <property name="idPhieuDieuTri" fetchPlan="_base"/>
                 <property name="chiTietDichVu" fetchPlan="_base"/>
                 <property name="idBenhNhan" fetchPlan="_base">
+                    <property name="trangThaiKhamBenh"/>
+                    <property name="ngayKhamBenh"/>
+                    <property name="thoiGianTaiKham"/>
                 </property>
                 <property name="idNhanSu" fetchPlan="_base"/>
             </fetchPlan>

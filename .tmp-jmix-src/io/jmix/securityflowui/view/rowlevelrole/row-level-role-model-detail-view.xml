@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright 2022 Haulmont.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://rowLevelRoleModelDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="roleModelDc"
+                  class="io.jmix.security.model.RowLevelRoleModel">
+            <collection id="rowLevelPoliciesDc" property="rowLevelPolicies"/>
+        </instance>
+        <collection id="childRolesDc" class="io.jmix.security.model.RowLevelRoleModel"/>
+    </data>
+    <facets>
+        <settings auto="true"/>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout alignItems="STRETCH"
+            padding="false" spacing="false"
+            expand="contentBox">
+        <vbox id="contentBox" classNames="overflow-auto" expand="tabSheet">
+            <formLayout id="form" dataContainer="roleModelDc">
+                <textField id="nameField" property="name"/>
+                <textField id="codeField" property="code" readOnly="true"/>
+                <textArea id="descriptionField" property="description" height="9.5em"/>
+                <textField id="sourceField" property="source" readOnly="true"/>
+            </formLayout>
+
+            <tabSheet id="tabSheet" width="100%" minHeight="30em">
+                <tab id="rowLevelPoliciesTab"
+                     label="msg://io.jmix.security.model/RowLevelRoleModel.rowLevelPolicies">
+                    <vbox id="rowLevelPoliciesWrapper" padding="false" height="100%">
+                        <hbox id="rowLevelPoliciesButtonsPanel" classNames="buttons-panel">
+                            <button action="rowLevelPoliciesTable.create"/>
+                            <button action="rowLevelPoliciesTable.edit"/>
+                            <button action="rowLevelPoliciesTable.read"/>
+                            <button action="rowLevelPoliciesTable.remove"/>
+                        </hbox>
+                        <dataGrid id="rowLevelPoliciesTable"
+                                  dataContainer="rowLevelPoliciesDc"
+                                  selectionMode="MULTI"
+                                  columnReorderingAllowed="true"
+                                  width="100%">
+                            <actions>
+                                <action id="create" type="list_create">
+                                    <properties>
+                                        <property name="openMode" value="DIALOG"/>
+                                    </properties>
+                                </action>
+                                <action id="edit" type="list_edit">
+                                    <properties>
+                                        <property name="openMode" value="DIALOG"/>
+                                    </properties>
+                                </action>
+                                <action id="read" type="list_read">
+                                    <properties>
+                                        <property name="openMode" value="DIALOG"/>
+                                    </properties>
+                                </action>
+                                <action id="remove" type="list_remove"/>
+                            </actions>
+                            <columns resizable="true">
+                                <column property="type"/>
+                                <column property="action"/>
+                                <column property="entityName"/>
+                                <column property="whereClause" flexGrow="2"/>
+                                <column property="joinClause" flexGrow="2"/>
+                            </columns>
+                        </dataGrid>
+                    </vbox>
+                </tab>
+                <tab id="childRolesTab"
+                     label="msg://io.jmix.security.model/RowLevelRoleModel.childRoles">
+                    <vbox id="childRolesWrapper" padding="false" height="100%">
+                        <hbox id="childRolesButtonsPanel" classNames="buttons-panel">
+                            <button action="childRolesTable.add"/>
+                            <button action="childRolesTable.remove"/>
+                        </hbox>
+                        <dataGrid id="childRolesTable"
+                                  dataContainer="childRolesDc"
+                                  selectionMode="MULTI"
+                                  columnReorderingAllowed="true"
+                                  width="100%">
+                            <actions>
+                                <action id="add" type="list_add"/>
+                                <action id="remove" type="list_remove">
+                                    <properties>
+                                        <property name="confirmation" value="false"/>
+                                    </properties>
+                                </action>
+                            </actions>
+                            <columns resizable="true">
+                                <column property="name" flexGrow="2"/>
+                                <column property="code"/>
+                                <column property="source"/>
+                            </columns>
+                        </dataGrid>
+                    </vbox>
+                </tab>
+            </tabSheet>
+        </vbox>
+
+        <hbox id="detailActions"
+              classNames="px-m py-s bg-contrast-5">
+            <button id="saveAndCloseBtn" action="saveAction"/>
+            <button id="closeBtn" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

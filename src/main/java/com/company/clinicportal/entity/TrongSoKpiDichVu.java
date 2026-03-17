@@ -29,11 +29,20 @@ public class TrongSoKpiDichVu {
     @Column(name = "trong_so_vat_ly_tri_lieu")
     private Double trongSoVatLyTriLieu;
 
+    @Column(name = "trong_so_dien_tri_lieu")
+    private Double trongSoDienTriLieu;
+
     @Column(name = "trong_so_keo_nan_tri_lieu")
     private Double trongSoKeoNanTriLieu;
 
+    @Column(name = "trong_so_keo_gian")
+    private Double trongSoKeoGian;
+
     @Column(name = "trong_so_xoa_bop_tri_lieu")
     private Double trongSoXoaBopTriLieu;
+
+    @Column(name = "trong_so_tap_phcn")
+    private Double trongSoTapPhcn;
 
     @Column(name = "trong_so_van_dong_tri_lieu")
     private Double trongSoVanDongTriLieu;
@@ -80,6 +89,14 @@ public class TrongSoKpiDichVu {
         this.trongSoKhamLuongGia = trongSoKhamLuongGia;
     }
 
+    public Double getTrongSoTapPhcn() {
+        return trongSoTapPhcn;
+    }
+
+    public void setTrongSoTapPhcn(Double trongSoTapPhcn) {
+        this.trongSoTapPhcn = trongSoTapPhcn;
+    }
+
     public Double getTrongSoXoaBopTriLieu() {
         return trongSoXoaBopTriLieu;
     }
@@ -96,12 +113,28 @@ public class TrongSoKpiDichVu {
         this.trongSoKeoNanTriLieu = trongSoKeoNanTriLieu;
     }
 
+    public Double getTrongSoKeoGian() {
+        return trongSoKeoGian;
+    }
+
+    public void setTrongSoKeoGian(Double trongSoKeoGian) {
+        this.trongSoKeoGian = trongSoKeoGian;
+    }
+
     public Double getTrongSoVatLyTriLieu() {
         return trongSoVatLyTriLieu;
     }
 
     public void setTrongSoVatLyTriLieu(Double trongSoVatLyTriLieu) {
         this.trongSoVatLyTriLieu = trongSoVatLyTriLieu;
+    }
+
+    public Double getTrongSoDienTriLieu() {
+        return trongSoDienTriLieu;
+    }
+
+    public void setTrongSoDienTriLieu(Double trongSoDienTriLieu) {
+        this.trongSoDienTriLieu = trongSoDienTriLieu;
     }
 
     public Long getIdPhieuDieuTri() {

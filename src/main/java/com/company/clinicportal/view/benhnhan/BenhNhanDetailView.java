@@ -229,25 +229,18 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
 
             benhNhanField.setText("Bệnh nhân: " + getEditedEntity().getInstanceName(metadataTools));
 
-            Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
-                    .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
-                    .parameter("bn", getEditedEntity())
-                    .maxResults(1)
-                    .optional();
             Span span = uiComponents.create(Span.class);
             Span spanTG = uiComponents.create(Span.class);
 
-            if (phieuDieuTri.isPresent()) {
-                if (phieuDieuTri.get().getTrangThai() != null) {
-                    var trangThai = phieuDieuTri.get().getTrangThai();
-                    span.setText(messages.getMessage(trangThai));
-                    span.addClassName(trangThai.toString()); // gán class CSS (VD: DANG_DT, DA_DT, KHONG_DT)
-                }
+            if (getEditedEntity().getTrangThaiKhamBenh() != null) {
+                var trangThai = getEditedEntity().getTrangThaiKhamBenh();
+                span.setText(messages.getMessage(trangThai));
+                span.addClassName(trangThai.toString()); // gán class CSS (VD: DANG_DT, DA_DT, KHONG_DT)
+            }
 
-                if (phieuDieuTri.get().getThoiGianTaiKham() != null) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    spanTG.setText(sdf.format(phieuDieuTri.get().getThoiGianTaiKham()));
-                }
+            if (getEditedEntity().getThoiGianTaiKham() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                spanTG.setText(sdf.format(getEditedEntity().getThoiGianTaiKham()));
             }
 
             Span label = uiComponents.create(Span.class);

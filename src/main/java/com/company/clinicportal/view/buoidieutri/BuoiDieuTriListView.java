@@ -125,6 +125,7 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
         BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
         buoiDieuTri.setIdChiTietDichVu(chiTietDichVu);
         buoiDieuTri.setIdBenhNhan(chiTietDichVu.getIdChiTietPhieuDieuTri().getIdBenhNhan());
+        buoiDieuTri.setIdChiTietDieuTri(chiTietDichVu.getIdChiTietPhieuDieuTri());
         return buoiDieuTri;
     }
 

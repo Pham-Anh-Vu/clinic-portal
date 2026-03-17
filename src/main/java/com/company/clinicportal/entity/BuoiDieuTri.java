@@ -54,6 +54,10 @@ public class BuoiDieuTri {
     @ManyToOne(fetch = FetchType.LAZY)
     private ChiTietDichVu idChiTietDichVu;
 
+    @JoinColumn(name = "ID_CHI_TIET_DIEU_TRI")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ChiTietDieuTri idChiTietDieuTri;
+
     @Column(name = "id_ngay_dieu_tri")
     private Long idNgayDieuTri;
 
@@ -124,6 +128,14 @@ public class BuoiDieuTri {
 
     public ChiTietDichVu getIdChiTietDichVu() {
         return idChiTietDichVu;
+    }
+
+    public ChiTietDieuTri getIdChiTietDieuTri() {
+        return idChiTietDieuTri;
+    }
+
+    public void setIdChiTietDieuTri(ChiTietDieuTri idChiTietDieuTri) {
+        this.idChiTietDieuTri = idChiTietDieuTri;
     }
 
     public Long getUpdatedById() {

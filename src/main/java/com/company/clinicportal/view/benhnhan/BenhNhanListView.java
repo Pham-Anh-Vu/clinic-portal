@@ -3,7 +3,6 @@ package com.company.clinicportal.view.benhnhan;
 import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.ChiTietDieuTri;
-import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.view.buoidieutri.ThuThuatDetailView;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.main.MainView;
@@ -29,7 +28,6 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Optional;
 
 
@@ -65,18 +63,11 @@ public class BenhNhanListView extends StandardListView<BenhNhan> {
         benhNhansDataGrid.addComponentColumn(lh -> {
                     if (lh == null) return uiComponents.create(Span.class);
 
-                    Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
-                            .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
-                            .parameter("bn", lh)
-                            .maxResults(1)
-                            .optional();
-
                     Span span = uiComponents.create(Span.class);
-
-                    if (phieuDieuTri.isPresent() && phieuDieuTri.get().getTrangThai() != null) {
-                        var trangThai = phieuDieuTri.get().getTrangThai(); // Enum hoặc String
+                    if (lh.getTrangThaiKhamBenh() != null) {
+                        var trangThai = lh.getTrangThaiKhamBenh();
                         span.setText(messages.getMessage(trangThai));
-                        span.addClassName(trangThai.toString()); // Gán class CSS nếu muốn
+                        span.addClassName(trangThai.toString());
                     }
 
                     return span;
@@ -86,16 +77,10 @@ public class BenhNhanListView extends StandardListView<BenhNhan> {
 
         benhNhansDataGrid.addColumn(lh -> {
                     if (lh == null) return uiComponents.create(Span.class);
-
-                    Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
-                            .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
-                            .parameter("bn", lh)
-                            .maxResults(1)
-                            .optional();
-                    if(phieuDieuTri.isEmpty() || phieuDieuTri.get().getThoiGianTaiKham() == null) return "";
+                    if (lh.getThoiGianTaiKham() == null) return "";
 
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    return sdf.format(phieuDieuTri.get().getThoiGianTaiKham());
+                    return sdf.format(lh.getThoiGianTaiKham());
                 })
                 .setHeader("Thời gian tái khám")
                 .setAutoWidth(true);

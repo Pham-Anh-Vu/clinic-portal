@@ -5,11 +5,13 @@ import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.LichSuThanhToan;
 import com.company.clinicportal.entity.BuoiDieuTri;
+import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
+import com.company.clinicportal.service.TinhKpiChiTietService;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -36,6 +38,10 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Route(value = "chi-tiet-dieu-tri-sbas/:id", layout = MainView.class)
 @ViewController(id = "ChiTietDieuTriSBA.detail")
@@ -76,6 +82,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionPropertyContainer<ChiTietDichVu> chiTietDichVuDc;
     @ViewComponent
     private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
+    @Autowired
+    private TinhKpiChiTietService tinhKpiChiTietService;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -168,6 +176,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                     for (int i = 0; i < soLuong; i++) {
                         BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
                         buoiDieuTri.setIdChiTietDichVu(persisted);
+                        buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
                         buoiDieuTri.setIdBenhNhan(persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan());
 
                         Calendar ngayThucHienCal = Calendar.getInstance();
@@ -181,6 +190,9 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
                     if (!saveContext.getEntitiesToSave().isEmpty()) {
                         dataManager.save(saveContext);
+                        if (getEditedEntity().getId() != null) {
+                            tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
+                        }
                     }
                 }
 
@@ -199,6 +211,14 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     @Subscribe("khuyenMaiField")
     public void onKhuyenMaiFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<Double>, Double> event) {
         recalculatePaymentFields();
+    }
+
+    @Subscribe
+    public void onValidation(final ValidationEvent event) {
+        String validationError = buildTrongSoValidationError();
+        if (validationError != null) {
+            event.getErrors().add(validationError);
+        }
     }
 
     private void recalculatePaymentFields() {
@@ -249,10 +269,91 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         ngayThanhToanField.setTypedValue(ngayThanhToanCuoi);
     }
 
+    private String buildTrongSoValidationError() {
+        Map<NhomDichVu, BigDecimal> trongSoTheoNhom = getTrongSoTheoNhom();
+        Set<NhomDichVu> nhomDuocChiDinh = getNhomDichVuDuocChiDinh();
+
+        Set<String> nhomKhongHopLe = new LinkedHashSet<>();
+        for (Map.Entry<NhomDichVu, BigDecimal> entry : trongSoTheoNhom.entrySet()) {
+            if (entry.getValue().compareTo(BigDecimal.ZERO) > 0
+                    && !nhomDuocChiDinh.contains(entry.getKey())) {
+                nhomKhongHopLe.add(getTenNhomDichVu(entry.getKey()));
+            }
+        }
+        if (!nhomKhongHopLe.isEmpty()) {
+            return "Trọng số chỉ được nhập cho nhóm đã có trong phần chỉ định dịch vụ. "
+                    + "Nhóm chưa được chỉ định: " + String.join(", ", nhomKhongHopLe) + ".";
+        }
+
+        BigDecimal tongTrongSo = BigDecimal.ZERO;
+        for (BigDecimal value : trongSoTheoNhom.values()) {
+            tongTrongSo = tongTrongSo.add(value);
+        }
+
+        BigDecimal hundred = BigDecimal.valueOf(100);
+        int compareResult = tongTrongSo.compareTo(hundred);
+        if (compareResult > 0) {
+            BigDecimal vuot = tongTrongSo.subtract(hundred);
+            return "Tổng trọng số đang vượt " + formatPercent(vuot)
+                    + "% (hiện tại " + formatPercent(tongTrongSo) + "%). Vui lòng điều chỉnh về 100%.";
+        }
+        if (compareResult < 0) {
+            BigDecimal thieu = hundred.subtract(tongTrongSo);
+            return "Tổng trọng số đang thiếu " + formatPercent(thieu)
+                    + "% (hiện tại " + formatPercent(tongTrongSo) + "%). Vui lòng điều chỉnh về 100%.";
+        }
+        return null;
+    }
+
+    private Map<NhomDichVu, BigDecimal> getTrongSoTheoNhom() {
+        Map<NhomDichVu, BigDecimal> result = new EnumMap<>(NhomDichVu.class);
+        result.put(NhomDichVu.VAT_LY_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoVatLyTriLieu()));
+        result.put(NhomDichVu.VAN_DONG_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoVanDongTriLieu()));
+        result.put(NhomDichVu.KEO_NAN_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoKeoNanTriLieu()));
+        result.put(NhomDichVu.XOA_BOP_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoXoaBopTriLieu()));
+        result.put(NhomDichVu.KHAM_LUONG_GIA, toBigDecimal(getEditedEntity().getTrongSoKhamLuongGia()));
+        return result;
+    }
+
+    private Set<NhomDichVu> getNhomDichVuDuocChiDinh() {
+        Set<NhomDichVu> result = new LinkedHashSet<>();
+        for (ChiTietDichVu item : chiTietDichVuDc.getItems()) {
+            if (item.getIdDichVu() != null && item.getIdDichVu().getNhomDichVu() != null) {
+                result.add(item.getIdDichVu().getNhomDichVu());
+            }
+        }
+        return result;
+    }
+
+    private BigDecimal toBigDecimal(Double value) {
+        return value != null ? BigDecimal.valueOf(value) : BigDecimal.ZERO;
+    }
+
+    private String formatPercent(BigDecimal value) {
+        return value.stripTrailingZeros().toPlainString();
+    }
+
+    private String getTenNhomDichVu(NhomDichVu nhomDichVu) {
+        return switch (nhomDichVu) {
+            case VAT_LY_TRI_LIEU -> "Vật lý trị liệu";
+            case VAN_DONG_TRI_LIEU -> "Vận động trị liệu";
+            case KEO_NAN_TRI_LIEU -> "Kéo nắn trị liệu";
+            case XOA_BOP_TRI_LIEU -> "Xoa bóp trị liệu";
+            case KHAM_LUONG_GIA -> "Khám lượng giá";
+        };
+    }
+
     @Install(to = "lichSuThanhToansDataGrid.create", subject = "newEntitySupplier")
     private LichSuThanhToan lichSuThanhToansDataGridCreateNewEntitySupplier() {
         LichSuThanhToan lichSuThanhToan = metadata.create(LichSuThanhToan.class);
         lichSuThanhToan.setIdChiTietDieuTri(getEditedEntity());
         return lichSuThanhToan;
+    }
+
+    @Subscribe
+    public void onAfterSave(final AfterSaveEvent event) {
+        if (getEditedEntity().getId() != null) {
+            tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
+        }
     }
 }

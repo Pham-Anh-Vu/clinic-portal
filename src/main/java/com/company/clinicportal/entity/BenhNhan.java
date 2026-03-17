@@ -2,6 +2,7 @@ package com.company.clinicportal.entity;
 
 import com.company.clinicportal.enumentity.GioiTinh;
 import com.company.clinicportal.enumentity.NguonBenhNhan;
+import com.company.clinicportal.enumentity.TrangThaiPhieuDT;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
@@ -68,6 +69,17 @@ public class BenhNhan {
     @Column(name = "tuoi")
     private String tuoi;
 
+    @Column(name = "trang_thai_kham_benh")
+    private String trangThaiKhamBenh;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "ngay_kham_benh")
+    private Date ngayKhamBenh;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "thoi_gian_tai_kham")
+    private Date thoiGianTaiKham;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"updatedAt\"")
     private Date updatedAt;
@@ -109,6 +121,30 @@ public class BenhNhan {
 
     public void setTuoi(String tuoi) {
         this.tuoi = tuoi;
+    }
+
+    public TrangThaiPhieuDT getTrangThaiKhamBenh() {
+        return trangThaiKhamBenh == null ? null : TrangThaiPhieuDT.fromId(trangThaiKhamBenh);
+    }
+
+    public void setTrangThaiKhamBenh(TrangThaiPhieuDT trangThaiKhamBenh) {
+        this.trangThaiKhamBenh = trangThaiKhamBenh == null ? null : trangThaiKhamBenh.getId();
+    }
+
+    public Date getNgayKhamBenh() {
+        return ngayKhamBenh;
+    }
+
+    public void setNgayKhamBenh(Date ngayKhamBenh) {
+        this.ngayKhamBenh = ngayKhamBenh;
+    }
+
+    public Date getThoiGianTaiKham() {
+        return thoiGianTaiKham;
+    }
+
+    public void setThoiGianTaiKham(Date thoiGianTaiKham) {
+        this.thoiGianTaiKham = thoiGianTaiKham;
     }
 
     public String getSdtNguoiThan() {

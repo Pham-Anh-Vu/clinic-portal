@@ -1,7 +1,6 @@
 package com.company.clinicportal.view.buoidieutri;
 
 import com.company.clinicportal.entity.BuoiDieuTri;
-import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
@@ -14,7 +13,6 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.Optional;
 
 
 @Route(value = "lich-dieu-tris", layout = MainView.class)
@@ -28,8 +26,6 @@ public class LichDieuTriListView extends StandardListView<BuoiDieuTri> {
     @Autowired
     private UiComponents uiComponents;
     @Autowired
-    private DataManager dataManager;
-    @Autowired
     private Messages messages;
     @ViewComponent
     private CollectionLoader<BuoiDieuTri> buoiDieuTrisDl;
@@ -40,20 +36,11 @@ public class LichDieuTriListView extends StandardListView<BuoiDieuTri> {
                     var bn = lh.getIdBenhNhan();
                     if (bn == null) return uiComponents.create(Span.class);
 
-                    Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
-                            .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
-                            .parameter("bn", bn)
-                            .maxResults(1)
-                            .optional();
-
                     Span span = uiComponents.create(Span.class);
-
-                    if (phieuDieuTri.isPresent()) {
-                        var trangThai = phieuDieuTri.get().getTrangThai(); // Enum hoặc String
-                        if(trangThai != null){
-                            span.setText(messages.getMessage(trangThai));
-                            span.addClassName(trangThai.toString()); // Gán class CSS nếu muốn
-                        }
+                    var trangThai = bn.getTrangThaiKhamBenh();
+                    if (trangThai != null) {
+                        span.setText(messages.getMessage(trangThai));
+                        span.addClassName(trangThai.toString());
                     }
 
                     return span;

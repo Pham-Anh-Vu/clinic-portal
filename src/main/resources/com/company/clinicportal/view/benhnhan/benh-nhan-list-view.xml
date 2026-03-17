@@ -8,6 +8,9 @@
                     class="com.company.clinicportal.entity.BenhNhan">
             <fetchPlan extends="_base">
                 <property name="id"/>
+                <property name="trangThaiKhamBenh"/>
+                <property name="ngayKhamBenh"/>
+                <property name="thoiGianTaiKham"/>
             </fetchPlan>
             <loader id="benhNhansDl" readOnly="true">
                 <query>

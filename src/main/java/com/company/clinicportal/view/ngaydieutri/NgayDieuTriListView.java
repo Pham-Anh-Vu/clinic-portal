@@ -17,9 +17,7 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Date;
-import java.util.Optional;
 
 
 @Route(value = "ngay-dieu-tris", layout = MainView.class)
@@ -56,22 +54,12 @@ public class NgayDieuTriListView extends StandardListView<NgayDieuTri> {
         ngayDieuTrisDataGrid.addColumn(lh -> {
                     var bn = lh.getIdBenhNhan();
                     if (bn == null) return null;
-
-                    Date ngayKham = dataManager.loadValue(
-                                    "select p.ngayKham from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc",
-                                    Date.class
-                            ).parameter("bn", bn)
-                            .maxResults(1)
-                            .optional()
-                            .orElse(null);
-
-                    if (ngayKham == null) {
+                    if (bn.getNgayKhamBenh() == null) {
                         return "";
                     }
 
-                    // Format về dd/MM/yyyy
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    return sdf.format(ngayKham);
+                    return sdf.format(bn.getNgayKhamBenh());
                 })
                 .setHeader("Ngày khám bệnh")
                 .setAutoWidth(true);
@@ -80,18 +68,11 @@ public class NgayDieuTriListView extends StandardListView<NgayDieuTri> {
                     var bn = lh.getIdBenhNhan();
                     if (bn == null) return uiComponents.create(Span.class);
 
-                    Optional<PhieuDieuTri> phieuDieuTri = dataManager.load(PhieuDieuTri.class)
-                            .query("select p from PhieuDieuTri p where p.idBenhNhan = :bn order by p.ngayKham desc")
-                            .parameter("bn", bn)
-                            .maxResults(1)
-                            .optional();
-
                     Span span = uiComponents.create(Span.class);
-
-                    if (phieuDieuTri.isPresent()) {
-                        var trangThai = phieuDieuTri.get().getTrangThai(); // Enum hoặc String
+                    if (bn.getTrangThaiKhamBenh() != null) {
+                        var trangThai = bn.getTrangThaiKhamBenh();
                         span.setText(messages.getMessage(trangThai));
-                        span.addClassName(trangThai.toString()); // Gán class CSS nếu muốn
+                        span.addClassName(trangThai.toString());
                     }
 
                     return span;

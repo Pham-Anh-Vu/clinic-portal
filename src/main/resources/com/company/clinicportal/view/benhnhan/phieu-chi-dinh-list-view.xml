@@ -13,6 +13,9 @@
                 <property name="hoVaTen"/>
                 <property name="ngaySinh"/>
                 <property name="tuoi"/>
+                <property name="trangThaiKhamBenh"/>
+                <property name="ngayKhamBenh"/>
+                <property name="thoiGianTaiKham"/>
             </fetchPlan>
             <loader id="benhNhansDl" readOnly="true">
                 <query>

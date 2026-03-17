@@ -19,28 +19,28 @@
             </loader>
             <fetchPlan extends="_base"/>
         </collection>
-        <collection id="chiTietDichVusDc" class="com.company.clinicportal.entity.ChiTietDichVu">
-            <loader id="chiTietDichVusDl" readOnly="true">
+        <collection id="tinhKpiChiTietsDc" class="com.company.clinicportal.entity.TinhKpiChiTiet">
+            <loader id="tinhKpiChiTietsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from ChiTietDichVu e]]>
+                    <![CDATA[select e from TinhKpiChiTiet e
+                              where e.idNhanSu = :idNhanSu
+                              order by e.ngayThucHien desc, e.id desc]]>
                 </query>
             </loader>
-            <fetchPlan extends="_base"/>
-        </collection>
-        <collection id="buoiDieuTrisDc" class="com.company.clinicportal.entity.BuoiDieuTri">
-            <loader id="buoiDieuTrisDl" readOnly="true">
-                <query>
-                    <![CDATA[select e from BuoiDieuTri e where e.idNhanSuStaging = :idNhanSuStaging ]]>
-                </query>
-            </loader>
-            <fetchPlan extends="_base">
-                <property name="idBenhNhan" fetchPlan="_base"/>
+            <fetchPlan>
+                <property name="caThucHien"/>
+                <property name="ngayThucHien"/>
+                <property name="trongSoKpi"/>
+                <property name="thanhTien"/>
                 <property name="idChiTietDichVu" fetchPlan="_base">
                     <property name="idDichVu" fetchPlan="_base">
                         <property name="tenDichVu"/>
                     </property>
-                    <property name="idChiTietPhieuDieuTri" fetchPlan="_base">
-                        <property name="tenPhieuDieuTri"/>
+                </property>
+                <property name="idChiTietDieuTri" fetchPlan="_base">
+                    <property name="tenPhieuDieuTri"/>
+                    <property name="idBenhNhan" fetchPlan="_base">
+                        <property name="hoVaTen"/>
                     </property>
                 </property>
             </fetchPlan>
@@ -106,28 +106,21 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="2"/>
                         </responsiveSteps>
-                        <dataGrid id="buoiDieuTrisDataGrid" dataContainer="buoiDieuTrisDc" minWidth="100px" width="100%" colspan="2" columnReorderingAllowed="true">
+                        <dataGrid id="tinhKpiChiTietsDataGrid" dataContainer="tinhKpiChiTietsDc" minWidth="100px" width="100%" colspan="2" columnReorderingAllowed="true">
                             <emptyStateComponent>
                                 <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
                                     <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
                                     <h2 text="Chưa có dữ liệu"/>
                                 </vbox>
                             </emptyStateComponent>
-                            <actions>
-                                <action id="create" type="list_create"/>
-                                <action id="edit" type="list_edit"/>
-                                <action id="remove" type="list_remove"/>
-                            </actions>
                             <columns resizable="true">
-                                <column property="trangThai"/>
-                                <column property="idBenhNhan.hoVaTen" header="Họ và tên bệnh nhân"/>
+                                <column property="idChiTietDieuTri.idBenhNhan.hoVaTen" header="Họ và tên bệnh nhân"/>
                                 <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
-                                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.tenPhieuDieuTri"/>
-                                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.trongSoKpi"/>
+                                <column property="idChiTietDieuTri.tenPhieuDieuTri"/>
                                 <column property="ngayThucHien"/>
-                                <column property="gioBatDau"/>
-                                <column property="gioKetThuc"/>
-                                <column property="ca"/>
+                                <column property="caThucHien"/>
+                                <column property="trongSoKpi"/>
+                                <column property="thanhTien"/>
                             </columns>
                         </dataGrid>
                     </formLayout>

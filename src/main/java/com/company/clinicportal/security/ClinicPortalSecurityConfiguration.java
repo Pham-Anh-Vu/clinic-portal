@@ -1,5 +1,7 @@
 package com.company.clinicportal.security;
 
+import io.jmix.securityflowui.util.RoleAssignmentCandidatePredicate;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -32,4 +34,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class ClinicPortalSecurityConfiguration {
 
+    @Bean
+    RoleAssignmentCandidatePredicate roleAssignmentCandidatePredicate() {
+        return RoleAssignmentCandidatePredicate.of((user, role) -> true);
+    }
 }

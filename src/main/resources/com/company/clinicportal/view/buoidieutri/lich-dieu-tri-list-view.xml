@@ -9,6 +9,9 @@
             <fetchPlan extends="_base">
                 <property name="idBenhNhan" fetchPlan="_base">
                     <property name="hoVaTen"/>
+                    <property name="trangThaiKhamBenh"/>
+                    <property name="ngayKhamBenh"/>
+                    <property name="thoiGianTaiKham"/>
                 </property>
                 <property name="idChiTietDichVu" fetchPlan="_base">
                     <property name="idChiTietPhieuDieuTri" fetchPlan="_base">
