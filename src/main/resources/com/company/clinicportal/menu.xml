@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
-    <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar"/>
+    <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar" classNames="bold-menu"/>
     <item view="LichDieuTri.list"
           title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"
-          icon="vaadin:plus-square-o" />
-    <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title" icon="vaadin:user"/>
-
+          icon="vaadin:plus-square-o" classNames="bold-menu"/>
+    <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title" icon="vaadin:user" classNames="bold-menu"/>
 
     <menu id="indication" description="msg://fis.pbcap.finexbackoffice/menu_config.indication.description"
           icon="vaadin:clipboard-text"
@@ -20,6 +19,10 @@
           title="msg://fis.pbcap.finexbackoffice/menu_config.patient.title">
         <item view="BenhNhan.list" title="msg://com.company.clinicportal.view.benhnhan/benhNhanListView.title" icon="vaadin:users"/>
         <item view="SoBenhAn.list" icon="vaadin:book" title="Sổ bệnh án"/>
+    </menu>
+
+    <menu id="system" description="msg://com.company.clinicportal/system" icon="vaadin:cog" title="msg://com.company.clinicportal/system">
+        <item view="User.list" title="msg://com.company.clinicportal/system.createAccount" icon="vaadin:clipboard-user"/>
     </menu>
 
 <!--    <menu id="application" title="msg://com.company.clinicportal/menu.application.title" opened="true" >-->

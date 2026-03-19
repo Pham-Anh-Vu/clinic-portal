@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <style>
+    @page { size: A4; margin: 10mm 10mm 10mm 20mm; }
+    html, body { padding: 0; margin: 0; }
+    body { font-family: Arial, "Times New Roman", Tahoma, sans-serif; font-size: 10pt; color: #000; }
+
+    .row { display: flex; justify-content: space-between; gap: 12px; }
+    .col { flex: 1 1 0; }
+    .center { text-align: center; }
+    .right { text-align: right; }
+    .title { font-weight: 700; font-size: 11pt; }
+    .subtle { font-style: italic; }
+    .mb8 { margin-bottom: 8px; }
+    .mb12 { margin-bottom: 12px; }
+
+    .leader-wrap{ display:inline-flex; align-items:flex-end; width:100%; gap:6px; }
+    .leader{ flex:1 1 auto; border-bottom:1px dotted #000; transform: translateY(-2px); }
+
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { border: 1px solid #000; padding: 4px 6px; vertical-align: top; }
+    th { font-weight: 700; text-align: center; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <div class="row mb8">
+    <div class="col">
+      <div>PHÒNG KHÁM CK PHCN</div>
+      <div style="font-weight:700">NHẬT MINH</div>
+    </div>
+    <div class="col center">
+      <div class="subtle">(Mẫu phiếu số 3)</div>
+      <div class="title">PHIẾU THỰC HIỆN KỸ THUẬT PHỤC HỒI CHỨC NĂNG</div>
+      <div class="leader-wrap"><span>Tờ số</span><span class="leader"></span></div>
+    </div>
+    <div class="col right">
+      <div class="leader-wrap"><span>MS</span><span class="leader"></span></div>
+      <div class="leader-wrap"><span>Số vào viện</span><span class="leader"></span></div>
+    </div>
+  </div>
+
+  <div class="mb8">
+    - Họ tên người bệnh: <b>${BenhNhan.hoVaTen}</b>
+    &nbsp;&nbsp;Năm sinh/Tuổi: <b>${BenhNhan.ngaySinh}</b> (<b>${BenhNhan.tuoi}</b> T)
+    &nbsp;&nbsp;Nam/Nữ: <b>${BenhNhan.gioiTinh}</b>
+  </div>
+  <div class="mb12">
+    - Địa chỉ: <b>${BenhNhan.diaChi}</b>
+  </div>
+  <div class="mb12">
+    - Chẩn đoán: <b>${ChiTietDieuTri.chuanDoan}</b>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 14%;">Ngày giờ</th>
+        <th style="width: 34%;">Mô tả diễn biến bệnh, tật/các vấn đề cần PHCN</th>
+        <th style="width: 20%;">Tên các dịch vụ</th>
+        <th style="width: 10%;">Thời gian (phút)</th>
+        <th style="width: 11%;">Người thực hiện</th>
+        <th style="width: 11%;">BS chỉ định</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${ROWS}
+    </tbody>
+  </table>
+</body>
+</html>
+

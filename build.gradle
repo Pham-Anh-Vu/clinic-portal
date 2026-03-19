@@ -41,7 +41,12 @@ dependencies {
     implementation 'org.apache.poi:poi:5.2.5'
     implementation 'org.apache.poi:poi-ooxml:5.2.5'
     implementation 'org.apache.poi:poi-scratchpad:5.2.5'
+    // PDF preview rendering (PDFBox 3 compatible)
+    implementation 'io.github.openhtmltopdf:openhtmltopdf-pdfbox:1.1.28'
 
+    // DOCX -> HTML conversion for report templates (no LibreOffice)
+    implementation 'org.docx4j:docx4j-core:11.4.11'
+    implementation 'org.docx4j:docx4j-JAXB-ReferenceImpl:11.4.11'
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -50,10 +55,36 @@ dependencies {
     implementation 'org.postgresql:postgresql'
 }
 
+tasks.register('exportWordTemplateToHtml', JavaExec) {
+    group = 'reporting'
+    description = 'Convert Word .doc template to UTF-8 HTML'
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.company.clinicportal.tools.WordToHtmlTool'
+
+    def inputDoc = file('src/main/resources/reports/29. Benh an ngoai tru PHCN-in.doc')
+    def outputHtml = file('src/main/resources/reports/29. Benh an ngoai tru PHCN-in.html')
+
+    args(inputDoc.absolutePath, outputHtml.absolutePath)
+}
+
+tasks.register('exportToDieuTriTemplateToHtml', JavaExec) {
+    group = 'reporting'
+    description = 'Convert To Dieu Tri .docx template to UTF-8 HTML'
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.company.clinicportal.tools.DocxToHtmlTool'
+}
+
 configurations.implementation {
     exclude group: 'com.vaadin', module: 'hilla'
     exclude group: 'com.vaadin', module: 'hilla-dev'
     exclude group: 'com.vaadin', module: 'copilot'
+}
+
+// Jmix BOM brings PDFBox 3.x; replace old OpenHTMLtoPDF (PDFBox 2.x) with PDFBox 3 compatible artifacts
+configurations.configureEach {
+    exclude group: 'com.openhtmltopdf'
 }
 
 test {

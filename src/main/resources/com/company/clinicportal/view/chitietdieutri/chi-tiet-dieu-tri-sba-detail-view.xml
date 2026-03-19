@@ -79,33 +79,6 @@
                         </vbox>
                     </vbox>
 
-                    <vbox width="100%" alignItems="START" padding="false"
-                          spacing="false" classNames="tab-5-grid">
-                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
-                              width="100%">
-                            <hbox classNames="buttons-panel" width="100%">
-                                <div width="100%" classNames="all-control-auto-pay">
-                                    <div classNames="title-grid">
-                                        <span text="KPI &amp; TRỌNG SỐ"/>
-                                    </div>
-                                </div>
-                            </hbox>
-                        </vbox>
-                        <vbox padding="false" classNames="grid-data">
-                            <formLayout dataContainer="chiTietDieuTriDc"
-                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
-                                <responsiveSteps>
-                                    <responsiveStep minWidth="0" columns="2"/>
-                                </responsiveSteps>
-                                <textField id="trongSoKPIField" property="trongSoKpi" colspan="2"/>
-                                <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
-                                <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
-                                <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>
-                                <textField id="trongSoXoaBopTriLieuField" property="trongSoXoaBopTriLieu"/>
-                                <textField id="trongSoKhamLuongGiaField" property="trongSoKhamLuongGia"/>
-                            </formLayout>
-                        </vbox>
-                    </vbox>
 
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
@@ -237,6 +210,35 @@
                             </formLayout>
                         </vbox>
                     </vbox>
+
+                    <vbox width="100%" alignItems="START" padding="false"
+                          spacing="false" classNames="tab-5-grid">
+                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                              width="100%">
+                            <hbox classNames="buttons-panel" width="100%">
+                                <div width="100%" classNames="all-control-auto-pay">
+                                    <div classNames="title-grid">
+                                        <span text="KPI &amp; TRỌNG SỐ"/>
+                                    </div>
+                                </div>
+                            </hbox>
+                        </vbox>
+                        <vbox padding="false" classNames="grid-data">
+                            <formLayout dataContainer="chiTietDieuTriDc"
+                                        css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                                <responsiveSteps>
+                                    <responsiveStep minWidth="0" columns="2"/>
+                                </responsiveSteps>
+                                <textField id="trongSoKPIField" property="trongSoKpi" colspan="2"/>
+                                <textField id="trongSoVatLyTriLieuField" property="trongSoVatLyTriLieu"/>
+                                <textField id="trongSoVanDongTriLieuField" property="trongSoVanDongTriLieu"/>
+                                <textField id="trongSoKeoNanTriLieuField" property="trongSoKeoNanTriLieu"/>
+                                <textField id="trongSoXoaBopTriLieuField" property="trongSoXoaBopTriLieu"/>
+                                <textField id="trongSoKhamLuongGiaField" property="trongSoKhamLuongGia"/>
+                            </formLayout>
+                        </vbox>
+                    </vbox>
+
 
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">

@@ -95,8 +95,8 @@
                   css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; padding: 16px; background: var(--lumo-base-color); margin-top: 16px;">
                 <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
                       css="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--lumo-success-color);">
-                    <h3 text="GIÁ KPI" 
-                        css="margin: 0; color: var(--lumo-success-color); font-weight: bold;"/>
+                    <h3 text="GIÁ KPI"
+                        css="margin: 0; color: var(--lumo-primary-color); font-weight: bold;"/>
                 </hbox>
                 <hbox id="buttonsPanel1" classNames="buttons-panel" justifyContent="END" css="margin-bottom: 8px;">
                     <button id="editBtn1" action="giaKpiDataGrid.editAction"/>
