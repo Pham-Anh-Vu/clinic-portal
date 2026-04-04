@@ -82,6 +82,7 @@
                         <column property="nhomDichVu"/>
                         <column property="moTa"/>
                         <column property="gia"/>
+                        <column property="giaBuoiLe"/>
                         <column property="giaKpiSang"/>
                         <column property="giaKpiToi"/>
                         <column property="donViTinh"/>

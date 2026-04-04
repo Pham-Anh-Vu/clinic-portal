@@ -77,3 +77,6 @@
     color: var(--lumo-primary-color-90pct);
 }
 
+.jmix-list-menu .jmix-menu-item-link .link-text{
+    font-weight: bold;
+}

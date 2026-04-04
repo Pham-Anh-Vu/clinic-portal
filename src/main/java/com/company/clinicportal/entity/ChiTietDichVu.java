@@ -1,5 +1,6 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.TinhTheoGia;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -37,6 +38,9 @@ public class ChiTietDichVu {
     @ManyToOne(fetch = FetchType.LAZY)
     private DmDichVu idDichVu;
 
+    @Column(name = "tinh_theo_gia")
+    private String tinhTheoGia;
+
     @Column(name = "khoang_cach_buoi_dieu_tri")
     private Long khoangCachBuoiDieuTri;
 
@@ -53,6 +57,14 @@ public class ChiTietDichVu {
 
     @Column(name = "\"updatedById\"")
     private Long updatedById;
+
+    public TinhTheoGia getTinhTheoGia() {
+        return tinhTheoGia == null ?  null : TinhTheoGia.fromId(tinhTheoGia);
+    }
+
+    public void setTinhTheoGia(TinhTheoGia tinhTheoGia) {
+        this.tinhTheoGia = tinhTheoGia == null ? null : tinhTheoGia.getId();
+    }
 
     public void setIdBacSi(NhanSu idBacSi) {
         this.idBacSi = idBacSi;

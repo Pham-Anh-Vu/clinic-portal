@@ -47,13 +47,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -138,21 +132,6 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
     private void applyPaymentSummaryForList() {
         for (ChiTietDieuTri chiTietDieuTri : chiTietDieuTrisDc.getItems()) {
-            Number tongTienNumber = dataManager.loadValue(
-                            "select coalesce(sum(dv.idDichVu.gia * dv.soLuong), 0) from ChiTietDichVu dv where dv.idChiTietPhieuDieuTri = :ctdt",
-                            Number.class
-                    )
-                    .parameter("ctdt", chiTietDieuTri)
-                    .one();
-
-            long tongTien = tongTienNumber != null ? tongTienNumber.longValue() : 0L;
-            double khuyenMaiPercent = chiTietDieuTri.getKhuyenMai() != null ? chiTietDieuTri.getKhuyenMai() : 0D;
-            long daThanhToan = dataManager.loadValue(
-                            "select coalesce(sum(e.daThanhToan), 0) from LichSuThanhToan e where e.idChiTietDieuTri = :ctdt",
-                            Long.class
-                    )
-                    .parameter("ctdt", chiTietDieuTri)
-                    .one();
             Date ngayThanhToanCuoi = dataManager.loadValue(
                             "select max(e.thanhToanLuc) from LichSuThanhToan e where e.idChiTietDieuTri = :ctdt",
                             Date.class
@@ -161,22 +140,11 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
                     .optional()
                     .orElse(null);
 
-            BigDecimal tongTienBd = BigDecimal.valueOf(tongTien);
-            long tongSauKhuyenMai = tongTienBd.subtract(
-                            tongTienBd.multiply(BigDecimal.valueOf(khuyenMaiPercent))
-                                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                    )
-                    .setScale(0, RoundingMode.HALF_UP)
-                    .longValue();
-            int phaiDong = BigDecimal.valueOf(tongSauKhuyenMai)
-                    .subtract(BigDecimal.valueOf(daThanhToan))
-                    .setScale(0, RoundingMode.HALF_UP)
-                    .intValue();
 
-            chiTietDieuTri.setTongTien(tongTien);
-            chiTietDieuTri.setTongTienSauKhuyenMai(tongSauKhuyenMai);
-            chiTietDieuTri.setDaThanhToan(daThanhToan);
-            chiTietDieuTri.setPhaiDong(phaiDong);
+            chiTietDieuTri.setTongTien(chiTietDieuTri.getTongTien());
+            chiTietDieuTri.setTongTienSauKhuyenMai(chiTietDieuTri.getTongTienSauKhuyenMai());
+            chiTietDieuTri.setDaThanhToan(chiTietDieuTri.getDaThanhToan());
+            chiTietDieuTri.setPhaiDong(chiTietDieuTri.getPhaiDong());
             chiTietDieuTri.setNgayThanhToan(ngayThanhToanCuoi);
         }
     }
@@ -351,12 +319,67 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
                 ? String.join("; ", bacSis)
                 : safeText(ctdt.getIdNhanSu() != null ? ctdt.getIdNhanSu().getHoTen() : null);
 
+        StringBuilder rows = new StringBuilder();
+
+        // 1. Lấy list id chiTiet
+        List<Long> chiTietIds = chiTietDichVus.stream()
+                .map(ChiTietDichVu::getId)
+                .toList();
+
+// 2. Load ALL BuoiDieuTri 1 lần
+        List<BuoiDieuTri> allBuoiDieuTris = dataManager.load(BuoiDieuTri.class)
+                .query("select e from BuoiDieuTri e where e.idChiTietDichVu.id in :ids")
+                .parameter("ids", chiTietIds)
+                .list();
+
+// 3. Group theo ChiTietDichVuId
+        Map<Long, List<BuoiDieuTri>> mapBuoiTheoChiTiet = allBuoiDieuTris.stream()
+                .collect(Collectors.groupingBy(e -> e.getIdChiTietDichVu().getId()));
+
+// 4. Loop chính
+        for (ChiTietDichVu chiTiet : chiTietDichVus) {
+
+            String ngay = chiTiet.getNgayBatDau() != null
+                    ? DATE_FORMAT.format(chiTiet.getNgayBatDau())
+                    : "";
+
+            List<BuoiDieuTri> buoiDieuTris = mapBuoiTheoChiTiet.getOrDefault(
+                    chiTiet.getId(), Collections.emptyList()
+            );
+
+            String tenKTVFinal = buoiDieuTris.stream()
+                    .map(BuoiDieuTri::getIdNhanSuStaging)
+                    .filter(Objects::nonNull)
+                    .map(nv -> nv.getHoTen())
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.joining("; "));
+
+            String tenDichVu = chiTiet.getIdDichVu() != null
+                    ? chiTiet.getIdDichVu().getTenDichVu()
+                    : "";
+
+            String bacSi = chiTiet.getIdBacSi() != null
+                    ? chiTiet.getIdBacSi().getHoTen()
+                    : "";
+
+            rows.append("<tr>")
+                    .append("<td>").append(ngay).append("</td>")
+                    .append("<td></td>")
+                    .append("<td>").append(tenDichVu).append("</td>")
+                    .append("<td></td>")
+                    .append("<td>").append(tenKTVFinal).append("</td>")
+                    .append("<td>").append(bacSi).append("</td>")
+                    .append("</tr>");
+        }
+
         Map<String, String> values = new HashMap<>();
         values.put("${ChiTietDieuTri.chuanDoan}", safeText(ctdt.getChuanDoan()));
         values.put("${ChiTietDieuTri.chuanDoanRaVien}", safeText(ctdt.getChuanDoanRaVien()));
         values.put("${ChiTietDieuTri.daXuLy}", safeText(ctdt.getDaXuLy()));
         values.put("${ChiTietDieuTri.dienBienBenh}", safeText(ctdt.getDienBienBenh()));
-        values.put("${ChiTietDieuTri.huongDieuTri}", safeText(ctdt.getHuongDieuTri()));
+        values.put("${ChiTietDieuTri.huongDieuTri}", tenDichVuText);
+        values.put("${ChiTietDieuTri.tinhTrangBenhNhan}", safeText(ctdt.getTinhTrangBenhNhan()));
         values.put("${ChiTietDieuTri.kbBoPhan}", safeText(ctdt.getKbBoPhan()));
         values.put("${ChiTietDieuTri.ketQuaCanLamSang}", safeText(ctdt.getKetQuaCanLamSang()));
         values.put("${ChiTietDieuTri.khamBenhQuaTrinhBenh}", safeText(ctdt.getKhamBenhQuaTrinhBenh()));
@@ -385,7 +408,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
         values.put("${idDichVu.tenDichVu}", tenDichVuText);
         values.put("${idBacSi.hoTen}", bacSiText);
-        values.put("${ngayBatDau}", ngayBatDauText);
+        values.put("${chiTietDichVuRows}", rows.toString());
 
         String htmlTemplate = loadHtmlTemplate(SO_BENH_AN_REPORT_TEMPLATE_HTML);
         String html = applyTemplateValues(htmlTemplate, values);

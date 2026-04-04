@@ -6,6 +6,7 @@ import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.LichSuThanhToan;
 import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.enumentity.NhomDichVu;
+import com.company.clinicportal.enumentity.TinhTheoGia;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
@@ -13,6 +14,9 @@ import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.company.clinicportal.service.TinhKpiChiTietService;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import io.jmix.core.DataManager;
@@ -35,13 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Route(value = "chi-tiet-dieu-tri-sbas/:id", layout = MainView.class)
 @ViewController(id = "ChiTietDieuTriSBA.detail")
@@ -89,54 +89,71 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         this.idBenhNhan = idBenhNhan;
     }
 
+
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
+
         khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
-        chiTietDieuTriDl.setParameter("idBenhNhan", idBenhNhan);
-        chiTietDieuTriDl.load();
 
         if (getEditedEntity().getId() != null) {
             lichSuThanhToansDl.setParameter("idChiTietDieuTri", getEditedEntity());
             lichSuThanhToansDl.load();
+
+            chiTietDieuTriDl.setParameter("idBenhNhan", idBenhNhan);
+            chiTietDieuTriDl.load();
         }
 
-        chiTietDichVusDataGrid.addComponentColumn(chiTietDichVu -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText("Chi tiết");
-            button.addClickListener(e -> {
-                if (chiTietDichVu != null && chiTietDichVu.getId() != null) {
-                    DialogWindow<View<?>> window =
-                            dialogWindows.view(this, "BuoiDieuTri.list")
-                                    .build();
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
-                    BuoiDieuTriListView view = (BuoiDieuTriListView) window.getView();
-                    view.setIdChiTietDichVu(chiTietDichVu.getId());
-                    window.open();
-                }
-            });
-            return button;
-        }).setHeader("Thao tác").setAutoWidth(true);
+        // ✅ Column Giá
+        Grid.Column<ChiTietDichVu> giaColumn = chiTietDichVusDataGrid.addColumn(chiTiet -> {
 
-        lichSuThanhToansDataGrid.addComponentColumn(lichSuThanhToan -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText("Chi tiết");
-            button.addClickListener(e -> {
-                DialogWindow<LichSuThanhToanDetailView> window =
-                        dialogWindows.detail(this, LichSuThanhToan.class)
-                                .withViewClass(LichSuThanhToanDetailView.class)
-                                .editEntity(lichSuThanhToan)
-                                .build();
-                window.addAfterCloseListener(eTT -> {
-                    if (getEditedEntity().getId() != null) {
-                        lichSuThanhToansDl.setParameter("idChiTietDieuTri", getEditedEntity());
-                        lichSuThanhToansDl.load();
-                    }
-                });
-                window.getView().setChiTietDieuTri(lichSuThanhToan.getIdChiTietDieuTri());
-                window.open();
-            });
-            return button;
-        }).setHeader("Thao tác").setAutoWidth(true);
+                    if (chiTiet.getIdDichVu() == null) return "";
+
+                    Long gia = TinhTheoGia.LE.equals(chiTiet.getTinhTheoGia())
+                            ? chiTiet.getIdDichVu().getGiaBuoiLe()
+                            : chiTiet.getIdDichVu().getGia();
+
+                    return gia != null ? formatter.format(gia) : "0";
+
+                }).setHeader("Giá")
+                .setKey("giaColumn")
+                .setAutoWidth(true)
+                .setSortable(true);
+
+        // ✅ Column Thao tác
+        Grid.Column<ChiTietDichVu> actionColumn = chiTietDichVusDataGrid.addComponentColumn(chiTietDichVu -> {
+                    JmixButton button = uiComponents.create(JmixButton.class);
+                    button.setText("Chi tiết");
+
+                    button.addClickListener(e -> {
+                        if (chiTietDichVu != null && chiTietDichVu.getId() != null) {
+
+                            DialogWindow<View<?>> window =
+                                    dialogWindows.view(this, "BuoiDieuTri.list")
+                                            .build();
+
+                            BuoiDieuTriListView view = (BuoiDieuTriListView) window.getView();
+                            view.setIdChiTietDichVu(chiTietDichVu.getId());
+
+                            window.open();
+                        }
+                    });
+
+                    return button;
+                }).setHeader("Thao tác")
+                .setKey("actionColumn")
+                .setAutoWidth(true);
+
+        // ✅ Set đúng thứ tự column
+        chiTietDichVusDataGrid.setColumnOrder(
+                chiTietDichVusDataGrid.getColumnByKey("tenDichVu"),
+                chiTietDichVusDataGrid.getColumnByKey("nhomDichVu"),
+                giaColumn,
+                chiTietDichVusDataGrid.getColumnByKey("soLuong"),
+                chiTietDichVusDataGrid.getColumnByKey("ngayBatDau"),
+                actionColumn
+        );
 
         recalculatePaymentFields();
     }
@@ -196,7 +213,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                     }
                 }
 
-                chiTietDieuTriDl.load();
+                chiTietDichVuDc.getMutableItems().add(persisted);
                 recalculatePaymentFields();
             }
         });
@@ -224,9 +241,16 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private void recalculatePaymentFields() {
         long tongTien = 0L;
         for (ChiTietDichVu item : chiTietDichVuDc.getItems()) {
-            long gia = item.getIdDichVu() != null && item.getIdDichVu().getGia() != null
-                    ? item.getIdDichVu().getGia()
-                    : 0L;
+            Long gia = 0L;
+
+            if (item.getIdDichVu() != null) {
+                Long rawGia = TinhTheoGia.LE.equals(item.getTinhTheoGia())
+                        ? item.getIdDichVu().getGiaBuoiLe()
+                        : item.getIdDichVu().getGia();
+
+                gia = rawGia != null ? rawGia : 0L;
+            }
+
             long soBuoi = item.getSoLuong() != null ? item.getSoLuong() : 0L;
             tongTien += gia * soBuoi;
         }

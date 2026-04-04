@@ -149,3 +149,11 @@ html {
     /*--vaadin-input-field-placeholder-color:var(--lumo-primary-color-30pct);*/
     /*    */
 }
+
+vaadin-login-form-wrapper {
+  max-width: none;
+}
+
+vaadin-login-form-wrapper::part(form) {
+  max-width: none;
+}

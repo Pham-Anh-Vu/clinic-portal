@@ -110,7 +110,7 @@
                             <div classNames="function-flex-end">
                                 <button action="chiTietDieuTrisDataGrid.create"
                                         classNames="action-button create"/>
-                                <button id="printReportButton" text="In phiếu báo cáo"/>
+                                <button id="printReportButton" text="In sổ"/>
                                 <button id="printToDieuTriButton" text="In tờ điều trị"/>
 
                             </div>
@@ -123,7 +123,7 @@
                         <actions>
                             <action id="create" type="list_create" text="Thêm phiếu">
                             </action>
-                            <action id="runReport" type="report_runListEntityReport" text="In phiếu báo cáo"/>
+                            <action id="runReport" type="report_runListEntityReport" text="In sổ"/>
                         </actions>
                         <columns resizable="true">
                             <column property="tenPhieuDieuTri"/>

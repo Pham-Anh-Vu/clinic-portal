@@ -7,6 +7,8 @@
                   class="com.company.clinicportal.entity.DmDichVu">
             <fetchPlan extends="_base">
                 <property name="id"/>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                </property>
             </fetchPlan>
             <loader id="dmDichVuDl"/>
         </instance>
@@ -28,6 +30,7 @@
             <select id="nhomDichVuField" property="nhomDichVu" required="true"/>
             <textArea id="moTaField" height="9.5em" property="moTa" colspan="2"/>
             <textField id="giaField" property="gia"/>
+            <textField id="giaLeField" property="giaBuoiLe"/>
             <textField id="giaKpiSangField" property="giaKpiSang" required="true"/>
             <textField id="giaKpiToiField" property="giaKpiToi" required="true"/>
             <textField id="donViTinhField" property="donViTinh"/>

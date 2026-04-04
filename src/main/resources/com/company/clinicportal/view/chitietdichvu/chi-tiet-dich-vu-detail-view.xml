@@ -35,7 +35,9 @@
             </responsiveSteps>
             <entityComboBox id="idDichVuField" property="idDichVu" itemsContainer="dmDichVusDc" label="msg:///dichVu" required="true"/>
             <textField id="soLuongField" property="soLuong" label="msg:///soBuoi" required="true"/>
+            <select id="tinhTheoGia" property="tinhTheoGia"/>
             <textField id="giaField" property="idDichVu.gia" label="msg:///gia" readOnly="true"/>
+            <textField id="giaLeField" property="idDichVu.giaBuoiLe" label="msg:///giaLe" readOnly="true"/>
             <textField id="donViTinhField" property="idDichVu.donViTinh" label="msg:///donViTinh" readOnly="true"/>
             <datePicker id="ngayBatDauField" property="ngayBatDau" required="true"/>
             <textField id="khoangCachBuoiDieuTriField" property="khoangCachBuoiDieuTri" required="true"/>

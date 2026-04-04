@@ -35,14 +35,18 @@ public class DmDichVu {
     @Column(name = "gia")
     private Long gia;
 
+    @Column(name = "gia_buoi_le")
+    private Long giaBuoiLe;
+
     @Column(name = "gia_kpi_sang")
     private Long giaKpiSang;
 
     @Column(name = "gia_kpi_toi")
     private Long giaKpiToi;
 
-    @Column(name = "\"Id_chi_tiet_dich_vu\"")
-    private Long idChiTietDichVu;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "\"Id_chi_tiet_dich_vu\"")
+    private ChiTietDichVu idChiTietDichVu;
 
     @Column(name = "khuyen_mai")
     private Double khuyenMai;
@@ -63,6 +67,14 @@ public class DmDichVu {
 
     @Column(name = "\"updatedById\"")
     private Long updatedById;
+
+    public Long getGiaBuoiLe() {
+        return giaBuoiLe;
+    }
+
+    public void setGiaBuoiLe(Long giaBuoiLe) {
+        this.giaBuoiLe = giaBuoiLe;
+    }
 
     public Long getUpdatedById() {
         return updatedById;
@@ -112,11 +124,11 @@ public class DmDichVu {
         this.khuyenMai = khuyenMai;
     }
 
-    public Long getIdChiTietDichVu() {
+    public ChiTietDichVu getIdChiTietDichVu() {
         return idChiTietDichVu;
     }
 
-    public void setIdChiTietDichVu(Long idChiTietDichVu) {
+    public void setIdChiTietDichVu(ChiTietDichVu idChiTietDichVu) {
         this.idChiTietDichVu = idChiTietDichVu;
     }
 

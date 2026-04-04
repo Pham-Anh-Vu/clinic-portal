@@ -379,14 +379,9 @@ table.t1 { max-width: 100%; }
 <span class="s2">4. Phương ph&aacute;p điều trị: </span><span class="s4">${ChiTietDieuTri.huongDieuTri}</span>
 </p>
 <p class="p1">
-<span class="s2">5. T&igrave;nh trạng người bệnh ra viện</span><span class="s1">: ...............................................................................................................................</span>
+<span class="s2">5. T&igrave;nh trạng người bệnh ra viện</span><span class="s1">:${ChiTietDieuTri.tinhTrangBenhNhan}</span>
 </p>
-<p class="p1">
-<span class="s1">...........................................................................................................................................................................................</span>
-</p>
-<p class="p1">
-<span class="s1">..........................................................................................................................................................................................</span>
-</p>
+
 <p class="p1">
 <span class="s2">6. Hướng điều trị v&agrave; c&aacute;c chế độ tiếp theo: </span><span class="s4">${ChiTietDieuTri.huongDieuTri}</span>
 </p>
@@ -539,7 +534,13 @@ table.t1 { max-width: 100%; }
 </tbody>
 </table>
 <p class="p3">
-<span class="s1">- Họ t&ecirc;n người bệnh: </span><span class="s4">${ChiTietDieuTri.idBenhNhan.hoVaTen}</span><span class="s1">Năm sinh/ Tuổi: </span><span class="s4">${ChiTietDieuTri.idBenhNhan.tuoi} </span><span class="s1">Nam/Nữ </span><span class="s4">${ChiTietDieuTri.idBenhNhan.gioiTinh}</span>
+<span class="s1">- Họ t&ecirc;n người bệnh: </span><span class="s4">${ChiTietDieuTri.idBenhNhan.hoVaTen}</span>
+</p>
+<p class="p3">
+    <span class="s1">Năm sinh/ Tuổi: </span><span class="s4">${ChiTietDieuTri.idBenhNhan.tuoi} </span>
+</p>
+<p class="p3">
+    <span class="s1">Nam/Nữ </span><span class="s4">${ChiTietDieuTri.idBenhNhan.gioiTinh}</span>
 </p>
 <p class="p1">
 <span class="s1">-Địa chỉ: </span><span class="s4">${ChiTietDieuTri.idBenhNhan.diaChi}</span>
@@ -576,29 +577,7 @@ table.t1 { max-width: 100%; }
 </p>
 </td>
 </tr>
-<tr class="r1">
-<td class="td23">
-<p class="p7">
-<span>${ngayBatDau}</span>
-</p>
-</td><td class="td24">
-<p class="p1"></p>
-</td><td class="td25">
-<p class="p7">
-<span>${idDichVu.tenDichVu}</span>
-</p>
-</td><td class="td26">
-<p class="p1"></p>
-</td><td class="td27">
-<p class="p7">
-<span>${idBacSi.hoTen}</span>
-</p>
-</td><td class="td27">
-<p class="p7">
-<span>${idBacSi.hoTen}</span>
-</p>
-</td>
-</tr>
+${chiTietDichVuRows}
 </tbody>
 </table>
 <p class="p1"></p>

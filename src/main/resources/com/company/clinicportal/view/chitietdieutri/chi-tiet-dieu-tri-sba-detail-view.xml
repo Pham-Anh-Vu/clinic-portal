@@ -200,11 +200,10 @@
                                     </actions>
 
                                     <columns resizable="true">
-                                        <column property="idDichVu.tenDichVu"/>
-                                        <column property="idDichVu.nhomDichVu"/>
-                                        <column property="idDichVu.gia"/>
-                                        <column property="soLuong" header="Số buổi"/>
-                                        <column property="ngayBatDau"/>
+                                        <column key="tenDichVu" property="idDichVu.tenDichVu"/>
+                                        <column key="nhomDichVu" property="idDichVu.nhomDichVu"/>
+                                        <column key="soLuong" property="soLuong" header="Số buổi"/>
+                                        <column key="ngayBatDau" property="ngayBatDau"/>
                                     </columns>
                                 </dataGrid>
                             </formLayout>
@@ -341,7 +340,7 @@
                                     <responsiveStep minWidth="0" columns="2"/>
                                 </responsiveSteps>
                                 <textArea id="dienBienBenhField" height="9.5em" property="dienBienBenh" colspan="2" />
-                                <timePicker id="chuanDoanRaVienField" property="chuanDoanRaVien" colspan="2" />
+                                <textField id="chuanDoanRaVienField" property="chuanDoanRaVien" colspan="2" />
                                 <textField id="tinhTrangBenhNhanField" property="tinhTrangBenhNhan" colspan="2" label="Tình trạng bệnh nhân ra viện"/>
                                 <textArea id="huongDieuTriField" height="9.5em" property="huongDieuTri" colspan="2" label="Hướng điều trị và các chế độ tiếp theo"/>
                                 <textField id="ngayBatDauField" property="ngayBatDau" label="Ngày bắt đầu"/>
