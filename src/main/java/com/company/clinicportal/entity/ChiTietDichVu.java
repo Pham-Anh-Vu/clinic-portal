@@ -38,6 +38,9 @@ public class ChiTietDichVu {
     @ManyToOne(fetch = FetchType.LAZY)
     private DmDichVu idDichVu;
 
+    @Column(name = "ghi_chu", length = 500)
+    private String ghiChu;
+
     @Column(name = "tinh_theo_gia")
     private String tinhTheoGia;
 
@@ -80,6 +83,14 @@ public class ChiTietDichVu {
 
     public DmDichVu getIdDichVu() {
         return idDichVu;
+    }
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
     }
 
     public void setIdChiTietPhieuDieuTri(ChiTietDieuTri idChiTietPhieuDieuTri) {

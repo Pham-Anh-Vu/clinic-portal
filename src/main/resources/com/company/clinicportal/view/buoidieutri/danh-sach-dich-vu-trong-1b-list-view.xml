@@ -21,6 +21,7 @@
                 <property name="gioKetThuc"/>
                 <property name="ca"/>
                 <property name="idNhanSuStaging" fetchPlan="_base"/>
+                <property name="idNhanSu2Staging" fetchPlan="_base"/>
             </fetchPlan>
             <loader id="buoiDieuTrisDl" readOnly="true">
                 <query>
@@ -64,7 +65,7 @@
                 <column property="gioBatDau"/>
                 <column property="gioKetThuc"/>
                 <column property="ca"/>
-                <column property="idNhanSuStaging" header="KTV thực hiện"/>
+                <column property="hoTenNhanSuThucHien" header="KTV thực hiện"/>
                 <column property="idChiTietDichVu.idChiTietPhieuDieuTri.tenPhieuDieuTri"/>
             </columns>
         </dataGrid>

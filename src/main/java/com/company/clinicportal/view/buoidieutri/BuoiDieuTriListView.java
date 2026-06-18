@@ -1,6 +1,7 @@
 package com.company.clinicportal.view.buoidieutri;
 
 import com.company.clinicportal.entity.*;
+import com.company.clinicportal.service.BuoiDieuTriService;
 import com.company.clinicportal.enumentity.CaLamViec;
 import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
@@ -24,16 +25,13 @@ import io.jmix.flowui.action.list.RemoveAction;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
+import io.jmix.flowui.util.RemoveOperation;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 @Route(value = "buoi-dieu-tris", layout = MainView.class)
@@ -62,6 +60,20 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
     private RemoveAction<BuoiDieuTri> buoiDieuTrisDataGridRemoveAction;
     @Autowired
     private Metadata metadata;
+    @Autowired
+    private BuoiDieuTriService buoiDieuTriService;
+
+    @Subscribe("buoiDieuTrisDataGrid.removeAction")
+    public void onBuoiDieuTrisDataGridRemoveBefore(RemoveOperation.BeforeActionPerformedEvent<BuoiDieuTri> event) {
+        List<BuoiDieuTri> items = event.getItems();
+        if (items.isEmpty()) {
+            return;
+        }
+        event.preventAction();
+        buoiDieuTriService.deleteAll(items);
+        buoiDieuTrisDl.setParameter("idChiTietDichVu", idChiTietDichVu);
+        buoiDieuTrisDl.load();
+    }
 
     public void setIdChiTietDichVu(Long idChiTietDichVu) {
         this.idChiTietDichVu = idChiTietDichVu;
@@ -132,32 +144,22 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
     @Install(to = "buoiDieuTrisDataGrid.createAction", subject = "afterSaveHandler")
     private void buoiDieuTrisDataGridCreateActionAfterSaveHandler(final BuoiDieuTri buoiDieuTri) {
         SaveContext saveContext = new SaveContext();
-        Date gioKetThucDate = buoiDieuTri.getGioKetThuc();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(gioKetThucDate);
-
-        int hour = cal.get(Calendar.HOUR_OF_DAY); // giờ 0-23
-
-        if (hour < 12) { // trước 12h trưa là sáng
-            buoiDieuTri.setCa(CaLamViec.SANG);
-        } else { // từ 12h trưa trở đi là tối
-            buoiDieuTri.setCa(CaLamViec.TOI);
-        }
+        buoiDieuTri.setCa(CaLamViec.fromGioBatDau(buoiDieuTri.getGioBatDau()));
         saveContext.saving(buoiDieuTri);
 
-        if(buoiDieuTri.getTrangThai().equals(TrangThaiBuoiDieuTri.DA_THUC_HIEN)){
-            if(buoiDieuTri.getIdNhanSuStaging() != null){
+        // Chỉ tính KPI khi buổi điều trị đã thực hiện.
+        if (TrangThaiBuoiDieuTri.DA_THUC_HIEN.equals(buoiDieuTri.getTrangThai())) {
+            if (buoiDieuTri.getIdNhanSuStaging() != null) {
                 TinhKpi tinhKpi = dataManager.create(TinhKpi.class);
                 tinhKpi.setIdNhanSu(buoiDieuTri.getIdNhanSuStaging());
                 tinhKpi.setThang(new Date());
 
                 Double sumKpi = tinhTrongSoKpi(buoiDieuTri).toBigInteger().doubleValue();
-                if(buoiDieuTri.getCa().equals(CaLamViec.SANG)){
+                if (CaLamViec.SANG.equals(buoiDieuTri.getCa())) {
                     tinhKpi.setKpiSang(sumKpi);
                     tinhKpi.setKpiToi((double) 0);
                     tinhKpi.setKpiTong(sumKpi);
-                }
-                else{
+                } else {
                     tinhKpi.setKpiToi(sumKpi);
                     tinhKpi.setKpiSang((double) 0);
                     tinhKpi.setKpiTong(sumKpi);
@@ -168,18 +170,17 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
                 saveContext.saving(tinhKpi);
             }
 
-            if(buoiDieuTri.getIdNhanSu2Staging() != null){
+            if (buoiDieuTri.getIdNhanSu2Staging() != null) {
                 TinhKpi tinhKpi = dataManager.create(TinhKpi.class);
                 tinhKpi.setIdNhanSu(buoiDieuTri.getIdNhanSu2Staging());
                 tinhKpi.setThang(new Date());
 
                 Double sumKpi = tinhTrongSoKpi(buoiDieuTri).toBigInteger().doubleValue();
-                if(buoiDieuTri.getCa().equals(CaLamViec.SANG)){
+                if (CaLamViec.SANG.equals(buoiDieuTri.getCa())) {
                     tinhKpi.setKpiSang(sumKpi);
                     tinhKpi.setKpiToi((double) 0);
                     tinhKpi.setKpiTong(sumKpi);
-                }
-                else{
+                } else {
                     tinhKpi.setKpiToi(sumKpi);
                     tinhKpi.setKpiSang((double) 0);
                     tinhKpi.setKpiTong(sumKpi);

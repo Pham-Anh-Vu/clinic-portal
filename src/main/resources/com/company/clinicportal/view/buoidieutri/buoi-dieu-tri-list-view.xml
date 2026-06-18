@@ -9,6 +9,7 @@
             <fetchPlan extends="_base">
                 <property name="id"/>
                 <property name="idNhanSuStaging" fetchPlan="_base"/>
+                <property name="idNhanSu2Staging" fetchPlan="_base"/>
             </fetchPlan>
             <loader id="buoiDieuTrisDl" readOnly="true">
                 <query>
@@ -84,7 +85,7 @@
                             <column property="gioBatDau"/>
                             <column property="gioKetThuc"/>
                             <column property="ca"/>
-                            <column property="idNhanSuStaging"/>
+                            <column property="hoTenNhanSuThucHien" header="Họ và tên nhân sự"/>
                             <column property="trangThai"/>
                         </columns>
                     </dataGrid>

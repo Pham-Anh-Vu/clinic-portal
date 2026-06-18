@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://toDieuTriDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="toDieuTriDc"
+                  class="com.company.clinicportal.entity.ToDieuTri">
+            <fetchPlan extends="_base">
+                <property name="idNguoiThucHien" fetchPlan="_base"/>
+                <property name="idBacSiChiDinh" fetchPlan="_base"/>
+                <property name="kyThuatList" fetchPlan="_base">
+                    <property name="idDichVu" fetchPlan="_base"/>
+                </property>
+            </fetchPlan>
+            <collection id="kyThuatListDc" property="kyThuatList"/>
+            <loader id="toDieuTriDl"/>
+        </instance>
+        <collection id="nhanSusDc" class="com.company.clinicportal.entity.NhanSu">
+            <loader id="nhanSusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NhanSu e order by e.hoTen]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+        <collection id="bacSiDc" class="com.company.clinicportal.entity.NhanSu">
+            <loader id="bacSiDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from NhanSu e where e.chucVu = 'Bác sĩ' order by e.hoTen]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose" text="Lưu dòng"/>
+        <action id="closeAction" type="detail_close" text="Hủy"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="toDieuTriDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <datePicker id="tuNgayField" property="tuNgay" label="msg://com.company.clinicportal.entity/ToDieuTri.tuNgay"/>
+            <datePicker id="denNgayField" property="denNgay" label="msg://com.company.clinicportal.entity/ToDieuTri.denNgay"/>
+            <textArea id="moTaDienBienBenhField" property="moTaDienBienBenh"
+                      label="msg://com.company.clinicportal.entity/ToDieuTri.moTaDienBienBenh"
+                      required="true" height="9.5em" colspan="2"/>
+        </formLayout>
+
+        <vbox width="100%" padding="false" spacing="false" classNames="tab-5-grid">
+            <vbox spacing="false" padding="false" classNames="header-grid-auto-pay" width="100%">
+                <hbox classNames="buttons-panel" width="100%">
+                    <div width="100%" classNames="all-control-auto-pay">
+                        <div classNames="title-grid">
+                            <span text="Danh sách dịch vụ kỹ thuật PHCN"/>
+                        </div>
+                        <div classNames="function-flex-end">
+                            <button action="kyThuatListDataGrid.create" text="Thêm kỹ thuật"
+                                    classNames="action-button create"/>
+                        </div>
+                    </div>
+                </hbox>
+            </vbox>
+            <vbox padding="false" classNames="grid-data">
+                <dataGrid id="kyThuatListDataGrid"
+                          dataContainer="kyThuatListDc"
+                          width="100%"
+                          allRowsVisible="true">
+                    <actions>
+                        <action id="create" type="list_create" text="Thêm kỹ thuật">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </action>
+                        <action id="edit" type="list_edit" text="Sửa">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </action>
+                        <action id="remove" type="list_remove"/>
+                    </actions>
+                    <columns resizable="true">
+                        <column property="idDichVu" header="Tên dịch vụ kỹ thuật PHCN"/>
+                        <column property="thoiGianPhut" header="Thời gian (phút)"/>
+                        <column key="thaoTacColumn" header="Thao tác"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
+        </vbox>
+
+        <formLayout dataContainer="toDieuTriDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <entityComboBox id="idNguoiThucHienField" property="idNguoiThucHien"
+                            itemsContainer="nhanSusDc"
+                            label="msg://com.company.clinicportal.entity/ToDieuTri.idNguoiThucHien"/>
+            <entityComboBox id="idBacSiChiDinhField" property="idBacSiChiDinh"
+                            itemsContainer="bacSiDc" required="true"
+                            label="msg://com.company.clinicportal.entity/ToDieuTri.idBacSiChiDinh"/>
+            <textArea id="ghiChuField" property="ghiChu"
+                      label="msg://com.company.clinicportal.entity/ToDieuTri.ghiChu"
+                      height="9.5em" colspan="2"/>
+        </formLayout>
+
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+            <button id="closeButton" action="closeAction" icon="CLOSE"/>
+            <button id="saveAndCloseButton" action="saveAction" icon="CHECK"/>
+        </hbox>
+    </layout>
+</view>

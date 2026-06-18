@@ -3,6 +3,7 @@ package com.company.clinicportal.entity;
 import com.company.clinicportal.enumentity.GioiTinh;
 import com.company.clinicportal.enumentity.NguonBenhNhan;
 import com.company.clinicportal.enumentity.TrangThaiPhieuDT;
+import io.jmix.core.FileRef;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
@@ -80,6 +81,12 @@ public class BenhNhan {
     @Column(name = "thoi_gian_tai_kham")
     private Date thoiGianTaiKham;
 
+    @Column(name = "file_so_da_ky", length = 1024)
+    private FileRef fileSoDaKy;
+
+    @Column(name = "ten_file_so_da_ky")
+    private String tenFileSoDaKy;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"updatedAt\"")
     private Date updatedAt;
@@ -145,6 +152,22 @@ public class BenhNhan {
 
     public void setThoiGianTaiKham(Date thoiGianTaiKham) {
         this.thoiGianTaiKham = thoiGianTaiKham;
+    }
+
+    public FileRef getFileSoDaKy() {
+        return fileSoDaKy;
+    }
+
+    public void setFileSoDaKy(FileRef fileSoDaKy) {
+        this.fileSoDaKy = fileSoDaKy;
+    }
+
+    public String getTenFileSoDaKy() {
+        return tenFileSoDaKy;
+    }
+
+    public void setTenFileSoDaKy(String tenFileSoDaKy) {
+        this.tenFileSoDaKy = tenFileSoDaKy;
     }
 
     public String getSdtNguoiThan() {
@@ -252,7 +275,32 @@ public class BenhNhan {
     }
 
     @PrePersist
+    private void onPrePersist() {
+        Date now = new Date();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
+        if (createdById == null) {
+            createdById = 0L;
+        }
+        if (updatedById == null) {
+            updatedById = createdById;
+        }
+        recalculateTuoi();
+    }
+
     @PreUpdate
+    private void onPreUpdate() {
+        updatedAt = new Date();
+        if (updatedById == null) {
+            updatedById = createdById != null ? createdById : 0L;
+        }
+        recalculateTuoi();
+    }
+
     private void recalculateTuoi() {
         this.tuoi = calculateTuoi(this.ngaySinh);
     }

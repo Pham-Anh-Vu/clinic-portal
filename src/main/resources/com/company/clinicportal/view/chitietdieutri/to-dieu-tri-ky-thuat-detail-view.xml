@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://toDieuTriKyThuatDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="toDieuTriKyThuatDc"
+                  class="com.company.clinicportal.entity.ToDieuTriKyThuat">
+            <fetchPlan extends="_base">
+                <property name="idDichVu" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="toDieuTriKyThuatDl"/>
+        </instance>
+        <collection id="dmDichVusDc" class="com.company.clinicportal.entity.DmDichVu">
+            <loader id="dmDichVusDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from DmDichVu e order by e.tenDichVu]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose" text="Lưu"/>
+        <action id="closeAction" type="detail_close" text="Hủy"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="toDieuTriKyThuatDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+            </responsiveSteps>
+            <entityComboBox id="idDichVuField" property="idDichVu"
+                            itemsContainer="dmDichVusDc" required="true"
+                            label="msg://com.company.clinicportal.entity/ToDieuTriKyThuat.idDichVu"/>
+            <textField id="thoiGianPhutField" property="thoiGianPhut"
+                       label="msg://com.company.clinicportal.entity/ToDieuTriKyThuat.thoiGianPhut"/>
+        </formLayout>
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+            <button id="closeButton" action="closeAction" icon="CLOSE"/>
+            <button id="saveAndCloseButton" action="saveAction" icon="CHECK"/>
+        </hbox>
+    </layout>
+</view>

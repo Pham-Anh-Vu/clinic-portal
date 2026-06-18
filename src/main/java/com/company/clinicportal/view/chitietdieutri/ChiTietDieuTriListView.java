@@ -10,6 +10,7 @@ import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
+import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
 import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
@@ -24,9 +25,6 @@ import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Date;
 
 
 @Route(value = "chi-tiet-dieu-tris", layout = MainView.class)
@@ -43,6 +41,8 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
     private DialogWindows dialogWindows;
     @Autowired
     private DataManager dataManager;
+    @Autowired
+    private ChiTietDieuTriPaymentSummaryService paymentSummaryService;
     @ViewComponent
     private H3 benhNhanField;
     @Autowired
@@ -64,10 +64,9 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(idBenhNhan != null){
+        if (idBenhNhan != null) {
             chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
             chiTietDieuTrisDl.load();
-            applyPaymentSummaryForList();
         }
 
         BenhNhan bn = dataManager.load(BenhNhan.class).id(idBenhNhan).optional().orElse(null);
@@ -89,9 +88,15 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
                                 .withViewClass(ChiTietDieuTriDetailView.class)
                                 .build();
                         window.addAfterCloseListener(e1 -> {
+                            if (!e1.closedWith(StandardOutcome.SAVE)) {
+                                return;
+                            }
+                            Long phieuId = chiTietDieuTri.getId();
+                            if (phieuId != null) {
+                                paymentSummaryService.refreshPaymentSummary(phieuId);
+                            }
                             chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
                             chiTietDieuTrisDl.load();
-                            applyPaymentSummaryForList();
                         });
 
                         window.open();
@@ -127,57 +132,13 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
         
         // Reload datagrid after dialog closes
         dialogWindow.addAfterCloseListener(event1 -> {
-            if(idBenhNhan != null){
+            if (idBenhNhan != null) {
                 chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
                 chiTietDieuTrisDl.load();
-                applyPaymentSummaryForList();
             }
         });
         
         dialogWindow.open();
     }
 
-    private void applyPaymentSummaryForList() {
-        for (ChiTietDieuTri chiTietDieuTri : chiTietDieuTrisDc.getItems()) {
-            Number tongTienNumber = dataManager.loadValue(
-                            "select coalesce(sum(dv.idDichVu.gia * dv.soLuong), 0) from ChiTietDichVu dv where dv.idChiTietPhieuDieuTri = :ctdt",
-                            Number.class
-                    )
-                    .parameter("ctdt", chiTietDieuTri)
-                    .one();
-            long tongTien = tongTienNumber != null ? tongTienNumber.longValue() : 0L;
-            double khuyenMaiPercent = chiTietDieuTri.getKhuyenMai() != null ? chiTietDieuTri.getKhuyenMai() : 0D;
-            long daThanhToan = dataManager.loadValue(
-                            "select coalesce(sum(e.daThanhToan), 0) from LichSuThanhToan e where e.idChiTietDieuTri = :ctdt",
-                            Long.class
-                    )
-                    .parameter("ctdt", chiTietDieuTri)
-                    .one();
-            Date ngayThanhToanCuoi = dataManager.loadValue(
-                            "select max(e.thanhToanLuc) from LichSuThanhToan e where e.idChiTietDieuTri = :ctdt",
-                            Date.class
-                    )
-                    .parameter("ctdt", chiTietDieuTri)
-                    .optional()
-                    .orElse(null);
-
-            BigDecimal tongTienBd = BigDecimal.valueOf(tongTien);
-            long tongSauKhuyenMai = tongTienBd.subtract(
-                            tongTienBd.multiply(BigDecimal.valueOf(khuyenMaiPercent))
-                                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                    )
-                    .setScale(0, RoundingMode.HALF_UP)
-                    .longValue();
-            int phaiDong = BigDecimal.valueOf(tongSauKhuyenMai)
-                    .subtract(BigDecimal.valueOf(daThanhToan))
-                    .setScale(0, RoundingMode.HALF_UP)
-                    .intValue();
-
-            chiTietDieuTri.setTongTien(tongTien);
-            chiTietDieuTri.setTongTienSauKhuyenMai(tongSauKhuyenMai);
-            chiTietDieuTri.setDaThanhToan(daThanhToan);
-            chiTietDieuTri.setPhaiDong(phaiDong);
-            chiTietDieuTri.setNgayThanhToan(ngayThanhToanCuoi);
-        }
-    }
 }

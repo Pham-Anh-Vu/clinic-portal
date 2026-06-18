@@ -7,6 +7,9 @@
                   class="com.company.clinicportal.entity.BenhNhan">
             <fetchPlan extends="_base">
                 <property name="id"/>
+                <property name="trangThaiKhamBenh"/>
+                <property name="ngayKhamBenh"/>
+                <property name="thoiGianTaiKham"/>
             </fetchPlan>
             <loader id="benhNhanDl"/>
         </instance>
@@ -91,17 +94,15 @@
                                     <hbox id="trangThaiBox"
                                           alignItems="CENTER"
                                           spacing="true"/>
-
+                                    <hbox id="ngayKhamBenhBox"
+                                          alignItems="CENTER"
+                                          spacing="true"/>
                                     <hbox id="thoiGianTaiKhamField"
                                           alignItems="CENTER"
                                           spacing="true"/>
-                                    <select id="nguonBenhNhanFieldRead" property="nguonBenhNhan" colspan="4"/>
+                                    <select id="nguonBenhNhanFieldRead" property="nguonBenhNhan" colspan="2"/>
 
-                                    <textField id="nguoiGioiThieuFieldRead" property="nguoiGioiThieu"/>
-                                    <textField id="hoTenNguoiThanFieldRead" property="hoTenNguoiThan"/>
-                                    <textField id="sdtNguoiThanFieldRead" property="sdtNguoiThan"/>
-                                    <textField id="quanHeVoiBenhNhanFieldRead" property="quanHeVoiBenhNhan"/>
-
+                                    <textField id="nguoiGioiThieuFieldRead" property="nguoiGioiThieu" colspan="2"/>
                                 </formLayout>
                             </vbox>
                         </vbox>

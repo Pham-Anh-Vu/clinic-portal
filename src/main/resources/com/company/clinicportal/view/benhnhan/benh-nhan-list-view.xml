@@ -14,7 +14,7 @@
             </fetchPlan>
             <loader id="benhNhansDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from BenhNhan e order by e.id desc]]>
+                    <![CDATA[select e from BenhNhan e order by e.createdAt desc]]>
                 </query>
             </loader>
         </collection>

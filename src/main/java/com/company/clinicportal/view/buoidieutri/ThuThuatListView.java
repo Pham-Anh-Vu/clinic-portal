@@ -1,7 +1,7 @@
 package com.company.clinicportal.view.buoidieutri;
 
 import com.company.clinicportal.entity.BuoiDieuTri;
-import com.company.clinicportal.entity.ChiTietDieuTri;
+import com.company.clinicportal.service.BuoiDieuTriService;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.Component;
@@ -22,6 +22,7 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 
 @Route(value = "thu-thuats", layout = MainView.class)
@@ -42,6 +43,8 @@ public class ThuThuatListView extends StandardListView<BuoiDieuTri> {
     private DataGrid<BuoiDieuTri> buoiDieuTrisDataGrid;
     @Autowired
     private DialogWindows dialogWindows;
+    @Autowired
+    private BuoiDieuTriService buoiDieuTriService;
     @ViewComponent("buoiDieuTrisDataGrid.removeAction")
     private RemoveAction<BuoiDieuTri> buoiDieuTrisDataGridRemoveAction;
     @ViewComponent
@@ -67,6 +70,8 @@ public class ThuThuatListView extends StandardListView<BuoiDieuTri> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        configureRemoveAction(buoiDieuTrisDataGridRemoveAction);
+        configureRemoveAction(buoiDieuTrisDataGrid2RemoveAction2);
         buoiDieuTrisDataGrid.addComponentColumn(buoiDieuTri -> {
                     // Tạo layout chứa hai nút
                     HorizontalLayout actionsLayout = uiComponents.create(HorizontalLayout.class);
@@ -140,6 +145,23 @@ public class ThuThuatListView extends StandardListView<BuoiDieuTri> {
                 .setAutoWidth(true);
     }
 
+    private void configureRemoveAction(RemoveAction<BuoiDieuTri> removeAction) {
+        removeAction.setBeforeActionPerformedHandler(event -> {
+            List<BuoiDieuTri> items = event.getItems();
+            if (items.isEmpty()) {
+                return;
+            }
+            event.preventAction();
+            buoiDieuTriService.deleteAll(items);
+            reloadThuThuatGrids();
+        });
+    }
+
+    private void reloadThuThuatGrids() {
+        buoiDieuTrisDl.setParameter("ngayThucHien", new Date());
+        buoiDieuTrisDl.load();
+        buoiDieuTrisDl_1.load();
+    }
 
     @Supply(to = "buoiDieuTrisDataGrid.trangThai", subject = "renderer")
     private Renderer<BuoiDieuTri> buoiDieuTrisDataGridTrangThaiRenderer() {

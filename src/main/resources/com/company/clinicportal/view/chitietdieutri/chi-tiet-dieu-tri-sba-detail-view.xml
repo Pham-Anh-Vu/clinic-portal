@@ -1,36 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
-      title="msg://chiTietDieuTriSBADetailView.title"
->
+      title="msg://chiTietDieuTriSBADetailView.title">
     <data>
         <instance id="chiTietDieuTriDc"
                   class="com.company.clinicportal.entity.ChiTietDieuTri">
             <fetchPlan extends="_base">
                 <property name="idBenhNhan" fetchPlan="_base"/>
                 <property name="idNhanSu" fetchPlan="_base"/>
-                <property name="chiTietDichVu" fetchPlan="_base"/>
+                <property name="chiTietDichVu" fetchPlan="_base">
+                    <property name="idDichVu" fetchPlan="_base"/>
+                    <property name="idBacSi" fetchPlan="_base"/>
+                </property>
+                <property name="fileDinhKem" fetchPlan="_base"/>
             </fetchPlan>
             <collection id="chiTietDichVuDc" property="chiTietDichVu"/>
-
-            <loader id="chiTietDieuTriDl">
-                <query><![CDATA[select e from ChiTietDieuTri e where e.idBenhNhan = :idBenhNhan]]></query>
-            </loader>
-
+            <collection id="fileDinhKemDc" property="fileDinhKem"/>
+            <loader id="chiTietDieuTriDl"/>
         </instance>
-        <collection id="lichSuThanhToansDc" class="com.company.clinicportal.entity.LichSuThanhToan">
-            <loader id="lichSuThanhToansDl" readOnly="true">
+        <collection id="toDieuTrisDc" class="com.company.clinicportal.entity.ToDieuTri">
+            <loader id="toDieuTrisDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from LichSuThanhToan e
-                              where e.idChiTietDieuTri = :idChiTietDieuTri
-                              order by e.thanhToanLuc desc, e.id desc]]>
+                    <![CDATA[select e from ToDieuTri e
+                              where e.chiTietDieuTri = :idChiTietDieuTri
+                              order by e.tuNgay asc, e.id asc]]>
                 </query>
             </loader>
             <fetchPlan>
-                <property name="thanhToanLuc"/>
-                <property name="daThanhToan"/>
+                <property name="id"/>
+                <property name="tuNgay"/>
+                <property name="denNgay"/>
+                <property name="moTaDienBienBenh"/>
                 <property name="ghiChu"/>
-                <property name="hoTenNguoiNopTien"/>
-                <property name="soDienThoai"/>
+                <property name="idNguoiThucHien" fetchPlan="_base"/>
+                <property name="idBacSiChiDinh" fetchPlan="_base"/>
+                <property name="kyThuatList" fetchPlan="_base">
+                    <property name="thoiGianPhut"/>
+                    <property name="idDichVu" fetchPlan="_base">
+                        <property name="tenDichVu"/>
+                    </property>
+                </property>
             </fetchPlan>
         </collection>
     </data>
@@ -78,7 +86,6 @@
                             </formLayout>
                         </vbox>
                     </vbox>
-
 
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
@@ -149,13 +156,71 @@
                                 <textField id="idNhanSuField" property="idNhanSu" label="Bác sĩ chỉ định"/>
                                 <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
                                 <textField id="khamBenhToanThanField" property="khamBenhToanThan" colspan="2"/>
+                                <textArea id="kbBoPhanField" height="9.5em" property="kbBoPhan" colspan="2" label="Khám các bộ phận"/>
                                 <textArea id="ketQuaCanLamSangField" height="9.5em" property="ketQuaCanLamSang" colspan="2" label="Tóm tắt kết quả cận lâm sàng"/>
                                 <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" label="Chẩn đoán ban đầu" colspan="2"/>
                                 <textField id="daXuLyField" property="daXuLy" colspan="2" label="Đã xử lý (thuốc, chăm sóc)"/>
+                                <textField id="linkGgDriveField" property="linkGgDrive" colspan="2"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.linkGgDrive"/>
                             </formLayout>
                         </vbox>
                     </vbox>
 
+                    <vbox width="100%" alignItems="START" padding="false"
+                          spacing="false" classNames="tab-5-grid">
+                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                              width="100%">
+                            <hbox classNames="buttons-panel" width="100%">
+                                <div width="100%" classNames="all-control-auto-pay">
+                                    <div classNames="title-grid">
+                                        <span text="FILE ĐÍNH KÈM"/>
+                                    </div>
+                                    <div classNames="function-flex-end">
+                                        <button action="fileDinhKemDataGrid.create" text="Thêm file"
+                                                classNames="action-button create"/>
+                                        <button action="fileDinhKemDataGrid.remove" classNames="action-button"/>
+                                        <button action="fileDinhKemDataGrid.refresh" classNames="action-button refresh"/>
+                                    </div>
+                                </div>
+                            </hbox>
+                        </vbox>
+                        <vbox padding="false" classNames="grid-data">
+                            <formLayout
+                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                                <responsiveSteps>
+                                    <responsiveStep minWidth="0" columns="1"/>
+                                </responsiveSteps>
+                                <dataGrid id="fileDinhKemDataGrid"
+                                          dataContainer="fileDinhKemDc"
+                                          width="100%">
+                                    <emptyStateComponent>
+                                        <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                            <h2 text="Chưa có file đính kèm"/>
+                                        </vbox>
+                                    </emptyStateComponent>
+                                    <actions>
+                                        <action id="create" type="list_create" text="Thêm file">
+                                            <properties>
+                                                <property name="openMode" value="DIALOG"/>
+                                            </properties>
+                                        </action>
+                                        <action id="edit" type="list_edit" text="Chi tiết">
+                                            <properties>
+                                                <property name="openMode" value="DIALOG"/>
+                                            </properties>
+                                        </action>
+                                        <action id="remove" type="list_remove" text="Xóa"/>
+                                        <action id="refresh" type="list_refresh"/>
+                                    </actions>
+                                    <columns resizable="true">
+                                        <column property="tenFile" header="Tên file"/>
+                                        <column property="file" header="Tệp đính kèm"/>
+                                    </columns>
+                                </dataGrid>
+                            </formLayout>
+                        </vbox>
+                    </vbox>
 
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
@@ -202,6 +267,7 @@
                                     <columns resizable="true">
                                         <column key="tenDichVu" property="idDichVu.tenDichVu"/>
                                         <column key="nhomDichVu" property="idDichVu.nhomDichVu"/>
+                                        <column key="ghiChu" property="ghiChu" header="Ghi chú"/>
                                         <column key="soLuong" property="soLuong" header="Số buổi"/>
                                         <column key="ngayBatDau" property="ngayBatDau"/>
                                     </columns>
@@ -210,6 +276,8 @@
                         </vbox>
                     </vbox>
 
+                    <!-- TẠM ẨN: khối KPI & TRỌNG SỐ (phiếu điều trị sổ bệnh án) -->
+                    <!--
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
                         <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
@@ -237,8 +305,10 @@
                             </formLayout>
                         </vbox>
                     </vbox>
+                    -->
 
-
+                    <!-- TẠM ẨN: khối THÔNG TIN THANH TOÁN (phiếu điều trị sổ bệnh án) -->
+                    <!--
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
                         <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
@@ -258,7 +328,7 @@
                                     <responsiveStep minWidth="0" columns="6"/>
                                 </responsiveSteps>
                                 <textField id="tongTienField" property="tongTien" readOnly="true"/>
-                                <textField id="khuyenMaiField" property="khuyenMai"/>
+                                <textField id="khuyenMaiField" label="Khuyến mãi (%)" placeholder="VD: 10,5 hoặc 10.5"/>
                                 <textField id="tongTienSauKhuyenMaiField" property="tongTienSauKhuyenMai" readOnly="true"/>
                                 <textField id="daThanhToanField" property="daThanhToan" readOnly="true"/>
                                 <textField id="phaiDongField" property="phaiDong" readOnly="true"/>
@@ -266,7 +336,10 @@
                             </formLayout>
                         </vbox>
                     </vbox>
+                    -->
 
+                    <!-- TẠM ẨN: khối LỊCH SỬ THANH TOÁN (phiếu điều trị sổ bệnh án) -->
+                    <!--
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
                         <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
@@ -293,7 +366,7 @@
                                           width="100%">
                                     <emptyStateComponent>
                                         <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
-                                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                            <icon icon="vaadin:file-o" size="48px" color="var(lumo-tertiary-text-color)"/>
                                             <h2 text="Chưa có dữ liệu"/>
                                         </vbox>
                                     </emptyStateComponent>
@@ -311,12 +384,67 @@
                                         <column property="soDienThoai"/>
                                     </columns>
                                 </dataGrid>
-
-
                             </formLayout>
                         </vbox>
                     </vbox>
+                    -->
 
+                </vbox>
+            </tab>
+            <tab id="tab3" label="TỜ ĐIỀU TRỊ">
+                <vbox width="100%">
+                    <vbox width="100%" alignItems="START" padding="false"
+                          spacing="false" classNames="tab-5-grid">
+                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                              width="100%">
+                            <hbox classNames="buttons-panel" width="100%">
+                                <div width="100%" classNames="all-control-auto-pay">
+                                    <div classNames="title-grid">
+                                        <span text="DANH SÁCH KỸ THUẬT ĐIỀU TRỊ"/>
+                                    </div>
+                                    <div classNames="function-flex-end">
+                                        <button action="toDieuTrisDataGrid.create" text="Thêm dòng điều trị"
+                                                classNames="action-button create"/>
+                                    </div>
+                                </div>
+                            </hbox>
+                        </vbox>
+                        <vbox padding="false" classNames="grid-data">
+                            <formLayout
+                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                                <responsiveSteps>
+                                    <responsiveStep minWidth="0" columns="1"/>
+                                </responsiveSteps>
+                                <dataGrid id="toDieuTrisDataGrid"
+                                          dataContainer="toDieuTrisDc"
+                                          width="100%">
+                                    <emptyStateComponent>
+                                        <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                            <h2 text="Chưa có dữ liệu"/>
+                                        </vbox>
+                                    </emptyStateComponent>
+                                    <actions>
+                                        <action id="create" type="list_create" text="Thêm dòng điều trị"/>
+                                        <action id="refresh" type="list_refresh"/>
+                                    </actions>
+                                    <columns resizable="true">
+                                        <column key="sttColumn" header="STT"/>
+                                        <column key="ngayGioColumn" header="Ngày giờ"/>
+                                        <column key="moTaColumn" header="Mô tả diễn biến bệnh, tật/các vấn đề cần PHCN"/>
+                                        <column key="tenDichVuColumn" header="Tên dịch vụ kỹ thuật PHCN"/>
+                                        <column key="thoiGianColumn" header="Thời gian (phút)"/>
+                                        <column key="nguoiThucHienColumn" header="Người thực hiện"/>
+                                        <column key="bacSiColumn" header="BS chỉ định"/>
+                                        <column key="thaoTacColumn" header="Thao tác"/>
+                                    </columns>
+                                </dataGrid>
+                            </formLayout>
+                        </vbox>
+                    </vbox>
+                    <hbox width="100%" justifyContent="END" padding="true">
+                        <button id="printToDieuTriButton" text="In tờ điều trị" icon="PRINT"/>
+                    </hbox>
                 </vbox>
             </tab>
             <tab id="tab2" label="TỔNG KẾT ĐIỀU TRỊ">

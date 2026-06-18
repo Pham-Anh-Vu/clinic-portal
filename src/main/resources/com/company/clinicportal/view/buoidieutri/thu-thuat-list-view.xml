@@ -132,8 +132,8 @@
                         </emptyStateComponent>
                         <actions>
                             <action id="createAction2" type="list_create" text="Tạo mới"/>
-                            <action id="refreshAction2" type="list_refresh" text="Xóa"/>
-
+                            <action id="removeAction2" type="list_remove" text="Xóa"/>
+                            <action id="refreshAction2" type="list_refresh" text="Làm mới"/>
                         </actions>
                         <columns resizable="true">
                             <column property="idBenhNhan.id" header="Mã BN"/>

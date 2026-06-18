@@ -1,5 +1,6 @@
 package com.company.clinicportal.entity;
 
+import io.jmix.core.FileRef;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
@@ -24,6 +25,14 @@ public class ChiTietDieuTri {
     @OneToMany(mappedBy = "idChiTietPhieuDieuTri")
     private List<ChiTietDichVu> chiTietDichVu;
 
+    @Composition
+    @OneToMany(mappedBy = "chiTietDieuTri")
+    private List<ChiTietDieuTriFileDinhKem> fileDinhKem;
+
+    @Composition
+    @OneToMany(mappedBy = "chiTietDieuTri")
+    private List<ToDieuTri> toDieuTri;
+
     @Column(name = "chuan_doan")
     @Lob
     private String chuanDoan;
@@ -44,9 +53,18 @@ public class ChiTietDieuTri {
     @Column(name = "da_xu_ly")
     private String daXuLy;
 
+    @Column(name = "link_gg_drive", length = 2048)
+    private String linkGgDrive;
+
     @Column(name = "dien_bien_benh")
     @Lob
     private String dienBienBenh;
+
+    @Column(name = "file_so_da_ky", length = 1024)
+    private FileRef fileSoDaKy;
+
+    @Column(name = "ten_file_so_da_ky")
+    private String tenFileSoDaKy;
 
     @Column(name = "giam_truc_tiep")
     private Long giamTrucTiep;
@@ -180,6 +198,22 @@ public class ChiTietDieuTri {
 
     public void setChiTietDichVu(List<ChiTietDichVu> chiTietDichVu) {
         this.chiTietDichVu = chiTietDichVu;
+    }
+
+    public List<ChiTietDieuTriFileDinhKem> getFileDinhKem() {
+        return fileDinhKem;
+    }
+
+    public void setFileDinhKem(List<ChiTietDieuTriFileDinhKem> fileDinhKem) {
+        this.fileDinhKem = fileDinhKem;
+    }
+
+    public List<ToDieuTri> getToDieuTri() {
+        return toDieuTri;
+    }
+
+    public void setToDieuTri(List<ToDieuTri> toDieuTri) {
+        this.toDieuTri = toDieuTri;
     }
 
     public void setIdNhanSu(NhanSu idNhanSu) {
@@ -486,12 +520,36 @@ public class ChiTietDieuTri {
         this.dienBienBenh = dienBienBenh;
     }
 
+    public FileRef getFileSoDaKy() {
+        return fileSoDaKy;
+    }
+
+    public void setFileSoDaKy(FileRef fileSoDaKy) {
+        this.fileSoDaKy = fileSoDaKy;
+    }
+
+    public String getTenFileSoDaKy() {
+        return tenFileSoDaKy;
+    }
+
+    public void setTenFileSoDaKy(String tenFileSoDaKy) {
+        this.tenFileSoDaKy = tenFileSoDaKy;
+    }
+
     public String getDaXuLy() {
         return daXuLy;
     }
 
     public void setDaXuLy(String daXuLy) {
         this.daXuLy = daXuLy;
+    }
+
+    public String getLinkGgDrive() {
+        return linkGgDrive;
+    }
+
+    public void setLinkGgDrive(String linkGgDrive) {
+        this.linkGgDrive = linkGgDrive;
     }
 
     public Long getDaThanhToan() {

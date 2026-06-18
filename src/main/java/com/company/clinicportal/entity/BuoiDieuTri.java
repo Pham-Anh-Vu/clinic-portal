@@ -2,12 +2,16 @@ package com.company.clinicportal.entity;
 
 import com.company.clinicportal.enumentity.CaLamViec;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @DdlGeneration(value = DdlGeneration.DbScriptGenerationMode.DISABLED)
 @JmixEntity
@@ -120,6 +124,19 @@ public class BuoiDieuTri {
 
     public NhanSu getIdNhanSuStaging() {
         return idNhanSuStaging;
+    }
+
+    @JmixProperty
+    @DependsOnProperties({"idNhanSuStaging", "idNhanSu2Staging"})
+    public String getHoTenNhanSuThucHien() {
+        List<String> names = new ArrayList<>(2);
+        if (idNhanSuStaging != null && idNhanSuStaging.getHoTen() != null) {
+            names.add(idNhanSuStaging.getHoTen());
+        }
+        if (idNhanSu2Staging != null && idNhanSu2Staging.getHoTen() != null) {
+            names.add(idNhanSu2Staging.getHoTen());
+        }
+        return String.join("; ", names);
     }
 
     public void setIdChiTietDichVu(ChiTietDichVu idChiTietDichVu) {

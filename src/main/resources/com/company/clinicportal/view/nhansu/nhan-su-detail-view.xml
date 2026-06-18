@@ -24,6 +24,8 @@
                 <query>
                     <![CDATA[select e from TinhKpiChiTiet e
                               where e.idNhanSu = :idNhanSu
+                                and (:tuNgay is null or e.ngayThucHien >= :tuNgay)
+                                and (:denNgay is null or e.ngayThucHien < :denNgay)
                               order by e.ngayThucHien desc, e.id desc]]>
                 </query>
             </loader>
@@ -106,6 +108,16 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="2"/>
                         </responsiveSteps>
+
+                        <div colspan="2" classNames="kpi-filter-panel">
+                            <hbox classNames="kpi-filter-fields" spacing="true" alignItems="END">
+                                <datePicker id="tuNgayFilterField" label="Từ ngày" placeholder="DD/MM/YYYY"/>
+                                <datePicker id="denNgayFilterField" label="Đến ngày" placeholder="DD/MM/YYYY"/>
+                                <button id="locKpiChiTietButton" text="Lọc" classNames="action-button create"/>
+                                <button id="xoaLocKpiChiTietButton" text="Xóa lọc" classNames="action-button refresh"/>
+                            </hbox>
+                        </div>
+
                         <dataGrid id="tinhKpiChiTietsDataGrid" dataContainer="tinhKpiChiTietsDc" minWidth="100px" width="100%" colspan="2" columnReorderingAllowed="true">
                             <emptyStateComponent>
                                 <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
@@ -115,12 +127,12 @@
                             </emptyStateComponent>
                             <columns resizable="true">
                                 <column property="idChiTietDieuTri.idBenhNhan.hoVaTen" header="Họ và tên bệnh nhân"/>
-                                <column property="idChiTietDichVu.idDichVu.tenDichVu"/>
-                                <column property="idChiTietDieuTri.tenPhieuDieuTri"/>
-                                <column property="ngayThucHien"/>
-                                <column property="caThucHien"/>
-                                <column property="trongSoKpi"/>
-                                <column property="thanhTien"/>
+                                <column property="idChiTietDichVu.idDichVu.tenDichVu" header="Dịch vụ"/>
+                                <column property="idChiTietDieuTri.tenPhieuDieuTri" header="Phiếu điều trị"/>
+                                <column property="ngayThucHien" header="Ngày thực hiện"/>
+                                <column property="caThucHien" header="Ca"/>
+                                <column property="trongSoKpi" header="Trọng số KPI"/>
+                                <column property="thanhTien" header="Thành tiền"/>
                             </columns>
                         </dataGrid>
                     </formLayout>

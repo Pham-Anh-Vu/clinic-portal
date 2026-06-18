@@ -60,6 +60,8 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
     private Messages messages;
     @ViewComponent
     private HorizontalLayout trangThaiBox;
+    @ViewComponent
+    private HorizontalLayout ngayKhamBenhBox;
 
     @ViewComponent
     private VerticalLayout formCreate;
@@ -231,6 +233,7 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
 
             Span span = uiComponents.create(Span.class);
             Span spanTG = uiComponents.create(Span.class);
+            Span spanNK = uiComponents.create(Span.class);
 
             if (getEditedEntity().getTrangThaiKhamBenh() != null) {
                 var trangThai = getEditedEntity().getTrangThaiKhamBenh();
@@ -243,16 +246,28 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
                 spanTG.setText(sdf.format(getEditedEntity().getThoiGianTaiKham()));
             }
 
+            if (getEditedEntity().getNgayKhamBenh() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                spanNK.setText(sdf.format(getEditedEntity().getNgayKhamBenh()));
+            }
+
             Span label = uiComponents.create(Span.class);
             label.setText("Trạng thái: ");
             label.addClassName("trang-thai-label");
 
             Span labelTG = uiComponents.create(Span.class);
             labelTG.setText("Thời gian tái khám: ");
-            label.addClassName("trang-thai-label");
+            labelTG.addClassName("trang-thai-label");
+
+            Span labelNK = uiComponents.create(Span.class);
+            labelNK.setText("Ngày khám bệnh: ");
+            labelNK.addClassName("trang-thai-label");
 
             trangThaiBox.removeAll();
             trangThaiBox.add(label, span);
+
+            ngayKhamBenhBox.removeAll();
+            ngayKhamBenhBox.add(labelNK, spanNK);
 
             thoiGianTaiKhamField.removeAll();
             thoiGianTaiKhamField.add(labelTG, spanTG);

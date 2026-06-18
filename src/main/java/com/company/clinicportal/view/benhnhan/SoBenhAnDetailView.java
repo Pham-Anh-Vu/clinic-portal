@@ -4,12 +4,19 @@ import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
+import com.company.clinicportal.entity.NhanSu;
+import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
+import com.company.clinicportal.service.LibreOfficeDocumentConversionService;
+import com.company.clinicportal.service.WordTemplateFillService;
+import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriDetailView;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriSBADetailView;
 import com.company.clinicportal.view.chitietdieutri.PhieuChiDinhDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamRegistration;
@@ -22,9 +29,6 @@ import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
-import io.jmix.flowui.app.inputdialog.DialogActions;
-import io.jmix.flowui.app.inputdialog.DialogOutcome;
-import io.jmix.flowui.app.inputdialog.InputParameter;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -35,6 +39,8 @@ import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 
@@ -62,13 +68,24 @@ import javax.xml.transform.stream.StreamResult;
 @EditedEntityContainer("benhNhanDc")
 @DialogMode(height = "100%", width = "80%")
 public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
-    private static final String SO_BENH_AN_REPORT_TEMPLATE_HTML = "/reports/29. Benh an ngoai tru PHCN-in.html";
+    private static final Logger log = LoggerFactory.getLogger(SoBenhAnDetailView.class);
+    private static final String SO_BENH_AN_REPORT_TEMPLATE_DOC = "/reports/29.-Benh-an-ngoai-tru-PHCN-in (1).docx";
     private static final String TO_DIEU_TRI_TEMPLATE_HTML = "/reports/tờ điều trị BN BCB.html";
+    private static final java.util.Set<String> RAW_HTML_PLACEHOLDERS = java.util.Set.of(
+            "${chiTietDichVuRows}",
+            "${ROWS}"
+    );
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
     @Autowired
     private DataManager dataManager;
+    @Autowired
+    private ChiTietDieuTriPaymentSummaryService paymentSummaryService;
+    @Autowired
+    private WordTemplateFillService wordTemplateFillService;
+    @Autowired
+    private LibreOfficeDocumentConversionService libreOfficeDocumentConversionService;
     @Autowired
     private UiComponents uiComponents;
     @Autowired
@@ -83,6 +100,8 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     private BenhNhan idBenhNhan = null;
     @ViewComponent
     private DataGrid<ChiTietDieuTri> chiTietDieuTrisDataGrid;
+//    @ViewComponent
+//    private DataGrid<BuoiDieuTri> buoiDieuTrisDataGrid;
     @Autowired
     private DialogWindows dialogWindows;
     @Autowired
@@ -106,47 +125,66 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     private CollectionContainer<ChiTietDieuTri> chiTietDieuTrisDc;
 
     @Subscribe
+    public void onInit(final InitEvent event) {
+        chiTietDieuTrisDataGrid.addComponentColumn(chiTietDieuTri -> {
+            JmixButton button = uiComponents.create(JmixButton.class);
+            button.setText("Chi tiết");
+            button.addClickListener(e -> openChiTietDieuTriDetail(chiTietDieuTri));
+            return button;
+        }).setHeader("Thao tác").setAutoWidth(true);
+
+//        buoiDieuTrisDataGrid.addComponentColumn(buoiDieuTri -> {
+//            JmixButton button = uiComponents.create(JmixButton.class);
+//            button.setText("Chi tiết");
+//            button.addClickListener(e -> {
+//                if (buoiDieuTri != null && buoiDieuTri.getIdChiTietDieuTri() != null) {
+//                    openChiTietDieuTriDetail(buoiDieuTri.getIdChiTietDieuTri());
+//                }
+//            });
+//            return button;
+//        }).setHeader("Thao tác").setAutoWidth(true);
+    }
+
+    @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
         if (idBenhNhan != null) {
             benhNhanDl.setEntityId(idBenhNhan.getId());
             benhNhanDl.load();
         }
 
-        chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
-        chiTietDieuTrisDl.load();
-        applyPaymentSummaryForList();
+        loadChiTietDieuTriList();
         refreshPatientInfoSection();
-
-        chiTietDieuTrisDataGrid.addComponentColumn(chiTietDieuTri -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText("Chi tiết");
-            button.addClickListener(e -> {
-                DialogWindow<ChiTietDieuTriSBADetailView> windows = dialogWindows.view(this, ChiTietDieuTriSBADetailView.class).build();
-                windows.getView().setIdBenhNhan(idBenhNhan);
-                windows.getView().setEntityToEdit(chiTietDieuTri);
-                windows.open();
-            });
-            return button;
-        }).setHeader("Thao tác").setAutoWidth(true);
     }
 
-    private void applyPaymentSummaryForList() {
-        for (ChiTietDieuTri chiTietDieuTri : chiTietDieuTrisDc.getItems()) {
-            Date ngayThanhToanCuoi = dataManager.loadValue(
-                            "select max(e.thanhToanLuc) from LichSuThanhToan e where e.idChiTietDieuTri = :ctdt",
-                            Date.class
-                    )
-                    .parameter("ctdt", chiTietDieuTri)
-                    .optional()
-                    .orElse(null);
-
-
-            chiTietDieuTri.setTongTien(chiTietDieuTri.getTongTien());
-            chiTietDieuTri.setTongTienSauKhuyenMai(chiTietDieuTri.getTongTienSauKhuyenMai());
-            chiTietDieuTri.setDaThanhToan(chiTietDieuTri.getDaThanhToan());
-            chiTietDieuTri.setPhaiDong(chiTietDieuTri.getPhaiDong());
-            chiTietDieuTri.setNgayThanhToan(ngayThanhToanCuoi);
+    private void loadChiTietDieuTriList() {
+        if (idBenhNhan == null) {
+            return;
         }
+        chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
+        chiTietDieuTrisDl.load();
+    }
+
+    private void openChiTietDieuTriDetail(ChiTietDieuTri chiTietDieuTri) {
+        DialogWindow<ChiTietDieuTriSBADetailView> windows = dialogWindows.view(this, ChiTietDieuTriSBADetailView.class).build();
+        windows.getView().setIdBenhNhan(idBenhNhan);
+        Long phieuId = chiTietDieuTri.getId();
+        if (phieuId != null) {
+            ChiTietDieuTri toEdit = dataManager.load(ChiTietDieuTri.class).id(phieuId).one();
+            windows.getView().setEntityToEdit(toEdit);
+        } else {
+            windows.getView().setEntityToEdit(chiTietDieuTri);
+        }
+        windows.addAfterCloseListener(closeEvent -> {
+            // Chỉ đồng bộ DB / reload grid khi user lưu; đóng bằng X không cần refresh.
+            if (!closeEvent.closedWith(StandardOutcome.SAVE)) {
+                return;
+            }
+            if (phieuId != null) {
+                paymentSummaryService.refreshPaymentSummary(phieuId);
+            }
+            loadChiTietDieuTriList();
+        });
+        windows.open();
     }
 
     @Subscribe("chiTietDieuTrisDataGrid.create")
@@ -159,14 +197,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         dialogWindow.setWidth("80%");
         dialogWindow.setHeight("100%");
 
-        // Reload datagrid after dialog closes
-        dialogWindow.addAfterCloseListener(event1 -> {
-            if(idBenhNhan != null){
-                chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
-                chiTietDieuTrisDl.load();
-                applyPaymentSummaryForList();
-            }
-        });
+        dialogWindow.addAfterCloseListener(event1 -> loadChiTietDieuTriList());
 
         dialogWindow.open();
     }
@@ -229,54 +260,85 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         ngayKhamBenhBox.add(labelNK, spanNK);
     }
 
+    @Subscribe("printReportButton2")
+    public void onPrintReportButton2Click(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+        ChiTietDieuTri selected = chiTietDieuTrisDataGrid.getSingleSelectedItem();
+        if (selected == null) {
+            notifications.create("Vui lòng chọn 1 phiếu trong danh sách để in báo cáo.")
+                    .withThemeVariant(NotificationVariant.LUMO_WARNING)
+                    .withPosition(Notification.Position.TOP_END)
+                    .withDuration(3000)
+                    .show();
+            return;
+        }
+
+        try {
+            notifications.create("Đang tạo bản xem trước...")
+                    .withPosition(Notification.Position.TOP_END)
+                    .withDuration(3000)
+                    .show();
+
+            byte[] wordBytes = generateSoBenhAnDoc(selected);
+            String fileName = buildSoBenhAnDocFileName(selected);
+            byte[] pdfBytes = libreOfficeDocumentConversionService.convertDocumentToPdf(wordBytes);
+
+            DialogWindow<SoBenhAnPreviewDialogView> window = dialogWindows
+                    .view(this, SoBenhAnPreviewDialogView.class)
+                    .build();
+            window.getView().setPreviewData(pdfBytes, wordBytes, fileName);
+            window.setWidth("90%");
+            window.setHeight("90%");
+            window.open();
+        } catch (Exception ex) {
+            log.error("Không thể tạo bản xem trước sổ bệnh án cho ChiTietDieuTri id={}", selected.getId(), ex);
+            notifications.create("Không thể tạo bản xem trước. Kiểm tra LibreOffice đã cài và cấu hình đúng chưa.")
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+        }
+    }
+
     @Subscribe("printReportButton")
     public void onPrintReportButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
         ChiTietDieuTri selected = chiTietDieuTrisDataGrid.getSingleSelectedItem();
         if (selected == null) {
             notifications.create("Vui lòng chọn 1 phiếu trong danh sách để in báo cáo.")
-                    .withType(Notifications.Type.WARNING)
+                    .withThemeVariant(NotificationVariant.LUMO_WARNING)
+                    .withPosition(Notification.Position.TOP_END)
+                    .withDuration(3000)
                     .show();
             return;
         }
 
         try {
-            byte[] fileBytes = generateSoBenhAnReportPdf(selected);
-            String fileName = buildReportFileName(selected);
+            byte[] fileBytes = generateSoBenhAnDoc(selected);
+            String fileName = buildSoBenhAnDocFileName(selected);
             StreamResource streamResource = new StreamResource(fileName, () -> new ByteArrayInputStream(fileBytes));
-            streamResource.setContentType("application/pdf");
+            streamResource.setContentType("application/msword");
             StreamRegistration registration = VaadinSession.getCurrent().getResourceRegistry().registerResource(streamResource);
-            UI.getCurrent().getPage().open(registration.getResourceUri().toString());
+            UI.getCurrent().getPage().executeJs(
+                    "const link = document.createElement('a');"
+                            + "link.href = $0;"
+                            + "link.download = $1;"
+                            + "document.body.appendChild(link);"
+                            + "link.click();"
+                            + "link.remove();",
+                    registration.getResourceUri().toString(),
+                    fileName
+            );
         } catch (Exception ex) {
-            notifications.create("Không thể tạo file báo cáo. Vui lòng kiểm tra mẫu in.")
+            log.error("Không thể tạo/tải sổ bệnh án cho ChiTietDieuTri id={}", selected.getId(), ex);
+            notifications.create("Không thể tải sổ bệnh án. Vui lòng kiểm tra mẫu Word.")
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
     }
 
-    @Subscribe("printToDieuTriButton")
-    public void onPrintToDieuTriButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
-        ChiTietDieuTri selected = chiTietDieuTrisDataGrid.getSingleSelectedItem();
-        if (selected == null) {
-            notifications.create("Vui lòng chọn 1 phiếu trong danh sách để in tờ điều trị.")
-                    .withType(Notifications.Type.WARNING)
-                    .show();
-            return;
-        }
-
-        try {
-            byte[] fileBytes = generateToDieuTriPdf(selected);
-            StreamResource streamResource = new StreamResource("to-dieu-tri.pdf", () -> new ByteArrayInputStream(fileBytes));
-            streamResource.setContentType("application/pdf");
-            StreamRegistration registration = VaadinSession.getCurrent().getResourceRegistry().registerResource(streamResource);
-            UI.getCurrent().getPage().open(registration.getResourceUri().toString());
-        } catch (Exception ex) {
-            notifications.create("Không thể tạo tờ điều trị. Vui lòng kiểm tra mẫu in.")
-                    .withType(Notifications.Type.ERROR)
-                    .show();
-        }
+    private byte[] generateSoBenhAnDoc(ChiTietDieuTri chiTietDieuTri) throws Exception {
+        Map<String, String> values = buildSoBenhAnPlaceholderValues(chiTietDieuTri);
+        return wordTemplateFillService.fillTemplate(SO_BENH_AN_REPORT_TEMPLATE_DOC, values);
     }
 
-    private byte[] generateSoBenhAnReportPdf(ChiTietDieuTri chiTietDieuTri) throws Exception {
+    private Map<String, String> buildSoBenhAnPlaceholderValues(ChiTietDieuTri chiTietDieuTri) {
         ChiTietDieuTri ctdt = chiTietDieuTri;
         if (chiTietDieuTri.getId() != null) {
             ctdt = dataManager.load(ChiTietDieuTri.class)
@@ -299,14 +361,10 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
                 .list();
 
         Set<String> tenDichVus = new LinkedHashSet<>();
-        Set<String> ngayBatDauDichVus = new LinkedHashSet<>();
         Set<String> bacSis = new LinkedHashSet<>();
         for (ChiTietDichVu chiTietDichVu : chiTietDichVus) {
             if (chiTietDichVu.getIdDichVu() != null && chiTietDichVu.getIdDichVu().getTenDichVu() != null) {
                 tenDichVus.add(chiTietDichVu.getIdDichVu().getTenDichVu());
-            }
-            if (chiTietDichVu.getNgayBatDau() != null) {
-                ngayBatDauDichVus.add(DATE_FORMAT.format(chiTietDichVu.getNgayBatDau()));
             }
             if (chiTietDichVu.getIdBacSi() != null && chiTietDichVu.getIdBacSi().getHoTen() != null) {
                 bacSis.add(chiTietDichVu.getIdBacSi().getHoTen());
@@ -314,63 +372,43 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         }
 
         String tenDichVuText = String.join("; ", tenDichVus);
-        String ngayBatDauText = String.join("; ", ngayBatDauDichVus);
         String bacSiText = !bacSis.isEmpty()
                 ? String.join("; ", bacSis)
                 : safeText(ctdt.getIdNhanSu() != null ? ctdt.getIdNhanSu().getHoTen() : null);
 
-        StringBuilder rows = new StringBuilder();
-
-        // 1. Lấy list id chiTiet
         List<Long> chiTietIds = chiTietDichVus.stream()
                 .map(ChiTietDichVu::getId)
                 .toList();
 
-// 2. Load ALL BuoiDieuTri 1 lần
-        List<BuoiDieuTri> allBuoiDieuTris = dataManager.load(BuoiDieuTri.class)
-                .query("select e from BuoiDieuTri e where e.idChiTietDichVu.id in :ids")
-                .parameter("ids", chiTietIds)
-                .list();
+        List<BuoiDieuTri> allBuoiDieuTris = Collections.emptyList();
+        if (!chiTietIds.isEmpty()) {
+            allBuoiDieuTris = dataManager.load(BuoiDieuTri.class)
+                    .query("select e from BuoiDieuTri e where e.idChiTietDichVu.id in :ids order by e.ngayThucHien, e.gioBatDau, e.id")
+                    .parameter("ids", chiTietIds)
+                    .list();
+        }
 
-// 3. Group theo ChiTietDichVuId
-        Map<Long, List<BuoiDieuTri>> mapBuoiTheoChiTiet = allBuoiDieuTris.stream()
-                .collect(Collectors.groupingBy(e -> e.getIdChiTietDichVu().getId()));
-
-// 4. Loop chính
-        for (ChiTietDichVu chiTiet : chiTietDichVus) {
-
-            String ngay = chiTiet.getNgayBatDau() != null
-                    ? DATE_FORMAT.format(chiTiet.getNgayBatDau())
+        StringBuilder rows = new StringBuilder();
+        for (BuoiDieuTri buoi : allBuoiDieuTris) {
+            ChiTietDichVu dv = buoi.getIdChiTietDichVu();
+            String tenDichVu = dv != null && dv.getIdDichVu() != null
+                    ? safeText(dv.getIdDichVu().getTenDichVu())
                     : "";
+            String bsChiDinh = dv != null && dv.getIdBacSi() != null
+                    ? safeText(dv.getIdBacSi().getHoTen())
+                    : safeText(ctdt.getIdNhanSu() != null ? ctdt.getIdNhanSu().getHoTen() : null);
+            String nguoiThucHien = safeText(buoi.getHoTenNhanSuThucHien());
 
-            List<BuoiDieuTri> buoiDieuTris = mapBuoiTheoChiTiet.getOrDefault(
-                    chiTiet.getId(), Collections.emptyList()
-            );
-
-            String tenKTVFinal = buoiDieuTris.stream()
-                    .map(BuoiDieuTri::getIdNhanSuStaging)
-                    .filter(Objects::nonNull)
-                    .map(nv -> nv.getHoTen())
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .collect(Collectors.joining("; "));
-
-            String tenDichVu = chiTiet.getIdDichVu() != null
-                    ? chiTiet.getIdDichVu().getTenDichVu()
-                    : "";
-
-            String bacSi = chiTiet.getIdBacSi() != null
-                    ? chiTiet.getIdBacSi().getHoTen()
-                    : "";
-
-            rows.append("<tr>")
-                    .append("<td>").append(ngay).append("</td>")
-                    .append("<td></td>")
-                    .append("<td>").append(tenDichVu).append("</td>")
-                    .append("<td></td>")
-                    .append("<td>").append(tenKTVFinal).append("</td>")
-                    .append("<td>").append(bacSi).append("</td>")
-                    .append("</tr>");
+            rows.append(formatNgayGioBuoiDieuTri(buoi)).append("||")
+                    .append(safeText(ctdt.getDienBienBenh())).append("||")
+                    .append(tenDichVu).append("||")
+                    .append(safeText(calcMinutes(buoi.getGioBatDau(), buoi.getGioKetThuc()))).append("||")
+                    .append(nguoiThucHien).append("||")
+                    .append(bsChiDinh)
+                    .append("\n");
+        }
+        if (rows.length() == 0) {
+            rows.append("(Chưa có buổi điều trị)||||||\n");
         }
 
         Map<String, String> values = new HashMap<>();
@@ -406,13 +444,38 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         values.put("${ChiTietDieuTri.idBenhNhan.sdtNguoiThan}",
                 safeText(benhNhan != null ? benhNhan.getSdtNguoiThan() : null));
 
-        values.put("${idDichVu.tenDichVu}", tenDichVuText);
-        values.put("${idBacSi.hoTen}", bacSiText);
         values.put("${chiTietDichVuRows}", rows.toString());
+        return values;
+    }
 
-        String htmlTemplate = loadHtmlTemplate(SO_BENH_AN_REPORT_TEMPLATE_HTML);
-        String html = applyTemplateValues(htmlTemplate, values);
-        return htmlToPdfBytes(html);
+    private String buildSoBenhAnDocFileName(ChiTietDieuTri chiTietDieuTri) {
+        String baseName = safeText(chiTietDieuTri.getTenPhieuDieuTri());
+        if (baseName.isBlank()) {
+            baseName = "so-benh-an";
+        }
+        String normalized = baseName.chars()
+                .mapToObj(c -> String.valueOf((char) c))
+                .collect(Collectors.joining())
+                .replaceAll("[\\\\/:*?\"<>|]", "_")
+                .trim();
+        return normalized + ".doc";
+    }
+
+    private void appendToDieuTriTableRow(StringBuilder rows,
+                                         String ngayGio,
+                                         String dienBien,
+                                         String tenDichVu,
+                                         String thoiGianPhut,
+                                         String nguoiThucHien,
+                                         String bacSiChiDinh) {
+        rows.append("<tr>")
+                .append("<td style=\"white-space: pre-wrap; vertical-align: top;\"><div class=\"doc-row\">&bull; ").append(escapeHtml(ngayGio)).append("</div></td>")
+                .append("<td style=\"white-space: pre-wrap; vertical-align: top;\"><div class=\"doc-row\">&bull; ").append(escapeHtml(dienBien)).append("</div></td>")
+                .append("<td style=\"white-space: pre-wrap; vertical-align: top;\"><div class=\"doc-row\">&bull; ").append(escapeHtml(tenDichVu)).append("</div></td>")
+                .append("<td style=\"white-space: pre-wrap; vertical-align: top; text-align: center;\"><div class=\"doc-row\">&bull; ").append(escapeHtml(thoiGianPhut)).append("</div></td>")
+                .append("<td style=\"white-space: pre-wrap; vertical-align: top;\"><div class=\"doc-row\">&bull; ").append(escapeHtml(nguoiThucHien)).append("</div></td>")
+                .append("<td style=\"white-space: pre-wrap; vertical-align: top;\"><div class=\"doc-row\">&bull; ").append(escapeHtml(bacSiChiDinh)).append("</div></td>")
+                .append("</tr>");
     }
 
     private byte[] generateToDieuTriPdf(ChiTietDieuTri chiTietDieuTri) throws Exception {
@@ -442,19 +505,17 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
             ChiTietDichVu dv = buoi.getIdChiTietDichVu();
             String tenDichVu = dv != null && dv.getIdDichVu() != null ? dv.getIdDichVu().getTenDichVu() : "";
             String bsChiDinh = dv != null && dv.getIdBacSi() != null ? dv.getIdBacSi().getHoTen() : safeText(ctdt.getIdNhanSu() != null ? ctdt.getIdNhanSu().getHoTen() : null);
-            String nguoiThucHien = safeText(
-                    buoi.getIdNhanSuStaging() != null ? buoi.getIdNhanSuStaging().getHoTen()
-                            : (buoi.getIdNhanSu2Staging() != null ? buoi.getIdNhanSu2Staging().getHoTen() : null)
-            );
+            String nguoiThucHien = safeText(buoi.getHoTenNhanSuThucHien());
 
-            rows.append("<tr>")
-                    .append("<td>").append(escapeHtml(formatNgayGioBuoiDieuTri(buoi))).append("</td>")
-                    .append("<td>").append(escapeHtml(safeText(ctdt.getDienBienBenh()))).append("</td>")
-                    .append("<td>").append(escapeHtml(tenDichVu)).append("</td>")
-                    .append("<td>").append(escapeHtml(safeText(calcMinutes(buoi.getGioBatDau(), buoi.getGioKetThuc())))).append("</td>")
-                    .append("<td>").append(escapeHtml(nguoiThucHien)).append("</td>")
-                    .append("<td>").append(escapeHtml(bsChiDinh)).append("</td>")
-                    .append("</tr>");
+            appendToDieuTriTableRow(
+                    rows,
+                    formatNgayGioBuoiDieuTri(buoi),
+                    safeText(ctdt.getDienBienBenh()),
+                    tenDichVu,
+                    safeText(calcMinutes(buoi.getGioBatDau(), buoi.getGioKetThuc())),
+                    nguoiThucHien,
+                    bsChiDinh
+            );
         }
         if (rows.isEmpty()) {
             rows.append("<tr><td colspan=\"6\" style=\"text-align:center;\">(Chưa có buổi điều trị)</td></tr>");
@@ -470,21 +531,8 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         values.put("${ROWS}", rows.toString());
 
         String htmlTemplate = loadHtmlTemplate(TO_DIEU_TRI_TEMPLATE_HTML);
-        String html = applyTemplateValues(htmlTemplate, values, java.util.Set.of("${ROWS}"));
+        String html = applyTemplateValues(htmlTemplate, values, RAW_HTML_PLACEHOLDERS);
         return htmlToPdfBytes(html);
-    }
-
-    private String buildReportFileName(ChiTietDieuTri chiTietDieuTri) {
-        String baseName = safeText(chiTietDieuTri.getTenPhieuDieuTri());
-        if (baseName.isBlank()) {
-            baseName = "bao-cao-so-benh-an";
-        }
-        String normalized = baseName.chars()
-                .mapToObj(c -> String.valueOf((char) c))
-                .collect(Collectors.joining())
-                .replaceAll("[\\\\/:*?\"<>|]", "_")
-                .trim();
-        return normalized + ".pdf";
     }
 
     private String loadHtmlTemplate(String templateResource) throws IOException {
@@ -550,6 +598,21 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         if (file.isFile()) {
             builder.useFont(file, family);
         }
+    }
+
+
+    private String resolveNguoiThucHien(BuoiDieuTri buoi) {
+        if (buoi == null) return "";
+        String hoTen = safeText(buoi.getHoTenNhanSuThucHien());
+        if (!hoTen.isBlank()) {
+            return hoTen;
+        }
+        return java.util.stream.Stream.of(buoi.getIdNhanSuStaging(), buoi.getIdNhanSu2Staging())
+                .filter(Objects::nonNull)
+                .map(NhanSu::getHoTen)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.joining("; "));
     }
 
     private String escapeHtml(String s) {

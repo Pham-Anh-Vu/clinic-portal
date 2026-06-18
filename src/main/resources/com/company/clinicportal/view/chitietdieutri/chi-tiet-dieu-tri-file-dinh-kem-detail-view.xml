@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://chiTietDieuTriFileDinhKemDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="chiTietDieuTriFileDinhKemDc"
+                  class="com.company.clinicportal.entity.ChiTietDieuTriFileDinhKem">
+            <fetchPlan extends="_base"/>
+            <loader id="chiTietDieuTriFileDinhKemDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="chiTietDieuTriFileDinhKemDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+            </responsiveSteps>
+            <textField id="tenFileField" property="tenFile" label="msg://com.company.clinicportal.entity/ChiTietDieuTriFileDinhKem.tenFile"/>
+            <fileStorageUploadField id="fileField"
+                                    property="file"
+                                    clearButtonVisible="true"
+                                    fileNameVisible="true"
+                                    acceptedFileTypes=".pdf,.jpg,.jpeg,.png"
+                                    label="msg://com.company.clinicportal.entity/ChiTietDieuTriFileDinhKem.file"/>
+        </formLayout>
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

@@ -3,7 +3,7 @@
     <item view="LichHen.list" title="msg://com.company.clinicportal.view.lichhen/lichHenListView.title" icon="vaadin:calendar" classNames="bold-menu"/>
     <item view="LichDieuTri.list"
           title="msg://com.company.clinicportal.view.ngaydieutri/ngayDieuTriListView.title"
-          icon="vaadin:plus-square-o" classNames="bold-menu"/>
+          icon="vaadin:plus-square-o" classNames="bold-menu" />
     <item view="NhanSu.list" title="msg://com.company.clinicportal.view.nhansu/nhanSuListView.title" icon="vaadin:user" classNames="bold-menu"/>
 
     <menu id="indication" description="msg://fis.pbcap.finexbackoffice/menu_config.indication.description"

@@ -1,6 +1,8 @@
 package com.company.clinicportal.entity;
 
 import com.company.clinicportal.enumentity.CaLamViec;
+import io.jmix.core.DeletePolicy;
+import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -44,6 +46,7 @@ public class TinhKpiChiTiet {
     @ManyToOne(fetch = FetchType.LAZY)
     private ChiTietDichVu idChiTietDichVu;
 
+    @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "ID_BUOI_DIEU_TRI")
     @ManyToOne(fetch = FetchType.LAZY)
     private BuoiDieuTri idBuoiDieuTri;

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://soBenhAnPreviewDialogView.title">
+    <layout>
+        <vbox width="100%" height="100%" spacing="true" padding="true" expand="previewFrame">
+            <div id="previewFrame" width="100%" height="100%" css="min-height: 70vh;"/>
+            <hbox spacing="true" justifyContent="END" width="100%">
+                <button id="downloadWordButton" text="msg://soBenhAnPreviewDialogView.downloadWord"/>
+                <button id="closeButton" text="msg://soBenhAnPreviewDialogView.close"/>
+            </hbox>
+        </vbox>
+    </layout>
+</view>

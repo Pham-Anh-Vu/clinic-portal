@@ -10,6 +10,7 @@ import com.company.clinicportal.entity.TinhKpiChiTiet;
 import com.company.clinicportal.enumentity.CaLamViec;
 import com.company.clinicportal.enumentity.LoaiGiaKPI;
 import com.company.clinicportal.enumentity.NhomDichVu;
+import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.SaveContext;
@@ -30,6 +31,26 @@ public class TinhKpiChiTietService {
 
     @Autowired
     private Metadata metadata;
+
+    /**
+     * Cập nhật tổng KPI tháng sau khi xóa chi tiết KPI (ví dụ khi xóa buổi điều trị).
+     */
+    public void recalcTinhKpiForNhanSuAndDate(Long nhanSuId, Date ngayThucHien) {
+        if (nhanSuId == null || ngayThucHien == null) {
+            return;
+        }
+        Set<MonthlyKey> keys = Set.of(new MonthlyKey(nhanSuId, normalizeMonthStart(ngayThucHien)));
+        recalcTinhKpiForMonthlyKeys(keys);
+    }
+
+    public void recalcTinhKpiAfterRemovingDetails(List<TinhKpiChiTiet> removedRows) {
+        if (removedRows == null || removedRows.isEmpty()) {
+            return;
+        }
+        Set<MonthlyKey> keys = new HashSet<>();
+        collectMonthlyKeys(removedRows, keys);
+        recalcTinhKpiForMonthlyKeys(keys);
+    }
 
     public void regenerateForChiTietDieuTri(Long chiTietDieuTriId) {
         if (chiTietDieuTriId == null) {
@@ -56,8 +77,10 @@ public class TinhKpiChiTietService {
 
         List<BuoiDieuTri> buoiDieuTris = dataManager.load(BuoiDieuTri.class)
                 .query("select distinct b from BuoiDieuTri b " +
-                        "where b.idChiTietDieuTri = :chiTiet ")
+                        "where b.idChiTietDieuTri = :chiTiet " +
+                        "and b.trangThai = :trangThaiDaThucHien")
                 .parameter("chiTiet", chiTietDieuTri)
+                .parameter("trangThaiDaThucHien", TrangThaiBuoiDieuTri.DA_THUC_HIEN.getId())
                 .list();
 
         SaveContext saveContext = new SaveContext();
@@ -93,6 +116,9 @@ public class TinhKpiChiTietService {
         List<TinhKpiChiTiet> newRows = new ArrayList<>();
 
         for (BuoiDieuTri buoi : buoiDieuTris) {
+            if (!TrangThaiBuoiDieuTri.DA_THUC_HIEN.equals(buoi.getTrangThai())) {
+                continue;
+            }
             if (buoi.getIdChiTietDichVu() == null || buoi.getIdChiTietDichVu().getId() == null) {
                 continue;
             }
@@ -184,23 +210,17 @@ public class TinhKpiChiTietService {
     }
 
     private CaLamViec resolveCaThucHien(BuoiDieuTri buoiDieuTri) {
-        if (buoiDieuTri.getGioBatDau() != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(buoiDieuTri.getGioBatDau());
-            int hour = cal.get(Calendar.HOUR_OF_DAY);
-            int minute = cal.get(Calendar.MINUTE);
-            if (hour > 17 || (hour == 17 && minute >= 30)) {
-                return CaLamViec.TOI;
-            }
-            return CaLamViec.SANG;
-        }
-        return buoiDieuTri.getCa() != null ? buoiDieuTri.getCa() : CaLamViec.SANG;
+        return CaLamViec.resolveFromGioBatDau(buoiDieuTri.getGioBatDau(), buoiDieuTri.getCa());
     }
 
     private void syncTinhKpiByMonth(List<TinhKpiChiTiet> oldRows, List<TinhKpiChiTiet> newRows) {
         Set<MonthlyKey> keys = new HashSet<>();
         collectMonthlyKeys(oldRows, keys);
         collectMonthlyKeys(newRows, keys);
+        recalcTinhKpiForMonthlyKeys(keys);
+    }
+
+    private void recalcTinhKpiForMonthlyKeys(Set<MonthlyKey> keys) {
         if (keys.isEmpty()) {
             return;
         }

@@ -18,6 +18,32 @@
                 <property name="idNhanSu" fetchPlan="_base"/>
             </fetchPlan>
         </collection>
+        <collection id="buoiDieuTrisDc" class="com.company.clinicportal.entity.BuoiDieuTri">
+            <loader id="buoiDieuTrisDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BuoiDieuTri e
+                              where e.idBenhNhan = :idBenhNhan
+                              order by e.ngayThucHien asc, e.gioBatDau asc, e.id asc]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base">
+                <property name="idChiTietDieuTri" fetchPlan="_base">
+                    <property name="dienBienBenh"/>
+                    <property name="chuanDoan"/>
+                </property>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                    <property name="ghiChu"/>
+                    <property name="idDichVu" fetchPlan="_base">
+                        <property name="tenDichVu"/>
+                    </property>
+                    <property name="idBacSi" fetchPlan="_base">
+                        <property name="hoTen"/>
+                    </property>
+                </property>
+                <property name="idNhanSuStaging" fetchPlan="_base"/>
+                <property name="idNhanSu2Staging" fetchPlan="_base"/>
+            </fetchPlan>
+        </collection>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -110,8 +136,9 @@
                             <div classNames="function-flex-end">
                                 <button action="chiTietDieuTrisDataGrid.create"
                                         classNames="action-button create"/>
-                                <button id="printReportButton" text="In sổ"/>
-                                <button id="printToDieuTriButton" text="In tờ điều trị"/>
+                                <button id="printReportButton" text="In sổ" visible="false"/>
+                                <button id="printReportButton2" text="In sổ"/>
+<!--                                <button id="printToDieuTriButton" text="In tờ điều trị"/>-->
 
                             </div>
                         </div>

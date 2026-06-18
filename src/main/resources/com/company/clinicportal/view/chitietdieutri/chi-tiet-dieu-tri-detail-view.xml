@@ -9,6 +9,7 @@
                 <property name="id"/>
                 <property name="idPhieuDieuTri" fetchPlan="_base"/>
                 <property name="chiTietDichVu" fetchPlan="_base"/>
+                <property name="fileDinhKem" fetchPlan="_base"/>
                 <property name="idBenhNhan" fetchPlan="_base">
                     <property name="trangThaiKhamBenh"/>
                     <property name="ngayKhamBenh"/>
@@ -17,6 +18,7 @@
                 <property name="idNhanSu" fetchPlan="_base"/>
             </fetchPlan>
             <collection id="chiTietDichVuDc" property="chiTietDichVu"/>
+            <collection id="fileDinhKemDc" property="fileDinhKem"/>
             <loader id="chiTietDieuTriDl"/>
         </instance>
         <collection id="lichSuThanhToansDc" class="com.company.clinicportal.entity.LichSuThanhToan">
@@ -33,6 +35,45 @@
                 <property name="ghiChu"/>
                 <property name="hoTenNguoiNopTien"/>
                 <property name="soDienThoai"/>
+            </fetchPlan>
+        </collection>
+        <collection id="buoiDieuTrisDc" class="com.company.clinicportal.entity.BuoiDieuTri">
+            <loader id="buoiDieuTrisDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BuoiDieuTri e
+                              where e.idChiTietDieuTri = :idChiTietDieuTri
+                                 or e.idChiTietDichVu.idChiTietPhieuDieuTri = :idChiTietDieuTri
+                              order by e.ngayThucHien asc, e.gioBatDau asc, e.id asc]]>
+                </query>
+            </loader>
+            <fetchPlan>
+                <property name="id"/>
+                <property name="ngayThucHien"/>
+                <property name="gioBatDau"/>
+                <property name="gioKetThuc"/>
+                <property name="trangThai"/>
+                <property name="ca"/>
+                <property name="idChiTietDichVu" fetchPlan="_base">
+                    <property name="ghiChu"/>
+                    <property name="ngayBatDau"/>
+                    <property name="soLuong"/>
+                    <property name="khoangCachBuoiDieuTri"/>
+                    <property name="idDichVu" fetchPlan="_base">
+                        <property name="tenDichVu"/>
+                    </property>
+                    <property name="idBacSi" fetchPlan="_base">
+                        <property name="hoTen"/>
+                    </property>
+                </property>
+                <property name="idChiTietDieuTri" fetchPlan="_base">
+                    <property name="dienBienBenh"/>
+                    <property name="chuanDoan"/>
+                    <property name="idNhanSu" fetchPlan="_base">
+                        <property name="hoTen"/>
+                    </property>
+                </property>
+                <property name="idNhanSuStaging" fetchPlan="_base"/>
+                <property name="idNhanSu2Staging" fetchPlan="_base"/>
             </fetchPlan>
         </collection>
     </data>
@@ -107,9 +148,6 @@
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="1"/>
                         </responsiveSteps>
-                        <!--                        <hbox css="width: 100%; justify-content: flex-end; gap: 8px;">-->
-                        <!--                           -->
-                        <!--                        </hbox>-->
                         <dataGrid id="chiTietDichVusDataGrid"
                                   dataContainer="chiTietDichVuDc"
                                   width="100%">
@@ -129,6 +167,7 @@
                             <columns resizable="true">
                                 <column property="idDichVu.tenDichVu"/>
                                 <column property="idDichVu.nhomDichVu"/>
+                                <column property="ghiChu" header="Ghi chú"/>
                                 <column property="idDichVu.gia"/>
                                 <column property="soLuong" header="Số buổi"/>
                                 <column property="ngayBatDau"/>
@@ -186,7 +225,7 @@
                             <responsiveStep minWidth="0" columns="6"/>
                         </responsiveSteps>
                         <textField id="tongTienField" property="tongTien" readOnly="true"/>
-                        <textField id="khuyenMaiField" property="khuyenMai"/>
+                        <textField id="khuyenMaiField" property="khuyenMai" placeholder="VD: 10,5 hoặc 10.5"/>
                         <textField id="tongTienSauKhuyenMaiField" property="tongTienSauKhuyenMai" readOnly="true"/>
                         <textField id="daThanhToanField" property="daThanhToan" readOnly="true"/>
                         <textField id="phaiDongField" property="phaiDong" readOnly="true"/>
@@ -244,30 +283,6 @@
                     </formLayout>
                 </vbox>
             </vbox>
-            <!--            <textField id="chuanDoanRaVienField" property="chuanDoanRaVien"/>-->
-            <!--            <dateTimePicker id="createdAtField" property="createdAt"/>-->
-            <!--            <textField id="createdByIdField" property="createdById"/>-->
-            <!--            <textField id="daXuLyField" property="daXuLy"/>-->
-            <!--            <textArea id="dienBienBenhField" height="9.5em" property="dienBienBenh"/>-->
-            <!--            <textField id="giamTrucTiepField" property="giamTrucTiep"/>-->
-            <!--            <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>-->
-            <!--            <textField id="huongDieuTriField" property="huongDieuTri"/>-->
-            <!--            <textField id="idPhieuDieuTriField" property="idPhieuDieuTri"/>-->
-            <!--            <textArea id="kbBoPhanField" height="9.5em" property="kbBoPhan"/>-->
-            <!--            <textArea id="ketQuaCanLamSangField" height="9.5em" property="ketQuaCanLamSang"/>-->
-            <!--            <textArea id="ketQuaXetNghiemField" height="9.5em" property="ketQuaXetNghiem"/>-->
-            <!--            <textArea id="khamBenhQuaTrinhBenhField" height="9.5em" property="khamBenhQuaTrinhBenh"/>-->
-            <!--            <textArea id="khamBenhTienSuBenhField" height="9.5em" property="khamBenhTienSuBenh"/>-->
-            <!--            <textField id="khamBenhToanThanField" property="khamBenhToanThan"/>-->
-            <!--            <textField id="lyDoVaoVienField" property="lyDoVaoVien"/>-->
-            <!--            <datePicker id="ngayBatDauField" property="ngayBatDau"/>-->
-            <!--            <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh"/>-->
-            <!--            <datePicker id="ngayKetThucField" property="ngayKetThuc"/>-->
-            <!--            <dateTimePicker id="ngayThanhToanField" property="ngayThanhToan"/>-->
-            <!--            <textField id="tenPhieuDieuTriField" property="tenPhieuDieuTri"/>-->
-            <!--            <textField id="tinhTrangBenhNhanField" property="tinhTrangBenhNhan"/>-->
-            <!--            <textField id="tinhTrangBnField" property="tinhTrangBn"/>-->
-
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
