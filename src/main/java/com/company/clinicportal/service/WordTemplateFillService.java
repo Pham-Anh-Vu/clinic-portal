@@ -20,12 +20,25 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Điền placeholder dạng {@code ${key}} trong mẫu Word (.doc / .docx) và trả về file đã điền.
  */
 @Service
 public class WordTemplateFillService {
+
+    private static final String CHU_KY_NGAY_KEY = "${chuKy.ngay}";
+    private static final String CHU_KY_THANG_KEY = "${chuKy.thang}";
+    private static final String CHU_KY_NAM_KEY = "${chuKy.nam}";
+    private static final Pattern SIGNATURE_DATE_PATTERN = Pattern.compile(
+            "Ngày\\s*[\\.…]+\\s*tháng\\s*[\\.…]+\\s*năm\\s*(?:[\\.…]+|\\d{4}\\.?)",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+    private static final Pattern LOWERCASE_DATE_PATTERN = Pattern.compile(
+            "ngày\\s*[\\.…]+\\s*tháng\\s*[\\.…]+\\s*năm\\s*[\\.…]+",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
 
     public byte[] fillDocTemplate(InputStream templateStream, Map<String, String> values) throws IOException {
         try (HWPFDocument document = new HWPFDocument(templateStream);
@@ -92,10 +105,13 @@ public class WordTemplateFillService {
 
     private void replaceInParagraph(XWPFParagraph paragraph, Map<String, String> values) {
         String text = paragraph.getText();
-        if (text == null || !text.contains("${")) {
+        if (text == null || text.isBlank()) {
             return;
         }
-        String replaced = applyReplacementsToText(text, values);
+        String replaced = text.contains("${")
+                ? applyReplacementsToText(text, values)
+                : text;
+        replaced = applyDatePlaceholderReplacement(replaced, values);
         if (replaced.equals(text)) {
             return;
         }
@@ -238,6 +254,23 @@ public class WordTemplateFillService {
             XWPFParagraph paragraph = cell.addParagraph();
             paragraph.createRun().setText(value, 0);
         }
+    }
+
+    private String applyDatePlaceholderReplacement(String text, Map<String, String> values) {
+        String ngay = values.get(CHU_KY_NGAY_KEY);
+        String thang = values.get(CHU_KY_THANG_KEY);
+        String nam = values.get(CHU_KY_NAM_KEY);
+        if (ngay == null || ngay.isBlank() || thang == null || thang.isBlank() || nam == null || nam.isBlank()) {
+            return text;
+        }
+        String ngayThangNam = ngay + " tháng " + thang + " năm " + nam;
+        if (text.contains("Ngày") && text.contains("tháng") && text.contains("năm")) {
+            text = SIGNATURE_DATE_PATTERN.matcher(text).replaceAll("Ngày " + ngayThangNam);
+        }
+        if (text.contains("ngày") && text.contains("tháng") && text.contains("năm")) {
+            text = LOWERCASE_DATE_PATTERN.matcher(text).replaceAll("ngày " + ngayThangNam);
+        }
+        return text;
     }
 
     private void applyReplacements(Replacer replacer, Map<String, String> values) {

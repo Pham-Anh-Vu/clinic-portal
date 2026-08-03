@@ -36,6 +36,9 @@
                             label="msg://com.company.clinicportal.entity/ToDieuTriKyThuat.idDichVu"/>
             <textField id="thoiGianPhutField" property="thoiGianPhut"
                        label="msg://com.company.clinicportal.entity/ToDieuTriKyThuat.thoiGianPhut"/>
+            <textArea id="ghiChuField" property="ghiChu"
+                      label="msg://com.company.clinicportal.entity/ToDieuTriKyThuat.ghiChu"
+                      height="9.5em"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="closeButton" action="closeAction" icon="CLOSE"/>

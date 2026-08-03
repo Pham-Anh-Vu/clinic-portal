@@ -87,6 +87,7 @@
                     <columns resizable="true">
                         <column property="idDichVu" header="Tên dịch vụ kỹ thuật PHCN"/>
                         <column property="thoiGianPhut" header="Thời gian (phút)"/>
+                        <column property="ghiChu" header="Ghi chú"/>
                         <column key="thaoTacColumn" header="Thao tác"/>
                     </columns>
                 </dataGrid>

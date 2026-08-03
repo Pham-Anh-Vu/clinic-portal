@@ -73,8 +73,9 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
     private HorizontalLayout trangThaiBox;
     @ViewComponent
     private DataGrid<LichSuThanhToan> lichSuThanhToansDataGrid;
-    @ViewComponent
-    private DataGrid<BuoiDieuTri> buoiDieuTrisDataGrid;
+    // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+    // @ViewComponent
+    // private DataGrid<BuoiDieuTri> buoiDieuTrisDataGrid;
     @ViewComponent
     private TypedTextField<Long> tongTienField;
     @ViewComponent
@@ -95,12 +96,14 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
     private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
     @ViewComponent
     private InstanceLoader<ChiTietDieuTri> chiTietDieuTriDl;
-    @ViewComponent
-    private CollectionLoader<BuoiDieuTri> buoiDieuTrisDl;
+    // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+    // @ViewComponent
+    // private CollectionLoader<BuoiDieuTri> buoiDieuTrisDl;
     @Autowired
     private TinhKpiChiTietService tinhKpiChiTietService;
-    @ViewComponent
-    private CollectionContainer<BuoiDieuTri> buoiDieuTrisDc;
+    // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+    // @ViewComponent
+    // private CollectionContainer<BuoiDieuTri> buoiDieuTrisDc;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -124,12 +127,15 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
             return button;
         }).setHeader("Thao tác").setAutoWidth(true);
 
-        buoiDieuTrisDataGrid.addComponentColumn(buoiDieuTri -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText("Chi tiết");
-            button.addClickListener(e -> openBuoiDieuTriDetail(buoiDieuTri, false));
-            return button;
-        }).setHeader("Thao tác").setAutoWidth(true);
+        // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+        // buoiDieuTrisDataGrid.addComponentColumn(buoiDieuTri -> {
+        //     JmixButton button = uiComponents.create(JmixButton.class);
+        //     button.setText("Chi tiết");
+        //     button.addClickListener(e -> openBuoiDieuTriDetail(buoiDieuTri, false));
+        //     return button;
+        // }).setHeader("Thao tác").setAutoWidth(true);
+        //
+        // configureBuoiDieuTrisColumns();
 
         lichSuThanhToansDataGrid.addComponentColumn(lichSuThanhToan -> {
             JmixButton button = uiComponents.create(JmixButton.class);
@@ -164,8 +170,9 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
 
         autoFillTongKetDieuTriFields();
 
-        buoiDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
-        buoiDieuTrisDl.load();
+        // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+        // buoiDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
+        // buoiDieuTrisDl.load();
 
         Span span = uiComponents.create(Span.class);
         var benhNhan = getEditedEntity().getIdBenhNhan();
@@ -401,15 +408,16 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
         return lichSuThanhToan;
     }
 
-    @Install(to = "buoiDieuTrisDataGrid.create", subject = "newEntitySupplier")
-    private BuoiDieuTri buoiDieuTrisDataGridCreateNewEntitySupplier() {
-        BuoiDieuTri buoiDieuTri = metadata.create(BuoiDieuTri.class);
-        buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
-        buoiDieuTri.setIdBenhNhan(getEditedEntity().getIdBenhNhan());
-        return buoiDieuTri;
-    }
+    // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+    // @Install(to = "buoiDieuTrisDataGrid.create", subject = "newEntitySupplier")
+    // private BuoiDieuTri buoiDieuTrisDataGridCreateNewEntitySupplier() {
+    //     BuoiDieuTri buoiDieuTri = metadata.create(BuoiDieuTri.class);
+    //     buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
+    //     buoiDieuTri.setIdBenhNhan(getEditedEntity().getIdBenhNhan());
+    //     return buoiDieuTri;
+    // }
 
-//    @Install(to = "buoiDieuTrisDataGrid.sttColumn", subject = "renderer")
+    //    @Install(to = "buoiDieuTrisDataGrid.sttColumn", subject = "renderer")
 //    private ComponentRenderer<Span, BuoiDieuTri> buoiDieuTrisDataGridSttColumnRenderer() {
 //        return new ComponentRenderer<>(buoiDieuTri -> {
 //            Span span = uiComponents.create(Span.class);
@@ -460,72 +468,100 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
 //        });
 //    }
 
-    private void openBuoiDieuTriDetail(BuoiDieuTri buoiDieuTri) {
-        if (buoiDieuTri == null || buoiDieuTri.getId() == null) {
-            return;
-        }
-        DialogWindow<BuoiDieuTriDetailView> window = dialogWindows.detail(this, BuoiDieuTri.class)
-                .withViewClass(BuoiDieuTriDetailView.class)
-                .editEntity(buoiDieuTri)
-                .build();
-        window.addAfterCloseListener(event -> buoiDieuTrisDl.load());
-        window.open();
-    }
-
-    
-
-    private void openBuoiDieuTriDetail(BuoiDieuTri buoiDieuTri, boolean newEntity) {
-        DialogWindow<BuoiDieuTriDetailView> window = dialogWindows.detail(this, BuoiDieuTri.class)
-                .withViewClass(BuoiDieuTriDetailView.class)
-                .editEntity(buoiDieuTri)
-                .build();
-        window.addAfterCloseListener(event -> buoiDieuTrisDl.load());
-        if (newEntity) {
-            window.getView().getEditedEntity().setIdChiTietDieuTri(getEditedEntity());
-            window.getView().getEditedEntity().setIdBenhNhan(getEditedEntity().getIdBenhNhan());
-        }
-        window.open();
-    }
-
-    private void deleteBuoiDieuTri(BuoiDieuTri buoiDieuTri) {
-        if (buoiDieuTri != null && buoiDieuTri.getId() != null) {
-            dataManager.remove(buoiDieuTri);
-            buoiDieuTrisDl.load();
-        }
-    }
-
-    private String formatBuoiDieuTriNgayGio(BuoiDieuTri buoiDieuTri) {
-        if (buoiDieuTri == null || buoiDieuTri.getNgayThucHien() == null) {
-            return "";
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String ngay = formatter.format(buoiDieuTri.getNgayThucHien().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        String gioBatDau = formatTime(buoiDieuTri.getGioBatDau());
-        String gioKetThuc = formatTime(buoiDieuTri.getGioKetThuc());
-        if (!gioBatDau.isBlank() && !gioKetThuc.isBlank()) {
-            return ngay + " " + gioBatDau + " - " + gioKetThuc;
-        }
-        if (!gioBatDau.isBlank()) {
-            return ngay + " " + gioBatDau;
-        }
-        return ngay;
-    }
-
-    private String formatBuoiDieuTriThoiGian(BuoiDieuTri buoiDieuTri) {
-        if (buoiDieuTri == null || buoiDieuTri.getGioBatDau() == null || buoiDieuTri.getGioKetThuc() == null) {
-            return "";
-        }
-        long minutes = (buoiDieuTri.getGioKetThuc().getTime() - buoiDieuTri.getGioBatDau().getTime()) / 60000L;
-        return minutes > 0 ? String.valueOf(minutes) : "";
-    }
-
-    private String formatTime(Date time) {
-        if (time == null) {
-            return "";
-        }
-        return DateTimeFormatter.ofPattern("HH:mm")
-                .format(time.toInstant().atZone(ZoneId.systemDefault()).toLocalTime());
-    }
+    // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+//    private void openBuoiDieuTriDetail(BuoiDieuTri buoiDieuTri) {
+//        if (buoiDieuTri == null || buoiDieuTri.getId() == null) {
+//            return;
+//        }
+//        DialogWindow<BuoiDieuTriDetailView> window = dialogWindows.detail(this, BuoiDieuTri.class)
+//                .withViewClass(BuoiDieuTriDetailView.class)
+//                .editEntity(buoiDieuTri)
+//                .build();
+//        window.addAfterCloseListener(event -> buoiDieuTrisDl.load());
+//        window.open();
+//    }
+//
+//
+//    private void openBuoiDieuTriDetail(BuoiDieuTri buoiDieuTri, boolean newEntity) {
+//        DialogWindow<BuoiDieuTriDetailView> window = dialogWindows.detail(this, BuoiDieuTri.class)
+//                .withViewClass(BuoiDieuTriDetailView.class)
+//                .editEntity(buoiDieuTri)
+//                .build();
+//        window.addAfterCloseListener(event -> buoiDieuTrisDl.load());
+//        if (newEntity) {
+//            window.getView().getEditedEntity().setIdChiTietDieuTri(getEditedEntity());
+//            window.getView().getEditedEntity().setIdBenhNhan(getEditedEntity().getIdBenhNhan());
+//        }
+//        window.open();
+//    }
+//
+//    private void deleteBuoiDieuTri(BuoiDieuTri buoiDieuTri) {
+//        if (buoiDieuTri != null && buoiDieuTri.getId() != null) {
+//            dataManager.remove(buoiDieuTri);
+//            buoiDieuTrisDl.load();
+//        }
+//    }
+//
+//    private void configureBuoiDieuTrisColumns() {
+//        Grid.Column<BuoiDieuTri> sttColumn = buoiDieuTrisDataGrid.getColumnByKey("sttColumn");
+//        if (sttColumn != null) {
+//            sttColumn.setRenderer(new ComponentRenderer<>(buoiDieuTri -> {
+//                Span span = uiComponents.create(Span.class);
+//                int stt = buoiDieuTrisDc.getItems().indexOf(buoiDieuTri) + 1;
+//                span.setText(stt > 0 ? String.valueOf(stt) : "");
+//                return span;
+//            }));
+//        }
+//        Grid.Column<BuoiDieuTri> ngayGioColumn = buoiDieuTrisDataGrid.getColumnByKey("ngayGioColumn");
+//        if (ngayGioColumn != null) {
+//            ngayGioColumn.setRenderer(new ComponentRenderer<>(buoiDieuTri -> {
+//                Span span = uiComponents.create(Span.class);
+//                span.setText(formatBuoiDieuTriNgayGio(buoiDieuTri));
+//                return span;
+//            }));
+//        }
+//        Grid.Column<BuoiDieuTri> thoiGianColumn = buoiDieuTrisDataGrid.getColumnByKey("thoiGianColumn");
+//        if (thoiGianColumn != null) {
+//            thoiGianColumn.setRenderer(new ComponentRenderer<>(buoiDieuTri -> {
+//                Span span = uiComponents.create(Span.class);
+//                span.setText(formatBuoiDieuTriThoiGian(buoiDieuTri));
+//                return span;
+//            }));
+//        }
+//    }
+//
+//    private String formatBuoiDieuTriNgayGio(BuoiDieuTri buoiDieuTri) {
+//        if (buoiDieuTri == null || buoiDieuTri.getNgayThucHien() == null) {
+//            return "";
+//        }
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//        String ngay = formatter.format(buoiDieuTri.getNgayThucHien().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+//        String gioBatDau = formatTime(buoiDieuTri.getGioBatDau());
+//        String gioKetThuc = formatTime(buoiDieuTri.getGioKetThuc());
+//        if (!gioBatDau.isBlank() && !gioKetThuc.isBlank()) {
+//            return ngay + " " + gioBatDau + " - " + gioKetThuc;
+//        }
+//        if (!gioBatDau.isBlank()) {
+//            return ngay + " " + gioBatDau;
+//        }
+//        return ngay;
+//    }
+//
+//    private String formatBuoiDieuTriThoiGian(BuoiDieuTri buoiDieuTri) {
+//        if (buoiDieuTri == null || buoiDieuTri.getGioBatDau() == null || buoiDieuTri.getGioKetThuc() == null) {
+//            return "";
+//        }
+//        long minutes = (buoiDieuTri.getGioKetThuc().getTime() - buoiDieuTri.getGioBatDau().getTime()) / 60000L;
+//        return minutes > 0 ? String.valueOf(minutes) : "";
+//    }
+//
+//    private String formatTime(Date time) {
+//        if (time == null) {
+//            return "";
+//        }
+//        return DateTimeFormatter.ofPattern("HH:mm")
+//                .format(time.toInstant().atZone(ZoneId.systemDefault()).toLocalTime());
+//    }
 
     @Subscribe
     public void onAfterSave(final AfterSaveEvent event) {
@@ -534,18 +570,19 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
         }
     }
 
-    @Subscribe(id = "buoiDieuTrisDl", target = Target.DATA_LOADER)
-    public void onBuoiDieuTrisDlPostLoad(final CollectionLoader.PostLoadEvent<BuoiDieuTri> event) {
-        // dữ liệu hiển thị cho tab Tờ điều trị
-    }
-
-    @Subscribe("buoiDieuTrisDataGrid.create")
-    public void onBuoiDieuTrisDataGridCreate(final ActionPerformedEvent event) {
-        BuoiDieuTri buoiDieuTri = metadata.create(BuoiDieuTri.class);
-        buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
-        buoiDieuTri.setIdBenhNhan(getEditedEntity().getIdBenhNhan());
-        openBuoiDieuTriDetail(buoiDieuTri);
-    }
+    // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
+    // @Subscribe(id = "buoiDieuTrisDl", target = Target.DATA_LOADER)
+    // public void onBuoiDieuTrisDlPostLoad(final CollectionLoader.PostLoadEvent<BuoiDieuTri> event) {
+    //     // dữ liệu hiển thị cho tab Tờ điều trị
+    // }
+    //
+    // @Subscribe("buoiDieuTrisDataGrid.create")
+    // public void onBuoiDieuTrisDataGridCreate(final ActionPerformedEvent event) {
+    //     BuoiDieuTri buoiDieuTri = metadata.create(BuoiDieuTri.class);
+    //     buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
+    //     buoiDieuTri.setIdBenhNhan(getEditedEntity().getIdBenhNhan());
+    //     openBuoiDieuTriDetail(buoiDieuTri);
+    // }
 
     
 

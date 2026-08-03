@@ -20,6 +20,8 @@ public class SoBenhAnPreviewDialogView extends StandardView {
 
     @ViewComponent
     private Div previewFrame;
+    @ViewComponent
+    private JmixButton downloadWordButton;
 
     @Autowired
     private Notifications notifications;
@@ -27,11 +29,23 @@ public class SoBenhAnPreviewDialogView extends StandardView {
     private byte[] pdfBytes;
     private byte[] wordBytes;
     private String wordFileName;
+    private String previewTitle;
 
     public void setPreviewData(byte[] pdfBytes, byte[] wordBytes, String wordFileName) {
         this.pdfBytes = pdfBytes;
         this.wordBytes = wordBytes;
         this.wordFileName = wordFileName;
+    }
+
+    public void setPreviewTitle(String previewTitle) {
+        this.previewTitle = previewTitle;
+    }
+
+    @Subscribe
+    public void onInit(final InitEvent event) {
+        if (previewTitle != null && !previewTitle.isBlank()) {
+            setPageTitle(previewTitle);
+        }
     }
 
     @Subscribe
@@ -60,12 +74,18 @@ public class SoBenhAnPreviewDialogView extends StandardView {
 
         previewFrame.removeAll();
         previewFrame.getElement().appendChild(iframeElement);
+
+        if (wordBytes == null || wordBytes.length == 0) {
+            downloadWordButton.setVisible(false);
+        } else if (isPdfDownload()) {
+            downloadWordButton.setText("Tải PDF");
+        }
     }
 
     @Subscribe("downloadWordButton")
     public void onDownloadWordButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
         if (wordBytes == null || wordBytes.length == 0) {
-            notifications.create("Không có file Word để tải.")
+            notifications.create("Không có file để tải.")
                     .withType(Notifications.Type.WARNING)
                     .show();
             return;
@@ -73,7 +93,7 @@ public class SoBenhAnPreviewDialogView extends StandardView {
 
         String fileName = wordFileName != null && !wordFileName.isBlank() ? wordFileName : "so-benh-an.doc";
         StreamResource streamResource = new StreamResource(fileName, () -> new ByteArrayInputStream(wordBytes));
-        streamResource.setContentType("application/msword");
+        streamResource.setContentType(isPdfDownload() ? "application/pdf" : "application/msword");
         StreamRegistration registration = VaadinSession.getCurrent()
                 .getResourceRegistry()
                 .registerResource(streamResource);
@@ -92,5 +112,9 @@ public class SoBenhAnPreviewDialogView extends StandardView {
     @Subscribe("closeButton")
     public void onCloseButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
         close(StandardOutcome.CLOSE);
+    }
+
+    private boolean isPdfDownload() {
+        return wordFileName != null && wordFileName.toLowerCase().endsWith(".pdf");
     }
 }

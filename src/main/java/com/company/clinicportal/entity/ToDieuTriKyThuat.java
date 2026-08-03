@@ -28,6 +28,9 @@ public class ToDieuTriKyThuat {
     @Column(name = "thoi_gian_phut")
     private Integer thoiGianPhut;
 
+    @Column(name = "ghi_chu", length = 500)
+    private String ghiChu;
+
     public Long getId() {
         return id;
     }
@@ -58,5 +61,13 @@ public class ToDieuTriKyThuat {
 
     public void setThoiGianPhut(Integer thoiGianPhut) {
         this.thoiGianPhut = thoiGianPhut;
+    }
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
     }
 }

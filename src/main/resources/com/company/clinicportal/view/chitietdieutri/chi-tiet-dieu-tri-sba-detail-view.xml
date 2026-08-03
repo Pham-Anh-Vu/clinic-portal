@@ -7,6 +7,18 @@
             <fetchPlan extends="_base">
                 <property name="idBenhNhan" fetchPlan="_base"/>
                 <property name="idNhanSu" fetchPlan="_base"/>
+                <property name="tongTien"/>
+                <property name="khuyenMai"/>
+                <property name="tongTienSauKhuyenMai"/>
+                <property name="daThanhToan"/>
+                <property name="phaiDong"/>
+                <property name="ngayThanhToan"/>
+                <property name="trongSoKpi"/>
+                <property name="trongSoVatLyTriLieu"/>
+                <property name="trongSoVanDongTriLieu"/>
+                <property name="trongSoKeoNanTriLieu"/>
+                <property name="trongSoXoaBopTriLieu"/>
+                <property name="trongSoKhamLuongGia"/>
                 <property name="chiTietDichVu" fetchPlan="_base">
                     <property name="idDichVu" fetchPlan="_base"/>
                     <property name="idBacSi" fetchPlan="_base"/>
@@ -17,6 +29,22 @@
             <collection id="fileDinhKemDc" property="fileDinhKem"/>
             <loader id="chiTietDieuTriDl"/>
         </instance>
+        <collection id="lichSuThanhToansDc" class="com.company.clinicportal.entity.LichSuThanhToan">
+            <loader id="lichSuThanhToansDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from LichSuThanhToan e
+                              where e.idChiTietDieuTri = :idChiTietDieuTri
+                              order by e.thanhToanLuc desc, e.id desc]]>
+                </query>
+            </loader>
+            <fetchPlan>
+                <property name="thanhToanLuc"/>
+                <property name="daThanhToan"/>
+                <property name="ghiChu"/>
+                <property name="hoTenNguoiNopTien"/>
+                <property name="soDienThoai"/>
+            </fetchPlan>
+        </collection>
         <collection id="toDieuTrisDc" class="com.company.clinicportal.entity.ToDieuTri">
             <loader id="toDieuTrisDl" readOnly="true">
                 <query>
@@ -155,11 +183,11 @@
                                 </responsiveSteps>
                                 <textField id="idNhanSuField" property="idNhanSu" label="Bác sĩ chỉ định"/>
                                 <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
-                                <textField id="khamBenhToanThanField" property="khamBenhToanThan" colspan="2"/>
-                                <textArea id="kbBoPhanField" height="9.5em" property="kbBoPhan" colspan="2" label="Khám các bộ phận"/>
                                 <textArea id="ketQuaCanLamSangField" height="9.5em" property="ketQuaCanLamSang" colspan="2" label="Tóm tắt kết quả cận lâm sàng"/>
                                 <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" label="Chẩn đoán ban đầu" colspan="2"/>
                                 <textField id="daXuLyField" property="daXuLy" colspan="2" label="Đã xử lý (thuốc, chăm sóc)"/>
+                                <textArea id="kbBoPhanField" property="kbBoPhan" height="9.5em" colspan="2" label="Khám bệnh bộ phận"/>
+                                <textArea id="khamBenhToanThanField" property="khamBenhToanThan" height="9.5em" colspan="2" label="Khám bệnh toàn thân"/>
                                 <textField id="linkGgDriveField" property="linkGgDrive" colspan="2"
                                            label="msg://com.company.clinicportal.entity/ChiTietDieuTri.linkGgDrive"/>
                             </formLayout>
@@ -276,8 +304,6 @@
                         </vbox>
                     </vbox>
 
-                    <!-- TẠM ẨN: khối KPI & TRỌNG SỐ (phiếu điều trị sổ bệnh án) -->
-                    <!--
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
                         <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
@@ -305,10 +331,7 @@
                             </formLayout>
                         </vbox>
                     </vbox>
-                    -->
 
-                    <!-- TẠM ẨN: khối THÔNG TIN THANH TOÁN (phiếu điều trị sổ bệnh án) -->
-                    <!--
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
                         <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
@@ -336,10 +359,7 @@
                             </formLayout>
                         </vbox>
                     </vbox>
-                    -->
 
-                    <!-- TẠM ẨN: khối LỊCH SỬ THANH TOÁN (phiếu điều trị sổ bệnh án) -->
-                    <!--
                     <vbox width="100%" alignItems="START" padding="false"
                           spacing="false" classNames="tab-5-grid">
                         <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
@@ -366,7 +386,7 @@
                                           width="100%">
                                     <emptyStateComponent>
                                         <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
-                                            <icon icon="vaadin:file-o" size="48px" color="var(lumo-tertiary-text-color)"/>
+                                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
                                             <h2 text="Chưa có dữ liệu"/>
                                         </vbox>
                                     </emptyStateComponent>
@@ -387,7 +407,6 @@
                             </formLayout>
                         </vbox>
                     </vbox>
-                    -->
 
                 </vbox>
             </tab>
@@ -468,6 +487,9 @@
                                     <responsiveStep minWidth="0" columns="2"/>
                                 </responsiveSteps>
                                 <textArea id="dienBienBenhField" height="9.5em" property="dienBienBenh" colspan="2" />
+                                <textField id="khamBenhToanThanField1" property="khamBenhToanThan" colspan="2"/>
+                                <textArea id="kbBoPhanField1" height="9.5em" property="kbBoPhan" colspan="2"
+                                          label="Khám các bộ phận, toàn thân"/>
                                 <textField id="chuanDoanRaVienField" property="chuanDoanRaVien" colspan="2" />
                                 <textField id="tinhTrangBenhNhanField" property="tinhTrangBenhNhan" colspan="2" label="Tình trạng bệnh nhân ra viện"/>
                                 <textArea id="huongDieuTriField" height="9.5em" property="huongDieuTri" colspan="2" label="Hướng điều trị và các chế độ tiếp theo"/>

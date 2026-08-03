@@ -5,38 +5,31 @@ import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.ChiTietDieuTriFileDinhKem;
+import com.company.clinicportal.entity.LichSuThanhToan;
 import com.company.clinicportal.entity.ToDieuTri;
 import com.company.clinicportal.entity.ToDieuTriKyThuat;
-// TẠM ẨN: logic Lịch sử thanh toán
-// import com.company.clinicportal.entity.LichSuThanhToan;
-// TẠM ẨN: logic KPI (trọng số)
-// import com.company.clinicportal.enumentity.NhomDichVu;
+import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.enumentity.TinhTheoGia;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
+import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
+import com.company.clinicportal.service.TinhKpiChiTietService;
 import com.company.clinicportal.service.ToDieuTriPrintService;
+import com.company.clinicportal.view.benhnhan.SoBenhAnPreviewDialogView;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
-// TẠM ẨN: logic Lịch sử thanh toán
-// import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
+import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
-// TẠM ẨN: logic Thanh toán
-// import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
-// TẠM ẨN: logic KPI
-// import com.company.clinicportal.service.TinhKpiChiTietService;
-// TẠM ẨN: logic Thanh toán (khuyến mãi)
-// import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.VaadinSession;
 import io.jmix.core.DataManager;
 import io.jmix.core.FetchPlan;
 import io.jmix.core.Metadata;
@@ -46,31 +39,24 @@ import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.action.DialogAction;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
-// TẠM ẨN: logic Thanh toán
-// import io.jmix.flowui.component.SupportsTypedValue;
-// import io.jmix.flowui.component.datepicker.TypedDatePicker;
+import io.jmix.flowui.component.SupportsTypedValue;
+import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
-// TẠM ẨN: logic Thanh toán
-// import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
-// TẠM ẨN: logic Lịch sử thanh toán
-// import io.jmix.flowui.model.CollectionLoader;
-// import io.jmix.flowui.model.CollectionContainer;
-import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
+import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-// TẠM ẨN: logic KPI & Thanh toán
-// import java.math.BigDecimal;
-// import java.math.RoundingMode;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
-import java.io.ByteArrayInputStream;
 import java.util.*;
 
 @Route(value = "chi-tiet-dieu-tri-sbas/:id", layout = MainView.class)
@@ -95,24 +81,22 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private Notifications notifications;
     @Autowired
     private ToDieuTriPrintService toDieuTriPrintService;
-    // TẠM ẨN: khối Lịch sử thanh toán
-    // @ViewComponent
-    // private DataGrid<LichSuThanhToan> lichSuThanhToansDataGrid;
-    // @ViewComponent
-    // private CollectionLoader<LichSuThanhToan> lichSuThanhToansDl;
-    // TẠM ẨN: khối Thông tin thanh toán
-    // @ViewComponent
-    // private TypedTextField<Long> tongTienField;
-    // @ViewComponent
-    // private TypedTextField<String> khuyenMaiField;
-    // @ViewComponent
-    // private TypedTextField<Long> daThanhToanField;
-    // @ViewComponent
-    // private TypedTextField<Long> tongTienSauKhuyenMaiField;
-    // @ViewComponent
-    // private TypedTextField<Integer> phaiDongField;
-    // @ViewComponent
-    // private TypedDatePicker<Date> ngayThanhToanField;
+    @ViewComponent
+    private DataGrid<LichSuThanhToan> lichSuThanhToansDataGrid;
+    @ViewComponent
+    private CollectionLoader<LichSuThanhToan> lichSuThanhToansDl;
+    @ViewComponent
+    private TypedTextField<Long> tongTienField;
+    @ViewComponent
+    private TypedTextField<String> khuyenMaiField;
+    @ViewComponent
+    private TypedTextField<Long> daThanhToanField;
+    @ViewComponent
+    private TypedTextField<Long> tongTienSauKhuyenMaiField;
+    @ViewComponent
+    private TypedTextField<Integer> phaiDongField;
+    @ViewComponent
+    private TypedDatePicker<Date> ngayThanhToanField;
     @Autowired
     private Metadata metadata;
     @Autowired
@@ -125,15 +109,12 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionLoader<ToDieuTri> toDieuTrisDl;
     @ViewComponent
     private CollectionContainer<ToDieuTri> toDieuTrisDc;
-    // TẠM ẨN: khối Lịch sử thanh toán
-    // @ViewComponent
-    // private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
-    // TẠM ẨN: logic KPI
-    // @Autowired
-    // private TinhKpiChiTietService tinhKpiChiTietService;
-    // TẠM ẨN: logic Thanh toán
-    // @Autowired
-    // private ChiTietDieuTriPaymentSummaryService paymentSummaryService;
+    @ViewComponent
+    private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
+    @Autowired
+    private TinhKpiChiTietService tinhKpiChiTietService;
+    @Autowired
+    private ChiTietDieuTriPaymentSummaryService paymentSummaryService;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -142,14 +123,15 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
-        // TẠM ẨN: logic Thanh toán (khuyến mãi, tính tổng tiền)
-        // khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
-        // khuyenMaiField.addValueChangeListener(event1 -> recalculatePaymentFields());
-        //
-        // if (getEditedEntity().getId() != null) {
-        //     lichSuThanhToansDl.setParameter("idChiTietDieuTri", getEditedEntity());
-        //     lichSuThanhToansDl.load();
-        // }
+        autoFillTongKetDieuTriFields();
+
+        khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
+        khuyenMaiField.addValueChangeListener(event1 -> recalculatePaymentFields());
+
+        if (getEditedEntity().getId() != null) {
+            lichSuThanhToansDl.setParameter("idChiTietDieuTri", getEditedEntity());
+            lichSuThanhToansDl.load();
+        }
 
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
@@ -210,15 +192,13 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             toDieuTrisDl.load();
         }
 
-        // TẠM ẨN: logic Thanh toán
-        // recalculatePaymentFields();
+        recalculatePaymentFields();
     }
 
-    // TẠM ẨN: logic Lịch sử thanh toán
-    // @Subscribe(id = "lichSuThanhToansDl", target = Target.DATA_LOADER)
-    // public void onLichSuThanhToansDlPostLoad(final CollectionLoader.PostLoadEvent<LichSuThanhToan> event) {
-    //     recalculatePaymentFields();
-    // }
+    @Subscribe(id = "lichSuThanhToansDl", target = Target.DATA_LOADER)
+    public void onLichSuThanhToansDlPostLoad(final CollectionLoader.PostLoadEvent<LichSuThanhToan> event) {
+        recalculatePaymentFields();
+    }
 
     @Subscribe("chiTietDichVusDataGrid.create")
     public void onChiTietDichVusDataGridCreate(final ActionPerformedEvent event) {
@@ -262,19 +242,17 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                         saveContext.saving(buoiDieuTri);
                     }
 
-                    if (!saveContext.getEntitiesToSave().isEmpty()) {
-                        dataManager.save(saveContext);
-                        // TẠM ẨN: logic KPI (tính lại sau khi thêm dịch vụ)
-                        // if (getEditedEntity().getId() != null) {
-                        //     tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
-                        // }
+if (!saveContext.getEntitiesToSave().isEmpty()) {
+                    dataManager.save(saveContext);
+                    if (getEditedEntity().getId() != null) {
+                        tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
                     }
                 }
-
-                chiTietDichVuDc.getMutableItems().add(loadChiTietDichVuForGrid(persisted.getId()));
-                // TẠM ẨN: logic Thanh toán
-                // recalculatePaymentFields();
             }
+
+            chiTietDichVuDc.getMutableItems().add(loadChiTietDichVuForGrid(persisted.getId()));
+            recalculatePaymentFields();
+        }
         });
         window.open();
     }
@@ -302,23 +280,24 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             return;
         }
         try {
+            notifications.create("Đang tạo bản xem trước...")
+                    .withPosition(Notification.Position.TOP_END)
+                    .withDuration(3000)
+                    .show();
+
             byte[] pdfBytes = toDieuTriPrintService.generatePdf(getEditedEntity());
             String fileName = "to-dieu-tri-" + getEditedEntity().getId() + ".pdf";
-            StreamResource streamResource = new StreamResource(fileName, () -> new ByteArrayInputStream(pdfBytes));
-            streamResource.setContentType("application/pdf");
-            StreamRegistration registration = VaadinSession.getCurrent().getResourceRegistry().registerResource(streamResource);
-            UI.getCurrent().getPage().executeJs(
-                    "const link = document.createElement('a');"
-                            + "link.href = $0;"
-                            + "link.download = $1;"
-                            + "document.body.appendChild(link);"
-                            + "link.click();"
-                            + "link.remove();",
-                    registration.getResourceUri().toString(),
-                    fileName
-            );
+
+            DialogWindow<SoBenhAnPreviewDialogView> window = dialogWindows
+                    .view(this, SoBenhAnPreviewDialogView.class)
+                    .build();
+            window.getView().setPreviewData(pdfBytes, pdfBytes, fileName);
+            window.getView().setPreviewTitle("Xem trước tờ điều trị");
+            window.setWidth("90%");
+            window.setHeight("90%");
+            window.open();
         } catch (Exception ex) {
-            notifications.create("Không thể in tờ điều trị. Vui lòng thử lại.")
+            notifications.create("Không thể tạo bản xem trước tờ điều trị. Vui lòng thử lại.")
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
@@ -425,6 +404,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         window.addAfterCloseListener(event -> {
             if (event.closedWith(StandardOutcome.SAVE)) {
                 toDieuTrisDl.load();
+                autoFillTongKetDieuTriFields();
             }
         });
         window.open();
@@ -459,6 +439,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                 ktCopy.setToDieuTri(copy);
                 ktCopy.setIdDichVu(kt.getIdDichVu());
                 ktCopy.setThoiGianPhut(kt.getThoiGianPhut());
+                ktCopy.setGhiChu(kt.getGhiChu());
                 kyThuatCopies.add(ktCopy);
             }
         }
@@ -526,45 +507,202 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         return value != null ? String.valueOf(value) : "";
     }
 
-    // TẠM ẨN: logic Thanh toán (khuyến mãi)
-    // @Subscribe("khuyenMaiField")
-    // public void onKhuyenMaiFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<TypedTextField<String>, String> event) {
-    //     recalculatePaymentFields();
-    // }
-    //
-    // @Subscribe("khuyenMaiField")
-    // public void onKhuyenMaiFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<String>, String> event) {
-    //     recalculatePaymentFields();
-    // }
+    @Subscribe("khuyenMaiField")
+    public void onKhuyenMaiFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<TypedTextField<String>, String> event) {
+        recalculatePaymentFields();
+    }
 
-    // TẠM ẨN: logic KPI (validate trọng số 100%)
-    // @Subscribe
-    // public void onValidation(final ValidationEvent event) {
-    //     String validationError = buildTrongSoValidationError();
-    //     if (validationError != null) {
-    //         event.getErrors().add(validationError);
-    //     }
-    // }
+    @Subscribe("khuyenMaiField")
+    public void onKhuyenMaiFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<String>, String> event) {
+        recalculatePaymentFields();
+    }
 
-    // TẠM ẨN: logic Thanh toán (tính tổng tiền, đã thanh toán, phải đóng)
-    // private void recalculatePaymentFields() { ... }
+    @Subscribe
+    public void onValidation(final ValidationEvent event) {
+        String validationError = buildTrongSoValidationError();
+        if (validationError != null) {
+            event.getErrors().add(validationError);
+        }
+    }
 
-    // TẠM ẨN: logic KPI (validate trọng số)
-    // private String buildTrongSoValidationError() { ... }
-    // private Map<NhomDichVu, BigDecimal> getTrongSoTheoNhom() { ... }
-    // private Set<NhomDichVu> getNhomDichVuDuocChiDinh() { ... }
-    // private Optional<BigDecimal> parseFlexibleDecimal(String value) { ... }
-    // private BigDecimal toBigDecimal(Double value) { ... }
-    // private String formatPercent(BigDecimal value) { ... }
-    // private String getTenNhomDichVu(NhomDichVu nhomDichVu) { ... }
+    private void recalculatePaymentFields() {
+        long tongTien = 0L;
+        for (ChiTietDichVu item : chiTietDichVuDc.getItems()) {
+            long gia = item.getIdDichVu() != null && item.getIdDichVu().getGia() != null
+                    ? item.getIdDichVu().getGia()
+                    : 0L;
+            long soBuoi = item.getSoLuong() != null ? item.getSoLuong() : 0L;
+            tongTien += gia * soBuoi;
+        }
 
-    // TẠM ẨN: logic Lịch sử thanh toán
-    // @Install(to = "lichSuThanhToansDataGrid.create", subject = "newEntitySupplier")
-    // private LichSuThanhToan lichSuThanhToansDataGridCreateNewEntitySupplier() {
-    //     LichSuThanhToan lichSuThanhToan = metadata.create(LichSuThanhToan.class);
-    //     lichSuThanhToan.setIdChiTietDieuTri(getEditedEntity());
-    //     return lichSuThanhToan;
-    // }
+        BigDecimal tongTienBd = BigDecimal.valueOf(tongTien);
+        BigDecimal khuyenMaiPercent = parseFlexibleDecimal(khuyenMaiField.getTypedValue())
+                .orElse(BigDecimal.ZERO);
+        long daThanhToanTong = 0L;
+        Date ngayThanhToanCuoi = null;
+        for (LichSuThanhToan lichSuThanhToan : lichSuThanhToansDc.getItems()) {
+            daThanhToanTong += lichSuThanhToan.getDaThanhToan() != null ? lichSuThanhToan.getDaThanhToan() : 0L;
+            if (lichSuThanhToan.getThanhToanLuc() != null
+                    && (ngayThanhToanCuoi == null || lichSuThanhToan.getThanhToanLuc().after(ngayThanhToanCuoi))) {
+                ngayThanhToanCuoi = lichSuThanhToan.getThanhToanLuc();
+            }
+        }
+        BigDecimal daThanhToan = BigDecimal.valueOf(daThanhToanTong);
+
+        BigDecimal tongSauKhuyenMaiBd = tongTienBd.subtract(
+                tongTienBd.multiply(khuyenMaiPercent)
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+        );
+        long tongSauKhuyenMai = tongSauKhuyenMaiBd.setScale(0, RoundingMode.HALF_UP).longValue();
+        int phaiDong = BigDecimal.valueOf(tongSauKhuyenMai)
+                .subtract(daThanhToan)
+                .setScale(0, RoundingMode.HALF_UP)
+                .intValue();
+
+        getEditedEntity().setTongTien(tongTien);
+        getEditedEntity().setTongTienSauKhuyenMai(tongSauKhuyenMai);
+        getEditedEntity().setDaThanhToan(daThanhToanTong);
+        getEditedEntity().setPhaiDong(phaiDong);
+        getEditedEntity().setNgayThanhToan(ngayThanhToanCuoi);
+
+        tongTienField.setTypedValue(tongTien);
+        tongTienSauKhuyenMaiField.setTypedValue(tongSauKhuyenMai);
+        daThanhToanField.setTypedValue(daThanhToanTong);
+        phaiDongField.setTypedValue(phaiDong);
+        ngayThanhToanField.setTypedValue(ngayThanhToanCuoi);
+    }
+
+    private String buildTrongSoValidationError() {
+        Map<NhomDichVu, BigDecimal> trongSoTheoNhom = getTrongSoTheoNhom();
+        Set<NhomDichVu> nhomDuocChiDinh = getNhomDichVuDuocChiDinh();
+
+        Set<String> nhomKhongHopLe = new LinkedHashSet<>();
+        for (Map.Entry<NhomDichVu, BigDecimal> entry : trongSoTheoNhom.entrySet()) {
+            if (entry.getValue().compareTo(BigDecimal.ZERO) > 0
+                    && !nhomDuocChiDinh.contains(entry.getKey())) {
+                nhomKhongHopLe.add(getTenNhomDichVu(entry.getKey()));
+            }
+        }
+        if (!nhomKhongHopLe.isEmpty()) {
+            return "Trọng số chỉ được nhập cho nhóm đã có trong phần chỉ định dịch vụ. "
+                    + "Nhóm chưa được chỉ định: " + String.join(", ", nhomKhongHopLe) + ".";
+        }
+
+        BigDecimal tongTrongSo = BigDecimal.ZERO;
+        for (BigDecimal value : trongSoTheoNhom.values()) {
+            tongTrongSo = tongTrongSo.add(value);
+        }
+
+        BigDecimal hundred = BigDecimal.valueOf(100);
+        int compareResult = tongTrongSo.compareTo(hundred);
+        if (compareResult > 0) {
+            BigDecimal vuot = tongTrongSo.subtract(hundred);
+            return "Tổng trọng số đang vượt " + formatPercent(vuot)
+                    + "% (hiện tại " + formatPercent(tongTrongSo) + "%). Vui lòng điều chỉnh về 100%.";
+        }
+        if (compareResult < 0) {
+            BigDecimal thieu = hundred.subtract(tongTrongSo);
+            return "Tổng trọng số đang thiếu " + formatPercent(thieu)
+                    + "% (hiện tại " + formatPercent(tongTrongSo) + "%). Vui lòng điều chỉnh về 100%.";
+        }
+        return null;
+    }
+
+    private Map<NhomDichVu, BigDecimal> getTrongSoTheoNhom() {
+        Map<NhomDichVu, BigDecimal> result = new EnumMap<>(NhomDichVu.class);
+        result.put(NhomDichVu.VAT_LY_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoVatLyTriLieu()));
+        result.put(NhomDichVu.VAN_DONG_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoVanDongTriLieu()));
+        result.put(NhomDichVu.KEO_NAN_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoKeoNanTriLieu()));
+        result.put(NhomDichVu.XOA_BOP_TRI_LIEU, toBigDecimal(getEditedEntity().getTrongSoXoaBopTriLieu()));
+        result.put(NhomDichVu.KHAM_LUONG_GIA, toBigDecimal(getEditedEntity().getTrongSoKhamLuongGia()));
+        return result;
+    }
+
+    private Set<NhomDichVu> getNhomDichVuDuocChiDinh() {
+        Set<NhomDichVu> result = new LinkedHashSet<>();
+        for (ChiTietDichVu item : chiTietDichVuDc.getItems()) {
+            if (item.getIdDichVu() != null && item.getIdDichVu().getNhomDichVu() != null) {
+                result.add(item.getIdDichVu().getNhomDichVu());
+            }
+        }
+        return result;
+    }
+
+    private Optional<BigDecimal> parseFlexibleDecimal(String value) {
+        if (value == null || value.isBlank()) {
+            return Optional.empty();
+        }
+
+        String normalized = value.trim().replace(',', '.');
+        try {
+            return Optional.of(new BigDecimal(normalized));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    private BigDecimal toBigDecimal(Double value) {
+        return value != null ? BigDecimal.valueOf(value) : BigDecimal.ZERO;
+    }
+
+    private String formatPercent(BigDecimal value) {
+        return value.stripTrailingZeros().toPlainString();
+    }
+
+    private String getTenNhomDichVu(NhomDichVu nhomDichVu) {
+        return switch (nhomDichVu) {
+            case VAT_LY_TRI_LIEU -> "Vật lý trị liệu";
+            case VAN_DONG_TRI_LIEU -> "Vận động trị liệu";
+            case KEO_NAN_TRI_LIEU -> "Kéo nắn trị liệu";
+            case XOA_BOP_TRI_LIEU -> "Xoa bóp trị liệu";
+            case KHAM_LUONG_GIA -> "Khám lượng giá";
+        };
+    }
+
+    @Install(to = "lichSuThanhToansDataGrid.create", subject = "newEntitySupplier")
+    private LichSuThanhToan lichSuThanhToansDataGridCreateNewEntitySupplier() {
+        LichSuThanhToan lichSuThanhToan = metadata.create(LichSuThanhToan.class);
+        lichSuThanhToan.setIdChiTietDieuTri(getEditedEntity());
+        return lichSuThanhToan;
+    }
+
+    private void autoFillTongKetDieuTriFields() {
+        ChiTietDieuTri chiTietDieuTri = getEditedEntity();
+        if (chiTietDieuTri == null) {
+            return;
+        }
+
+        if (chiTietDieuTri.getDienBienBenh() == null || chiTietDieuTri.getDienBienBenh().isBlank()) {
+            chiTietDieuTri.setDienBienBenh(resolveDienBienBenhFromToDieuTri(chiTietDieuTri));
+        }
+        if (chiTietDieuTri.getChuanDoanRaVien() == null || chiTietDieuTri.getChuanDoanRaVien().isBlank()) {
+            String chuanDoan = chiTietDieuTri.getChuanDoan();
+            chiTietDieuTri.setChuanDoanRaVien(chuanDoan != null ? chuanDoan : "");
+        }
+    }
+
+    private String resolveDienBienBenhFromToDieuTri(ChiTietDieuTri chiTietDieuTri) {
+        if (chiTietDieuTri.getId() == null) {
+            return "";
+        }
+        List<ToDieuTri> lines = dataManager.load(ToDieuTri.class)
+                .query("select e from ToDieuTri e where e.chiTietDieuTri = :ctdt order by e.tuNgay asc, e.id asc")
+                .parameter("ctdt", chiTietDieuTri)
+                .list();
+
+        StringBuilder sb = new StringBuilder();
+        for (ToDieuTri line : lines) {
+            String moTa = line.getMoTaDienBienBenh();
+            if (moTa == null || moTa.isBlank()) {
+                continue;
+            }
+            if (!sb.isEmpty()) {
+                sb.append("\n\n");
+            }
+            sb.append(moTa.trim());
+        }
+        return sb.toString();
+    }
 
     @Install(to = "fileDinhKemDataGrid.create", subject = "newEntitySupplier")
     private ChiTietDieuTriFileDinhKem fileDinhKemDataGridCreateNewEntitySupplier() {
@@ -575,16 +713,14 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
     @Subscribe
     public void onBeforeSave(final BeforeSaveEvent event) {
-        // TẠM ẨN: logic Thanh toán
-        // recalculatePaymentFields();
-        // paymentSummaryService.applyTotals(getEditedEntity());
+        recalculatePaymentFields();
+        paymentSummaryService.applyTotals(getEditedEntity());
     }
 
     @Subscribe
     public void onAfterSave(final AfterSaveEvent event) {
-        // TẠM ẨN: logic KPI (tính lại sau khi lưu phiếu)
-        // if (getEditedEntity().getId() != null) {
-        //     tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
-        // }
+        if (getEditedEntity().getId() != null) {
+            tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
+        }
     }
 }

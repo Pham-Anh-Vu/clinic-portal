@@ -33,8 +33,8 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <entityComboBox id="idDichVuField" property="idDichVu" itemsContainer="dmDichVusDc" label="msg:///dichVu" required="true" colspan="2"/>
-            <textField id="ghiChuField" property="ghiChu" label="msg://com.company.clinicportal.entity/ChiTietDichVu.ghiChu" colspan="2"/>
+            <entityComboBox id="idDichVuField" property="idDichVu" itemsContainer="dmDichVusDc" label="msg:///dichVu" required="true"/>
+            <textField id="ghiChuField" property="ghiChu" label="msg://com.company.clinicportal.entity/ChiTietDichVu.ghiChu"/>
             <textField id="soLuongField" property="soLuong" label="msg:///soBuoi" required="true"/>
             <select id="tinhTheoGia" property="tinhTheoGia"/>
             <textField id="giaField" property="idDichVu.gia" label="msg:///gia" readOnly="true"/>

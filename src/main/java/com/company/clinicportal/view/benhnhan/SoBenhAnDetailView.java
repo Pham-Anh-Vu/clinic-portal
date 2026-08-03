@@ -343,6 +343,9 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         if (chiTietDieuTri.getId() != null) {
             ctdt = dataManager.load(ChiTietDieuTri.class)
                     .id(chiTietDieuTri.getId())
+                    .fetchPlan(fp -> fp
+                            .addFetchPlan("_base")
+                            .add("idPhieuDieuTri", p -> p.addFetchPlan("_base")))
                     .optional()
                     .orElse(chiTietDieuTri);
         }
@@ -426,8 +429,9 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         values.put("${ChiTietDieuTri.lyDoVaoVien}", safeText(ctdt.getLyDoVaoVien()));
         values.put("${ChiTietDieuTri.ngayBatDau}", formatDate(ctdt.getNgayBatDau()));
         values.put("${ChiTietDieuTri.ngayKetThuc}", formatDate(ctdt.getNgayKetThuc()));
-        values.put("${ChiTietDieuTri.idPhieuDieuTri.ngayKham}",
-                formatDate(benhNhan != null ? benhNhan.getNgayKhamBenh() : null));
+        Date ngayKhamBenh = resolveNgayKhamBenh(ctdt, benhNhan);
+        values.put("${ChiTietDieuTri.idPhieuDieuTri.ngayKham}", formatDate(ngayKhamBenh));
+        putChuKyDateValues(values, ngayKhamBenh);
 
         values.put("${ChiTietDieuTri.idBenhNhan.hoVaTen}",
                 safeText(benhNhan != null ? benhNhan.getHoVaTen() : null));
@@ -638,6 +642,27 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
     private String formatDate(Date date) {
         return date != null ? DATE_FORMAT.format(date) : "";
+    }
+
+    private void putChuKyDateValues(Map<String, String> values, Date ngayKhamBenh) {
+        Date effectiveDate = ngayKhamBenh != null ? ngayKhamBenh : new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(effectiveDate);
+        values.put("${chuKy.ngay}", String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)));
+        values.put("${chuKy.thang}", String.valueOf(calendar.get(Calendar.MONTH) + 1));
+        values.put("${chuKy.nam}", String.valueOf(calendar.get(Calendar.YEAR)));
+    }
+
+    private Date resolveNgayKhamBenh(ChiTietDieuTri chiTietDieuTri, BenhNhan benhNhan) {
+        if (chiTietDieuTri != null
+                && chiTietDieuTri.getIdPhieuDieuTri() != null
+                && chiTietDieuTri.getIdPhieuDieuTri().getNgayKham() != null) {
+            return chiTietDieuTri.getIdPhieuDieuTri().getNgayKham();
+        }
+        if (benhNhan != null && benhNhan.getNgayKhamBenh() != null) {
+            return benhNhan.getNgayKhamBenh();
+        }
+        return null;
     }
 
     private String formatNgayGioBuoiDieuTri(BuoiDieuTri buoi) {
