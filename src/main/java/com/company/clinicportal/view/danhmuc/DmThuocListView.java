@@ -14,7 +14,7 @@ import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "danhmuc/thuoc", layout = MainView.class)
+@Route(value = "dm-thuocs", layout = MainView.class)
 @ViewController(id = "ltcs_DmThuoc.list")
 @ViewDescriptor(path = "dm-thuoc-list-view.xml")
 @LookupComponent("dmThuocsDataGrid")

@@ -18,11 +18,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 
 /**
  * Outbox/queue bền vững cho việc gửi đơn thuốc.
@@ -54,7 +49,6 @@ public class LienThongOutboxService {
     public static final String ENTITY_NAME = "ltcs_LienThongDonThuocOutbox";
 
     private final LienThongProperties properties;
-    private final ScheduledExecutorService scheduler;
 
     @Autowired
     private DataManager dataManager;
@@ -67,24 +61,22 @@ public class LienThongOutboxService {
 
     public LienThongOutboxService(LienThongProperties properties) {
         this.properties = properties;
-        this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "lienthong-outbox");
-            t.setDaemon(true);
-            return t;
-        });
     }
 
-    @PostConstruct
-    void start() {
-        long periodSec = 30;
-        scheduler.scheduleWithFixedDelay(this::tick, periodSec, periodSec, TimeUnit.SECONDS);
-        log.info("LienThongOutboxService worker started, period={}s", periodSec);
-    }
+    // Scheduler đã bị tắt - dùng nút "Đồng bộ" thủ công thay vì quét tự động mỗi 30s
+    // @PostConstruct
+    // void start() {
+    //     long periodSec = 30;
+    //     scheduler.scheduleWithFixedDelay(this::tick, periodSec, periodSec, TimeUnit.SECONDS);
+    //     log.info("LienThongOutboxService worker started, period={}s", periodSec);
+    // }
 
-    @PreDestroy
-    void stop() {
-        scheduler.shutdownNow();
-    }
+    // @PreDestroy
+    // void stop() {
+    //     if (scheduler != null) {
+    //         scheduler.shutdownNow();
+    //     }
+    // }
 
     /**
      * Worker tick được gọi bởi scheduler. Gọi qua bridge để proxy AOP hoạt động.
@@ -177,10 +169,22 @@ public class LienThongOutboxService {
                 return;
             }
             if (svc != null) {
+                // ma_lien_thong_bac_si + password lấy từ application.properties
+                // ma_lien_thong_co_so + passwordCoSo lấy từ DB CoSoKhamChuaBenhLienThong
+                String doctorMa = properties.getBacSi() == null ? null : properties.getBacSi().getMaLienThongBacSi();
+                String doctorPw = properties.getBacSi() == null ? null : properties.getBacSi().getPassword();
+                if (doctorMa == null || doctorMa.isBlank() || doctorPw == null || doctorPw.isBlank()) {
+                    log.warn("[Outbox] Thiếu clinicportal.lienthong.bac-si.* trong application.properties; job={} → FAILED.",
+                            row.getMaDonThuoc());
+                    markFailed(row, "Thiếu cấu hình ma_lien_thong_bac_si/password trong application.properties.");
+                    return;
+                }
                 LienThongGuiDonThuocService.GuiDonThuocResult result =
                         svc.send(dt, row.getIdempotencyKey(),
                                 dt.getMaCoSoKcb(),
-                                resolveFacilityPassword(dt));
+                                resolveFacilityPassword(dt),
+                                doctorMa,
+                                doctorPw);
                 if (result.success) {
                     markDone(row);
                 } else if (result.httpStatus >= 500 || result.httpStatus == 0) {

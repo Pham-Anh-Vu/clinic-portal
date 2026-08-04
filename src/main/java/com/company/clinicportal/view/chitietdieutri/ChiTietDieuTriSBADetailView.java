@@ -13,6 +13,7 @@ import com.company.clinicportal.entity.ToDieuTriKyThuat;
 import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.enumentity.TinhTheoGia;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
+import com.company.clinicportal.enumentity.TrangThaiDonThuoc;
 import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
 import com.company.clinicportal.service.DonThuocService;
 import com.company.clinicportal.service.TinhKpiChiTietService;
@@ -39,6 +40,7 @@ import io.jmix.core.DataManager;
 import io.jmix.core.FetchPlan;
 import io.jmix.core.Metadata;
 import io.jmix.core.SaveContext;
+import io.jmix.core.UnconstrainedDataManager;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.action.DialogAction;
@@ -63,6 +65,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,6 +129,14 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private ChiTietDieuTriPaymentSummaryService paymentSummaryService;
     @Autowired
     private DonThuocService donThuocService;
+    @Autowired
+    private com.company.clinicportal.lienthong.LienThongGuiDonThuocService lienThongService;
+    @Autowired
+    private com.company.clinicportal.lienthong.CoSoKhamChuaBenhLienThongService coSoService;
+    @Autowired
+    private com.company.clinicportal.lienthong.SecretCipher secretCipher;
+    @Autowired
+    private com.company.clinicportal.lienthong.LienThongPasswordPrompt lienThongPasswordPrompt;
 
     /** Tên bác sĩ mặc định khi tạo đơn thuốc nhanh từ chi tiết phiếu điều trị. */
     private static final String DEFAULT_TEN_BAC_SI = "BS. Đặng Thị Hà";
@@ -137,6 +149,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionContainer<DonThuoc> donThuocsDc;
     @ViewComponent
     private JmixButton addDonThuocButton;
+    @ViewComponent
+    private JmixButton dongBoDonThuocButton;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -422,6 +436,153 @@ if (!saveContext.getEntitiesToSave().isEmpty()) {
             log.error("Không thể mở dialog thêm đơn thuốc từ ChiTietDieuTri id={}", chiTietDieuTri.getId(), ex);
             notifications.create("Không thể tạo đơn thuốc: " + ex.getMessage())
                     .withType(Notifications.Type.ERROR)
+                    .show();
+        }
+    }
+
+    /**
+     * Nhấn nút "Đồng bộ" trên tab ĐƠN THUỐC → gọi API gửi đơn liên thông NGAY LẬP TỨC
+     * (không qua scheduler 30s).
+     *
+     * <p>Flow:
+     * <ol>
+     *     <li>Validate đơn thuốc.</li>
+     *     <li>Lấy cấu hình cơ sở KCB liên thông.</li>
+     *     <li>Gọi API trực tiếp qua {@link LienThongGuiDonThuocService}.</li>
+     *     <li>Cập nhật trạng thái đơn và hiển thị kết quả.</li>
+     * </ol>
+     */
+    @Subscribe("dongBoDonThuocButton")
+    public void onDongBoDonThuocButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+        // Chỉ lấy đơn thuốc có trạng thái CHO_GUI hoặc GUI_LOI (không gửi NHAP)
+        List<DonThuoc> tatCaDonThuoc = donThuocsDc.getItems().stream().collect(Collectors.toList());
+        List<DonThuoc> danhSach = tatCaDonThuoc.stream()
+                .filter(dt -> {
+                    TrangThaiDonThuoc trangThai = dt.getTrangThaiEnum();
+                    return trangThai == TrangThaiDonThuoc.CHO_GUI
+                        || trangThai == TrangThaiDonThuoc.GUI_LOI;
+                })
+                .collect(Collectors.toList());
+
+        if (tatCaDonThuoc.isEmpty()) {
+            notifications.create("Không có đơn thuốc nào để đồng bộ.")
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+        if (danhSach.isEmpty()) {
+            notifications.create("Không có đơn thuốc nào ở trạng thái chờ gửi hoặc gửi lỗi.\n"
+                    + "(Các đơn ở trạng thái khác sẽ không được gửi).")
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+
+        // Lấy cơ sở KCB liên thông đầu tiên (active)
+        List<com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong> coSoList =
+                dataManager.load(com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong.class)
+                        .query("select e from ltcs_CoSoKhamChuaBenhLienThong e where e.active = true")
+                        .list();
+        if (coSoList.isEmpty()) {
+            notifications.create("Chưa có cấu hình cơ sở KCB liên thông. Vui lòng kiểm tra.")
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+            return;
+        }
+        com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong coSo = coSoList.get(0);
+        String password = coSoService.decryptPasswordOrNull(coSo);
+        if (password == null || password.isBlank()) {
+            notifications.create("Cơ sở KCB chưa có password. Vui lòng cấu hình.")
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+            return;
+        }
+
+        // Lấy thông tin đăng nhập bác sĩ từ application.properties.
+        // Theo FSD §VI: API gửi đơn cần token từ /api/auth/dang-nhap-bac-si.
+        com.company.clinicportal.lienthong.LienThongPasswordPrompt.BacSiCredentials creds =
+                lienThongPasswordPrompt.resolveBacSiCredentials(notifications);
+        if (creds == null) {
+            // user huỷ dialog hoặc thiếu config
+            return;
+        }
+
+        dongBoDonThuocButton.setEnabled(false);
+        notifications.create("Đang đồng bộ " + danhSach.size() + " đơn thuốc...")
+                .withPosition(Notification.Position.TOP_END)
+                .withDuration(2000)
+                .show();
+
+        int success = 0, fail = 0;
+        StringBuilder errors = new StringBuilder();
+
+        for (DonThuoc dt : danhSach) {
+            // Load lại entity từ DB với fetch plan đầy đủ, tránh lazy fetch trên detached object
+            UUID donThuocId = dt.getId();
+            if (donThuocId == null) {
+                fail++;
+                errors.append("• ").append(dt.getMaDonThuoc()).append(": đơn chưa được lưu\n");
+                continue;
+            }
+            List<String> validationErrors = donThuocService.validateForIssue(donThuocId);
+            if (!validationErrors.isEmpty()) {
+                fail++;
+                errors.append("• ").append(dt.getMaDonThuoc()).append(": ").append(String.join(", ", validationErrors)).append("\n");
+                continue;
+            }
+            // Load lại DonThuoc managed từ DB để gọi service gửi liên thông (cần lazy access bên trong)
+            DonThuoc managedDt = dataManager.load(DonThuoc.class)
+                    .id(donThuocId)
+                    .fetchPlan(fp -> fp
+                            .addFetchPlan("_base")
+                            .add("chiTiets", b -> b.addFetchPlan("_base"))
+                            .add("chanDoans", b -> b.addFetchPlan("_base"))
+                            .add("dotDungs", b -> b.addFetchPlan("_base")))
+                    .one();
+
+            try {
+                String idempotencyKey = managedDt.getIdempotencyKey() != null ? managedDt.getIdempotencyKey()
+                        : java.util.UUID.randomUUID().toString();
+                // maLienThongBacSi + password lấy từ application.properties
+                // maLienThongCoSo + passwordCoSo lấy từ DB CoSoKhamChuaBenhLienThong
+                com.company.clinicportal.lienthong.LienThongGuiDonThuocService.GuiDonThuocResult result =
+                        lienThongService.send(managedDt, idempotencyKey,
+                                coSo.getMaLienThong(), password,
+                                creds.maLienThongBacSi, creds.password);
+
+                if (result.success) {
+                    success++;
+                    log.info("[DongBo] Gửi thành công maDonThuoc={} httpStatus={}",
+                            dt.getMaDonThuoc(), result.httpStatus);
+                } else {
+                    fail++;
+                    String errMsg = result.response != null ? result.response.message : "HTTP " + result.httpStatus;
+                    errors.append("• ").append(dt.getMaDonThuoc()).append(": ").append(errMsg).append("\n");
+                    log.warn("[DongBo] Gửi thất bại maDonThuoc={} httpStatus={} msg={}",
+                            dt.getMaDonThuoc(), result.httpStatus, errMsg);
+                }
+            } catch (Exception ex) {
+                fail++;
+                errors.append("• ").append(dt.getMaDonThuoc()).append(": ").append(ex.getMessage()).append("\n");
+                log.error("[DongBo] Lỗi khi gửi maDonThuoc=" + dt.getMaDonThuoc(), ex);
+            }
+        }
+
+        dongBoDonThuocButton.setEnabled(true);
+        donThuocsDl.load();
+
+        if (success > 0 && fail == 0) {
+            notifications.create("Đồng bộ thành công " + success + " đơn thuốc!")
+                    .withType(Notifications.Type.SUCCESS)
+                    .show();
+        } else if (success > 0 && fail > 0) {
+            notifications.create("Đồng bộ: " + success + " OK, " + fail + " lỗi. Xem log để chi tiết.")
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+        } else {
+            notifications.create("Đồng bộ thất bại. " + fail + " lỗi.\n" + errors)
+                    .withType(Notifications.Type.ERROR)
+                    .withDuration(8000)
                     .show();
         }
     }

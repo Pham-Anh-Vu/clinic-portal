@@ -25,13 +25,14 @@ import java.util.Set;
 /**
  * Import danh mục thuốc từ Excel (.xlsx). Dùng cho MVP khi chưa đồng bộ từ danh mục BYT.
  *
- * Cột Excel kỳ vọng (dòng 1 = header, 6 trường):
+ * Cột Excel kỳ vọng (dòng 1 = header, 7 trường):
  * A: ma_thuoc (tùy chọn)   - để trống sẽ tự sinh từ hoat_chat + ten_thuoc
- * B: ten_thuoc (*)         - tên thuốc (bắt buộc)
- * C: hoat_chat             - hoạt chất
- * D: don_vi_tinh           - viên/ống/gói/chai/hộp/tuýp/ml/g/mg/liều
- * E: ham_luong             - hàm lượng
- * F: ghi_chu               - ghi chú
+ * B: ten_thuoc (*)           - tên thuốc (bắt buộc)
+ * C: biet_duoc              - biệt dược (tên thương mại)
+ * D: hoat_chat              - hoạt chất
+ * E: don_vi_tinh            - viên/ống/gói/chai/hộp/tuýp/ml/g/mg/liều
+ * F: ham_luong              - hàm lượng
+ * G: ghi_chu                - ghi chú
  */
 @Service
 public class DmThuocImportService {
@@ -107,21 +108,21 @@ public class DmThuocImportService {
 
     private DmThuoc parseRow(Row row, int rowNumber, Set<String> usedMaThuocInBatch) {
         DmThuoc e = dataManager.create(DmThuoc.class);
-        // Cột Excel (6 trường - header tiếng Việt):
+        // Cột Excel (7 trường - header tiếng Việt):
         // A: Mã thuốc       (tùy chọn - để trống sẽ tự sinh từ Hoạt chất + Tên thuốc)
         // B: Tên thuốc      (bắt buộc)
-        // C: Hoạt chất
-        // D: Đơn vị tính
-        // E: Hàm lượng
-        // F: Ghi chú
+        // C: Biệt dược      (tên thương mại)
+        // D: Hoạt chất
+        // E: Đơn vị tính
+        // F: Hàm lượng
+        // G: Ghi chú
         String maThuocRaw = nullIfBlank(readString(row.getCell(0)));
         String tenThuoc = nullIfBlank(readString(row.getCell(1)));
-        String hoatChat = nullIfBlank(readString(row.getCell(2)));
         if (tenThuoc == null) throw new IllegalArgumentException("ten_thuoc (cột B) bắt buộc");
 
         String maThuoc;
         if (maThuocRaw == null) {
-            maThuoc = generateMaThuoc(tenThuoc, hoatChat, usedMaThuocInBatch);
+            maThuoc = generateMaThuoc(tenThuoc, nullIfBlank(readString(row.getCell(3))), usedMaThuocInBatch);
         } else {
             maThuoc = maThuocRaw;
         }
@@ -131,11 +132,11 @@ public class DmThuocImportService {
         usedMaThuocInBatch.add(maThuoc);
         e.setMaThuoc(maThuoc);
         e.setTenThuoc(tenThuoc);
-
-        e.setHoatChat(hoatChat);
-        e.setDonViTinh(nullIfBlank(readString(row.getCell(3))));
-        e.setHamLuong(nullIfBlank(readString(row.getCell(4))));
-        e.setGhiChu(nullIfBlank(readString(row.getCell(5))));
+        e.setBietDuoc(nullIfBlank(readString(row.getCell(2))));
+        e.setHoatChat(nullIfBlank(readString(row.getCell(3))));
+        e.setDonViTinh(nullIfBlank(readString(row.getCell(4))));
+        e.setHamLuong(nullIfBlank(readString(row.getCell(5))));
+        e.setGhiChu(nullIfBlank(readString(row.getCell(6))));
         return e;
     }
 

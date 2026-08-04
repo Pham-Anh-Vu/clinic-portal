@@ -23,6 +23,7 @@
             </responsiveSteps>
             <textField property="maThuoc" required="true" colspan="2"/>
             <textField property="tenThuoc" required="true" colspan="2"/>
+            <textField property="bietDuoc" colspan="2"/>
             <textField property="hoatChat" colspan="2"/>
             <textField property="donViTinh"/>
             <textField property="hamLuong"/>

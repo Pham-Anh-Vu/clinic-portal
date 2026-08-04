@@ -501,6 +501,8 @@
                                     <div classNames="function-flex-end">
                                         <button id="addDonThuocButton" text="Thêm mới đơn thuốc"
                                                 icon="vaadin:plus" classNames="action-button create"/>
+                                        <button id="dongBoDonThuocButton" text="Đồng bộ"
+                                                icon="vaadin:sync" classNames="action-button sync"/>
                                         <button action="donThuocsDataGrid.refresh" classNames="action-button refresh"/>
                                     </div>
                                 </div>

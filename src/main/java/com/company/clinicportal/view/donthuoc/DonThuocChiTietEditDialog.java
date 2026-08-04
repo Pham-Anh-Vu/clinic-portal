@@ -4,6 +4,7 @@ import com.company.clinicportal.entity.DonThuocChiTiet;
 import com.company.clinicportal.entity.DmThuoc;
 import com.company.clinicportal.service.DonThuocService;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.Notifications;
@@ -20,12 +21,9 @@ import java.math.BigDecimal;
  * Modal nhập/sửa 1 dòng thuốc trong đơn thuốc.
  *
  * <p>Mở từ {@link DonThuocQuickAddDialog} qua {@code dialogWindows.detail(...)}
- * với {@code .editEntity(ct)} — entity được Jmix attach vào dataContainer đúng cách,
- * UI fields (kể cả readonly) refresh tự động khi container.setProperty.</p>
+ * với {@code .editEntity(ct)} — entity được Jmix attach vào dataContainer đúng cách.</p>
  *
- * <p>Khi user chọn DmThuoc, gọi {@link DonThuocService#pickDrug(InstanceContainer, DmThuoc)}
- * để validate (không trùng) và điền snapshot field qua container.setProperty
- * (không phải plain setter) → readonly fields refresh OK.</p>
+ * <p>Khi user chọn DmThuoc, tự điền các trường snapshot (mã, tên, biệt dược, đơn vị tính).</p>
  */
 @Route(value = "don-thuoc-chi-tiet-edit", layout = MainView.class)
 @ViewController(id = "DonThuocChiTietEditDialog")
@@ -45,36 +43,39 @@ public class DonThuocChiTietEditDialog extends StandardDetailView<DonThuocChiTie
     private TypedTextField<BigDecimal> soLuongField;
     @ViewComponent
     private JmixButton saveBtn;
+    @ViewComponent
+    private TypedTextField<String> maThuocSnapshotField;
+    @ViewComponent
+    private TypedTextField<String> tenThuocSnapshotField;
+    @ViewComponent
+    private TypedTextField<String> bietDuocSnapshotField;
+    @ViewComponent
+    private TypedTextField<String> donViTinhSnapshotField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         refreshSaveButton();
     }
 
+    /**
+     * Khi user chọn thuốc từ danh mục → điền các trường snapshot.
+     * Dùng AbstractField.ComponentValueChangeEvent (fired khi user chọn entity).
+     */
     @Subscribe("dmThuocField")
-    public void onDmThuocFieldValueChange(HasValue.ValueChangeEvent<DmThuoc> e) {
-        if (!e.isFromClient() || e.getValue() == null) {
-            refreshSaveButton();
+    public void onDmThuocFieldComponentValueChange(
+            final AbstractField.ComponentValueChangeEvent<EntityPicker<DmThuoc>, DmThuoc> event) {
+        DmThuoc dm = event.getValue();
+        if (dm == null) {
+            maThuocSnapshotField.setValue(null);
+            tenThuocSnapshotField.setValue(null);
+            bietDuocSnapshotField.setValue(null);
+            donViTinhSnapshotField.setValue(null);
             return;
         }
-        @SuppressWarnings("unchecked")
-        InstanceContainer<DonThuocChiTiet> container =
-                (InstanceContainer<DonThuocChiTiet>) getViewData().getContainer("chiTietDc");
-        DonThuocChiTiet ct = container.getItem();
-        try {
-            donThuocService.pickDrug(ct, e.getValue());
-            // Re-fire container event bằng setItem để UI refresh readonly fields
-            // (entity là POJO không có PropertyChangeListener).
-            container.setItem(ct);
-            notifications.create("Đã điền thông tin thuốc")
-                    .withType(Notifications.Type.SUCCESS).show();
-        } catch (IllegalStateException ex) {
-            notifications.create(ex.getMessage())
-                    .withType(Notifications.Type.WARNING).show();
-            container.setItem(ct);
-            ct.setDmThuoc(null);
-        }
-        refreshSaveButton();
+        maThuocSnapshotField.setValue(dm.getMaThuoc());
+        tenThuocSnapshotField.setValue(dm.getTenThuoc());
+        bietDuocSnapshotField.setValue(dm.getBietDuoc());
+        donViTinhSnapshotField.setValue(dm.getDonViTinh());
     }
 
     @Subscribe("soLuongField")
@@ -82,11 +83,8 @@ public class DonThuocChiTietEditDialog extends StandardDetailView<DonThuocChiTie
         if (e.isFromClient()) refreshSaveButton();
     }
 
-    /** Bật/tắt nút Save dựa trên DmThuoc + số lượng. */
     private void refreshSaveButton() {
-        DonThuocChiTiet ct = getEditedEntity();
-        boolean ok = ct != null && ct.getDmThuoc() != null && ct.getSoLuong() != null;
-        saveBtn.setEnabled(ok);
+        // Button state managed by action + required fields in XML
     }
 
     /** Validate cuối trước khi Jmix save. */

@@ -72,6 +72,7 @@
                     <columns resizable="true">
                         <column property="maThuoc"/>
                         <column property="tenThuoc"/>
+                        <column property="bietDuoc"/>
                         <column property="hoatChat"/>
                         <column property="donViTinh"/>
                         <column property="hamLuong"/>

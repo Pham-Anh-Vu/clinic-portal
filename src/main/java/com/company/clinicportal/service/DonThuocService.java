@@ -65,7 +65,6 @@ public class DonThuocService {
             throw new IllegalArgumentException("PhieuDieuTri chưa có bệnh nhân");
         }
         DonThuoc dt = dataManager.create(DonThuoc.class);
-        dt.setMaDonThuoc(codeGenerator.nextMaDonThuoc());
         dt.setIdempotencyKey(codeGenerator.newIdempotencyKey());
         dt.setBenhNhan(bn);
         dt.setPhieuDieuTri(phieuDieuTri);
@@ -74,11 +73,13 @@ public class DonThuocService {
         dt.setMaCoSoKcb(maCoSoKcb);
         dt.setNgayKe(codeGenerator.now());
         dt.setTrangThaiEnum(TrangThaiDonThuoc.NHAP);
-        dt.setLoaiDonEnum(LoaiDon.THUONG);
-        dt.setHinhThucDieuTriEnum(
+        dt.setLoaiDon(LoaiDon.THUONG);
+        dt.setHinhThucDieuTri(
                 com.company.clinicportal.enumentity.HinhThucDieuTri.NGOAI_TRU);
         dt.setApiResponse(null);
         dt.setRetryCount(0);
+        // Sinh mã đơn thuốc 14 ký tự SAU khi đã set loại đơn
+        dt.setMaDonThuoc(codeGenerator.nextMaDonThuoc(dt.getLoaiDon()));
 
         SaveContext ctx = new SaveContext().saving(dt);
         dataManager.save(ctx);
@@ -112,7 +113,6 @@ public class DonThuocService {
         }
 
         DonThuoc dt = dataManager.create(DonThuoc.class);
-        dt.setMaDonThuoc(codeGenerator.nextMaDonThuoc());
         dt.setIdempotencyKey(codeGenerator.newIdempotencyKey());
         dt.setBenhNhan(bn);
         dt.setPhieuDieuTri(phieuDieuTri);
@@ -123,11 +123,13 @@ public class DonThuocService {
         dt.setMaCoSoKcb(null);
         dt.setNgayKe(codeGenerator.now());
         dt.setTrangThaiEnum(TrangThaiDonThuoc.NHAP);
-        dt.setLoaiDonEnum(LoaiDon.THUONG);
-        dt.setHinhThucDieuTriEnum(
+        dt.setLoaiDon(LoaiDon.THUONG);
+        dt.setHinhThucDieuTri(
                 com.company.clinicportal.enumentity.HinhThucDieuTri.NGOAI_TRU);
         dt.setApiResponse(null);
         dt.setRetryCount(0);
+        // Sinh mã đơn thuốc 14 ký tự SAU khi đã set loại đơn
+        dt.setMaDonThuoc(codeGenerator.nextMaDonThuoc(dt.getLoaiDon()));
 
         // Auto-fill Chuẩn đoán từ Chi tiết phiếu điều trị.
         String chuanDoan = chiTietDieuTri.getChuanDoan();
@@ -135,9 +137,21 @@ public class DonThuocService {
             dt.setChanDoanText(chuanDoan.trim());
         }
 
-        SaveContext ctx = new SaveContext().saving(dt);
-        dataManager.save(ctx);
+        // KHÔNG save ở đây - chỉ tạo entity in-memory, lưu khi user nhấn Lưu/Lưu nháp
+        // dataManager.save(ctx);
         return dt;
+    }
+
+    /**
+     * Sinh lại mã đơn thuốc khi user đổi loại đơn.
+     * Dùng cùng sequence mới (khác mã đơn cũ) để tránh trùng suffix.
+     *
+     * @param dt      entity đơn thuốc (để cập nhật .setMaDonThuoc)
+     * @param newLoaiDon loại đơn mới (để gen suffix -c/-h/-n/-y)
+     */
+    public String regenerateMaDonThuoc(DonThuoc dt, LoaiDon newLoaiDon) {
+        if (dt == null || newLoaiDon == null) return null;
+        return codeGenerator.nextMaDonThuoc(newLoaiDon);
     }
 
     /**
@@ -176,33 +190,33 @@ public class DonThuocService {
 
     /**
      * Thêm dòng thuốc vào đơn (chỉ pick từ danh mục, tự snapshot).
+     * Luôn thêm vào {@code dt.getChiTiets()} để cascade persist + không bị orphan removal.
      */
     @Transactional
     public DonThuocChiTiet addDrugLine(DonThuoc dt, DmThuoc dmThuoc, Integer stt) {
         if (dt == null) throw new IllegalArgumentException("dt null");
-        if (dmThuoc == null) {
-            // Không có tham chiếu danh mục → cho phép dòng rỗng
-            DonThuocChiTiet empty = dataManager.create(DonThuocChiTiet.class);
-            empty.setDonThuoc(dt);
-            empty.setStt(stt);
-            dataManager.save(new SaveContext().saving(empty));
-            return empty;
-        }
-        // Không cho phép trùng thuốc trong cùng đơn (theo mã thuốc)
-        Long dup = dataManager.loadValue(
-                        "select count(e) from DonThuocChiTiet e where e.donThuoc = :dt and e.maThuocSnapshot = :ma and e.maThuocSnapshot is not null",
-                        Long.class)
-                .parameter("dt", dt)
-                .parameter("ma", dmThuoc.getMaThuoc())
-                .one();
-        if (dup != null && dup > 0L) {
-            throw new IllegalStateException("Thuốc " + dmThuoc.getMaThuoc() + " đã có trong đơn. Hãy tăng số lượng hoặc chọn thuốc khác.");
+        if (dmThuoc != null && dt.getId() != null) {
+            // Không cho phép trùng thuốc trong cùng đơn (theo mã thuốc). Bỏ qua check khi dt chưa persist
+            // (collection rỗng, thêm mới lần đầu sẽ không bao giờ trùng).
+            Long dup = dataManager.loadValue(
+                            "select count(e) from DonThuocChiTiet e where e.donThuoc = :dt and e.maThuocSnapshot = :ma and e.maThuocSnapshot is not null",
+                            Long.class)
+                    .parameter("dt", dt)
+                    .parameter("ma", dmThuoc.getMaThuoc())
+                    .one();
+            if (dup != null && dup > 0L) {
+                throw new IllegalStateException("Thuốc " + dmThuoc.getMaThuoc() + " đã có trong đơn. Hãy tăng số lượng hoặc chọn thuốc khác.");
+            }
         }
         DonThuocChiTiet ct = dataManager.create(DonThuocChiTiet.class);
         ct.setDonThuoc(dt);
         ct.setStt(stt);
-        ct.snapshotFrom(dmThuoc);
-        dataManager.save(new SaveContext().saving(ct));
+        if (dmThuoc != null) {
+            ct.snapshotFrom(dmThuoc);
+        }
+        // Thêm vào collection để cascade persist khi save toàn bộ dt.
+        // Lưu ý: KHÔNG gọi save() riêng ở đây (lý do giống addDiagnosis) - persist sẽ xảy ra khi dt được save.
+        dt.getChiTiets().add(ct);
         return ct;
     }
 
@@ -250,6 +264,9 @@ public class DonThuocService {
 
     @Transactional
     public DonThuocChanDoan addDiagnosis(DonThuoc dt, Icd10 icd, Integer stt, String ketLuan) {
+        if (dt == null) {
+            throw new IllegalArgumentException("DonThuoc không được null");
+        }
         DonThuocChanDoan cd = dataManager.create(DonThuocChanDoan.class);
         cd.setDonThuoc(dt);
         cd.setStt(stt);
@@ -257,7 +274,10 @@ public class DonThuocService {
             cd.snapshotFrom(icd);
         }
         cd.setKetLuan(ketLuan);
-        dataManager.save(new SaveContext().saving(cd));
+        // Thêm vào collection để cascade persist khi save toàn bộ dt.
+        // Lưu ý: KHÔNG gọi save() riêng ở đây để tránh "new object through relationship not marked PERSIST"
+        // khi dt chưa được persist. Việc persist cd sẽ xảy ra cùng với dt (cascade ALL) khi dialog save draft.
+        dt.getChanDoans().add(cd);
         return cd;
     }
 
@@ -268,8 +288,17 @@ public class DonThuocService {
     public DonThuocChanDoan pickDiagnosis(DonThuocChanDoan cd, Icd10 icd) {
         if (cd == null) throw new IllegalArgumentException("cd null");
         if (icd == null) return cd;
+        Long dup = dataManager.loadValue(
+                        "select count(e) from DonThuocChanDoan e where e.donThuoc = :dt and e.maIcdSnapshot = :ma and e.id <> :self and e.maIcdSnapshot is not null",
+                        Long.class)
+                .parameter("dt", cd.getDonThuoc())
+                .parameter("ma", icd.getMaIcd())
+                .parameter("self", cd.getId())
+                .one();
+        if (dup != null && dup > 0L) {
+            throw new IllegalStateException("Chẩn đoán " + icd.getMaIcd() + " đã có trong đơn.");
+        }
         cd.snapshotFrom(icd);
-        dataManager.save(new SaveContext().saving(cd));
         return cd;
     }
 
@@ -292,6 +321,25 @@ public class DonThuocService {
      * - Loại đơn hợp lệ
      * - Bệnh nhân snapshot đầy đủ (họ tên, ngày sinh, giới tính)
      */
+    public List<String> validateForIssue(UUID id) {
+        if (id == null) {
+            List<String> err = new ArrayList<>();
+            err.add("don-thuoc-empty");
+            return err;
+        }
+        // Load lại entity với fetch plan đầy đủ để tránh lazy fetch trên detached object
+        DonThuoc dt = dataManager.load(DonThuoc.class)
+                .id(id)
+                .fetchPlan(fp -> fp
+                        .addFetchPlan("_base")
+                        .add("chiTiets", b -> b.addFetchPlan("_base"))
+                        .add("chanDoans", b -> b.addFetchPlan("_base"))
+                        .add("dotDungs", b -> b.addFetchPlan("_base")))
+                .optional()
+                .orElse(null);
+        return validateForIssue(dt);
+    }
+
     public List<String> validateForIssue(DonThuoc dt) {
         List<String> errors = new ArrayList<>();
         if (dt == null) {
@@ -413,7 +461,7 @@ public class DonThuocService {
         dt.setMaDinhDanhCongDan(bn.getMaDinhDanhCongDan());
         dt.setSoDienThoai(bn.getDienThoai());
         dt.setNgaySinh(bn.getNgaySinh());
-        dt.setGioiTinh(bn.getGioiTinh() == null ? null : bn.getGioiTinh().getId());
+        dt.setGioiTinh(bn.getGioiTinh() == null ? null : bn.getGioiTinh().getApiCode());
         dt.setDiaChi(bn.getDiaChi());
         dt.setCanNang(bn.getCanNang());
         dt.setSoThangTuoi(bn.getSoThangTuoi());

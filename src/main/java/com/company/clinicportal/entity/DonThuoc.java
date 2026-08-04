@@ -308,15 +308,11 @@ public class DonThuoc {
     public String getChuKyBenhNhan() { return chuKyBenhNhan; }
     public void setChuKyBenhNhan(String chuKyBenhNhan) { this.chuKyBenhNhan = chuKyBenhNhan; }
 
-    public LoaiDon getLoaiDonEnum() { return LoaiDon.fromId(loaiDon); }
-    public void setLoaiDonEnum(LoaiDon v) { this.loaiDon = v == null ? null : v.getId(); }
-    public String getLoaiDon() { return loaiDon; }
-    public void setLoaiDon(String loaiDon) { this.loaiDon = loaiDon; }
+    public LoaiDon getLoaiDon() { return LoaiDon.fromId(loaiDon); }
+    public void setLoaiDon(LoaiDon v) { this.loaiDon = v == null ? null : v.getId(); }
 
-    public HinhThucDieuTri getHinhThucDieuTriEnum() { return HinhThucDieuTri.fromId(hinhThucDieuTri); }
-    public void setHinhThucDieuTriEnum(HinhThucDieuTri v) { this.hinhThucDieuTri = v == null ? null : v.getId(); }
-    public String getHinhThucDieuTri() { return hinhThucDieuTri; }
-    public void setHinhThucDieuTri(String hinhThucDieuTri) { this.hinhThucDieuTri = hinhThucDieuTri; }
+    public HinhThucDieuTri getHinhThucDieuTri() { return HinhThucDieuTri.fromId(hinhThucDieuTri); }
+    public void setHinhThucDieuTri(HinhThucDieuTri v) { this.hinhThucDieuTri = v == null ? null : v.getId(); }
 
     public Date getNgayKe() { return ngayKe; }
     public void setNgayKe(Date ngayKe) { this.ngayKe = ngayKe; }

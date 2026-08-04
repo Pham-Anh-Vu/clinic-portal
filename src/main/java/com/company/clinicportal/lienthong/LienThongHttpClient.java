@@ -68,6 +68,21 @@ public class LienThongHttpClient {
         }, "GET " + path);
     }
 
+    /**
+     * POST rồi trả raw String body — dùng khi BYT trả chuỗi plain text
+     * thay vì JSON (ví dụ: "Gửi đơn thuốc thành công" HTTP 200).
+     */
+    public String postForString(String path, Object body, String bearerToken) {
+        return executeWithRetry(() -> {
+            var req = restClient.post().uri(path)
+                    .header(HDR_CORRELATION, newCorrelationId());
+            if (bearerToken != null && !bearerToken.isBlank()) {
+                req = req.header(HDR_AUTHORIZATION, "bearer " + bearerToken);
+            }
+            return req.body(body).retrieve().body(String.class);
+        }, "POST " + path);
+    }
+
     private <T> T executeWithRetry(java.util.function.Supplier<T> call, String label) {
         int max = Math.max(0, properties.getMaxRetries());
         long backoff = Math.max(1, properties.getRetryInitialBackoffMs());

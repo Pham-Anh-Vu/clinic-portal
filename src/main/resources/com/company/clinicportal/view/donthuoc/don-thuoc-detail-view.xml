@@ -52,8 +52,8 @@
                     <responsiveStep minWidth="60em" columns="3"/>
                 </responsiveSteps>
                 <textField property="maDonThuoc" readOnly="true"/>
-                <select property="loaiDon"/>
-                <select property="hinhThucDieuTri"/>
+                <select property="loaiDon"  itemsEnum="com.company.clinicportal.enumentity.LoaiDon"/>
+                <select property="hinhThucDieuTri" itemsEnum="com.company.clinicportal.enumentity.HinhThucDieuTri"/>
                 <datePicker property="ngayKe"/>
                 <datePicker property="ngayTaiKham"/>
                 <select property="trangThai" readOnly="true"/>
@@ -149,8 +149,8 @@
 
         <hbox id="actionsBox" justifyContent="END" spacing="true" padding="true">
             <button id="previewButton" text="Preview / In" icon="vaadin:eye"/>
-            <button id="issueButton" text="Lưu &amp; phát hành" icon="vaadin:check"/>
-            <button id="cancelButton" text="Huỷ đơn" icon="vaadin:close"/>
+            <button id="issueButton" text="Lưu " icon="vaadin:check"/>
+            <button id="cancelButton" text="Huỷ đơn" icon="vaadin:close" visible="false"/>
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>

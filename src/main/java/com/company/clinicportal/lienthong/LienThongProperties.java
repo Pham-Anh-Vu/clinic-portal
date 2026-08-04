@@ -37,6 +37,9 @@ public class LienThongProperties {
 
     private Crypto crypto = new Crypto();
 
+    /** Cấu hình tài khoản bác sĩ liên thông (lấy từ application.properties). */
+    private BacSi bacSi = new BacSi();
+
     public String getEnvironment() { return environment; }
     public void setEnvironment(String environment) { this.environment = environment; }
 
@@ -73,6 +76,9 @@ public class LienThongProperties {
     public Crypto getCrypto() { return crypto; }
     public void setCrypto(Crypto crypto) { this.crypto = crypto; }
 
+    public BacSi getBacSi() { return bacSi; }
+    public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
+
     public boolean isProduction() { return "production".equalsIgnoreCase(environment); }
 
     public static class Crypto {
@@ -85,5 +91,28 @@ public class LienThongProperties {
 
         public String getKeyVersion() { return keyVersion; }
         public void setKeyVersion(String keyVersion) { this.keyVersion = keyVersion; }
+    }
+
+    /**
+     * Cấu hình tài khoản bác sĩ liên thông đọc từ {@code application.properties}.
+     * Theo FSD §VI: API {@code /api/auth/dang-nhap-bac-si} yêu cầu
+     * {@code ma_lien_thong_co_so_kham_chua_benh, ma_lien_thong_bac_si, password}.
+     *
+     * <ul>
+     *     <li>{@code maLienThongBacSi} + {@code password}: lấy từ config (một bác sĩ duy nhất).</li>
+     *     <li>{@code maLienThongCoSoKhamChuaBenh}: lấy từ DB {@code CoSoKhamChuaBenhLienThong}
+     *         (có thể nhiều cơ sở, chọn active).</li>
+     * </ul>
+     */
+    public static class BacSi {
+        /** Mã liên thông bác sĩ trên BYT. Ví dụ: BS001. */
+        private String maLienThongBacSi = "";
+        /** Mật khẩu tài khoản bác sĩ trên BYT. Nên dùng biến môi trường. */
+        private String password = "";
+
+        public String getMaLienThongBacSi() { return maLienThongBacSi; }
+        public void setMaLienThongBacSi(String maLienThongBacSi) { this.maLienThongBacSi = maLienThongBacSi; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
     }
 }

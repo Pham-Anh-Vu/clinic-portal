@@ -66,30 +66,37 @@ public class LienThongGuiDonThuocService {
         this.objectMapper = objectMapper;
     }
 
-    public GuiDonThuocResult send(DonThuoc dt, String idempotencyKey, String maLienThongCoSo, String password) {
+    public GuiDonThuocResult send(DonThuoc dt, String idempotencyKey,
+                                  String maLienThongCoSo, String passwordCoSo,
+                                  String maLienThongBacSi, String passwordBacSi) {
         if (!properties.isEnabled()) {
             throw new LienThongApiException("Liên thông đang tắt.", 0, null, null);
         }
         if (dt == null) throw new LienThongApiException("DonThuoc null", 0, null, null);
 
-        String token = tokenService.getFacilityToken(maLienThongCoSo, password);
+        // Lấy doctor token theo FSD: token gửi đơn thuốc phải lấy từ /api/auth/dang-nhap-bac-si
+        String token = tokenService.getDoctorToken(maLienThongCoSo, maLienThongBacSi, passwordBacSi);
+
         GuiDonThuocRequest request = DonThuocMappingService.fromEntity(dt);
         String correlationId = DonThuocAuditService.newCorrelationId();
         long start = DonThuocAuditService.startTimer();
 
         String reqJson = safeStringify(request);
         Map<String, Object> reqMasked = maskRequest(request);
+
         try {
-            GuiDonThuocResponse resp = httpClient.post(
-                    "/api/v1/gui-don-thuoc",
-                    request,
-                    GuiDonThuocResponse.class,
-                    token);
+            // Gọi POST, nhận raw body vì BYT có thể trả plain string thay vì JSON
+            String rawBody = httpClient.postForString(
+                    "/api/v1/gui-don-thuoc", request, token);
+
+            // Parse response: BYT có thể trả chuỗi đơn thuần hoặc JSON
+            GuiDonThuocResponse resp = parseResponse(rawBody, 200);
             long ms = DonThuocAuditService.stopTimer(start);
             audit.recordSuccess("gui-don-thuoc", correlationId, 200,
                     reqMasked, responseAsMap(resp), ms, dt.getMaDonThuoc());
             applyResponse(dt, resp, idempotencyKey, null);
             return new GuiDonThuocResult(true, 200, resp, reqJson, correlationId);
+
         } catch (HttpStatusCodeException ex) {
             HttpStatusCode status = ex.getStatusCode();
             long ms = DonThuocAuditService.stopTimer(start);
@@ -97,12 +104,14 @@ public class LienThongGuiDonThuocService {
             int code = status == null ? 0 : status.value();
             boolean retryable = code >= 500 || code == 408 || code == 429;
             if (code == 401) {
-                tokenService.invalidateFacility(maLienThongCoSo);
+                tokenService.invalidateDoctor(maLienThongCoSo, maLienThongBacSi);
             }
+            GuiDonThuocResponse resp = parseResponse(body, code);
+            Map<String, Object> respMap = responseAsMap(resp);
             audit.recordFailure("gui-don-thuoc", correlationId, code, reqMasked,
                     body == null ? ex.getMessage() : body, ms, retryable, dt.getMaDonThuoc());
-            applyResponse(dt, null, idempotencyKey, "HTTP " + code + ": " + body);
-            return new GuiDonThuocResult(false, code, null, reqJson, correlationId);
+            applyResponse(dt, resp, idempotencyKey, "HTTP " + code + ": " + body);
+            return new GuiDonThuocResult(false, code, resp, reqJson, correlationId);
         } catch (RestClientException ex) {
             long ms = DonThuocAuditService.stopTimer(start);
             String msg = ex.getMessage();
@@ -112,17 +121,116 @@ public class LienThongGuiDonThuocService {
         }
     }
 
+    /**
+     * Phiên bản DEBUG: chỉ log JSON, không gọi API thật. Dùng để verify payload.
+     */
+    public GuiDonThuocResult sendDebug(DonThuoc dt, String idempotencyKey) {
+        GuiDonThuocRequest request = DonThuocMappingService.fromEntity(dt);
+        String correlationId = DonThuocAuditService.newCorrelationId();
+        String reqJson = safeStringify(request);
+
+        log.warn("╔══════════════════════════════════════════════════════════════╗");
+        log.warn("║            DEBUG: JSON SẼ GỬI ĐI (API ĐANG BỊ TẮT)         ║");
+        log.warn("╠══════════════════════════════════════════════════════════════╣");
+        log.warn("║ maDonThuoc    : {}", dt.getMaDonThuoc());
+        log.warn("║ idempotencyKey: {}", idempotencyKey);
+        log.warn("╠══════════════════════════════════════════════════════════════╣");
+        log.warn("║                         FULL JSON                            ║");
+        log.warn("╠══════════════════════════════════════════════════════════════╣");
+        log.warn("{}", reqJson);
+        log.warn("╚══════════════════════════════════════════════════════════════╝");
+
+        return new GuiDonThuocResult(false, 0, null, reqJson, correlationId + "-DEBUG");
+    }
+
+    /**
+     * Parse raw body từ BYT.
+     *
+     * <p>Thực tế BYT 808/QĐ-BYT trả về JSON object (không phải plain text):
+     * <pre>
+     *   200 OK: { "success": "Gửi đơn thuốc thành công", "checksum": "..." }
+     *   422:    { "success": "Đơn thuốc đã được sử dụng...", "danh_sach_cac_loi":[...] }
+     * </pre>
+     * Đôi khi server cũng trả body không phải JSON (chuỗi thuần) — cũng xử lý.</p>
+     */
+    private GuiDonThuocResponse parseResponse(String body, int httpStatus) {
+        if (body == null || body.isBlank()) {
+            if (httpStatus == 200) {
+                return GuiDonThuocResponse.ok("(không có nội dung, coi như thành công)");
+            }
+            return GuiDonThuocResponse.error("(response rỗng, HTTP " + httpStatus + ")");
+        }
+        body = body.trim();
+        // Thử parse JSON
+        if (body.startsWith("{") || body.startsWith("[")) {
+            try {
+                GuiDonThuocResponse resp = objectMapper.readValue(body, GuiDonThuocResponse.class);
+                resp.httpStatus = httpStatus;
+
+                // Map BYT's `success` field (String) → response.message / successFlag.
+                // Field `success` không có trong DTO nên Jackson bỏ qua; lấy từ JSON
+                // thô bằng cách parse lại qua Map.
+                try {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> raw = objectMapper.readValue(body, java.util.Map.class);
+                    Object successObj = raw.get("success");
+                    if (successObj != null) {
+                        resp.message = String.valueOf(successObj);
+                        // success=True ↔ BYT báo "thành công" (không phân biệt hoa/thường).
+                        resp.successFlag = containsIgnoreCase(resp.message, "thành công");
+                    }
+                    Object checksumObj = raw.get("checksum");
+                    if (checksumObj != null) {
+                        resp.checksum = String.valueOf(checksumObj);
+                    }
+                    // Lấy danh_sach_cac_loi nếu có
+                    Object dsLoiObj = raw.get("danh_sach_cac_loi");
+                    if (dsLoiObj instanceof java.util.List<?> dsList && !dsList.isEmpty()) {
+                        resp.danh_sach_cac_loi = new java.util.ArrayList<>();
+                        for (Object item : dsList) {
+                            if (item instanceof java.util.Map<?, ?> m) {
+                                GuiDonThuocResponse.DanhSachLoi d = new GuiDonThuocResponse.DanhSachLoi();
+                                Object truong = m.get("truong");
+                                Object maLoi = m.get("ma_loi");
+                                Object tb = m.get("thong_bao");
+                                d.truong = truong == null ? null : String.valueOf(truong);
+                                d.ma_loi = maLoi == null ? null : String.valueOf(maLoi);
+                                d.thong_bao = tb == null ? null : String.valueOf(tb);
+                                resp.danh_sach_cac_loi.add(d);
+                            }
+                        }
+                    }
+                } catch (Exception ignore) {
+                    // raw parse fail → giữ nguyên giá trị từ DTO mapping
+                }
+                return resp;
+            } catch (Exception jsonEx) {
+                // Không phải JSON object → fall through xử lý chuỗi
+            }
+        }
+        // BYT trả chuỗi thuần (không phải JSON)
+        if (httpStatus == 200) {
+            return GuiDonThuocResponse.ok(body);
+        }
+        return GuiDonThuocResponse.error(body);
+    }
+
+    private static boolean containsIgnoreCase(String haystack, String needle) {
+        if (haystack == null || needle == null) return false;
+        return haystack.toLowerCase().contains(needle.toLowerCase());
+    }
+
     private void applyResponse(DonThuoc dt, GuiDonThuocResponse resp, String idempotencyKey, String error) {
         dt.setIdempotencyKey(idempotencyKey);
         dt.setLanGuiLienThong((dt.getLanGuiLienThong() == null ? 0 : dt.getLanGuiLienThong()) + 1);
         dt.setLanGuiCuoiAt(Date.from(Instant.now()));
-        if (resp != null && resp.success) {
+        if (resp != null && resp.isSuccess()) {
             dt.setTrangThaiEnum(com.company.clinicportal.enumentity.TrangThaiDonThuoc.PHAT_HANH);
             dt.setLastError(null);
-            dt.setMaDonThuocQg(resp.ma_don_thuoc_qg);
-            dt.setDonThuocIdQg(resp.don_thuoc_id);
+            // BYT không trả mã đơn quốc gia trong body thành công → dùng mã local
+            dt.setMaDonThuocQg(dt.getMaDonThuoc());
             dt.setNgayDongBoCuoiAt(Date.from(Instant.now()));
-            dt.setPhanHoiCuoi(safeStringify(resp));
+            dt.setPhanHoiCuoi(resp.message);
         } else if (error != null) {
             dt.setLastError(truncate(error, 1000));
             // không đổi trạng thái đơn từ DA_GUI → vẫn cho retry
@@ -132,30 +240,26 @@ public class LienThongGuiDonThuocService {
 
     private Map<String, Object> maskRequest(GuiDonThuocRequest req) {
         Map<String, Object> m = new LinkedHashMap<>();
-        m.put("ma_don_thuoc", req.so_vao_vien); // chỉ log thông tin không nhạy cảm
-        m.put("ho_va_ten_benh_nhan", req.ho_va_ten_benh_nhan);
-        m.put("so_cmnd_cccd", req.so_cmnd_cccd == null ? null : maskText(req.so_cmnd_cccd));
-        m.put("so_dien_thoai", req.so_dien_thoai == null ? null : maskText(req.so_dien_thoai));
-        m.put("so_dinh_danh_y_te", req.so_dinh_danh_y_te == null ? null : maskText(req.so_dinh_danh_y_te));
-        m.put("ho_va_ten_bac_si", req.ho_va_ten_bac_si);
-        m.put("ma_lien_thong_bac_si", req.ma_lien_thong_bac_si);
-        m.put("so_cchn_bac_si", req.so_cchn_bac_si == null ? null : maskText(req.so_cchn_bac_si));
-        m.put("count_don_thuoc_chi_tiet", req.don_thuoc_chi_tiet == null ? 0 : req.don_thuoc_chi_tiet.size());
+        m.put("loai_don_thuoc", req.loai_don_thuoc);
+        m.put("ma_don_thuoc", req.ma_don_thuoc);
+        m.put("ho_ten_benh_nhan", req.ho_ten_benh_nhan);
+        m.put("ma_dinh_danh_cong_dan", req.ma_dinh_danh_cong_dan == null ? null : maskText(req.ma_dinh_danh_cong_dan));
+        m.put("so_dien_thoai_nguoi_kham_benh", req.so_dien_thoai_nguoi_kham_benh == null ? null : maskText(req.so_dien_thoai_nguoi_kham_benh));
+        m.put("ma_dinh_danh_y_te", req.ma_dinh_danh_y_te == null ? null : maskText(req.ma_dinh_danh_y_te));
+        m.put("count_thong_tin_don_thuoc", req.thong_tin_don_thuoc == null ? 0 : req.thong_tin_don_thuoc.size());
         m.put("count_chan_doan", req.chan_doan == null ? 0 : req.chan_doan.size());
-        m.put("count_dot_dung", req.dot_dung == null ? 0 : req.dot_dung.size());
-        m.put("ngay_ke_don", req.ngay_ke_don == null ? null : req.ngay_ke_don.toString());
+        m.put("count_dot_dung_thuoc", req.dot_dung_thuoc == null ? 0 : 1);
+        m.put("ngay_gio_ke_don", req.ngay_gio_ke_don);
         return m;
     }
 
     private Map<String, Object> responseAsMap(GuiDonThuocResponse resp) {
         Map<String, Object> m = new LinkedHashMap<>();
         if (resp == null) return m;
-        m.put("success", resp.success);
-        m.put("error_code", resp.error_code);
+        m.put("status", resp.status);
         m.put("message", resp.message);
-        m.put("ma_don_thuoc_qg", resp.ma_don_thuoc_qg);
-        m.put("don_thuoc_id", resp.don_thuoc_id);
-        m.put("errors", resp.errors);
+        m.put("httpStatus", resp.httpStatus);
+        m.put("danh_sach_cac_loi", resp.danh_sach_cac_loi);
         return m;
     }
 

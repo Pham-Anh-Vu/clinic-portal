@@ -12,7 +12,6 @@
         <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title" icon="vaadin:file-text"/>
         <item view="ThuThuat.list" title="msg://com.company.clinicportal.view.buoidieutri/thuThuatListView.title" icon="vaadin:wrench"/>
         <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title" icon="vaadin:list"/>
-        <item view="ltcs_DonThuoc.list" title="msg://com.company.clinicportal.lienthong.menu.donThuocList.title" icon="vaadin:list"/>
     </menu>
 
     <menu id="patient" description="msg://fis.pbcap.finexbackoffice/menu_config.patient.description"
