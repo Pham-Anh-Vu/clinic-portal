@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://donThuocListView.title"
+      focusComponent="donThuocsDataGrid">
+    <data readOnly="true">
+        <collection id="donThuocsDc" class="com.company.clinicportal.entity.DonThuoc">
+            <fetchPlan extends="_base"/>
+            <loader id="donThuocsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from DonThuoc e order by e.ngayKe desc, e.maDonThuoc desc]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <layout>
+        <vbox spacing="true" width="100%" height="100%">
+            <vbox spacing="false" width="100%"
+                  css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; padding: 16px; background: var(--lumo-base-color);">
+                <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
+                      css="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--lumo-primary-color);">
+                    <hbox spacing="true" alignItems="CENTER">
+                        <icon icon="vaadin:medal" size="20px"
+                              color="var(--lumo-primary-color)"/>
+                        <h3 text="Danh mục thuốc"
+                            css="margin: 0; color: var(--lumo-primary-color); font-weight: bold;"/>
+                    </hbox>
+                </hbox>
+
+                <genericFilter id="genericFilter" dataLoader="donThuocsDl" opened="false">
+                    <properties include=".*"/>
+                </genericFilter>
+
+                <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END"
+                      css="margin-top: 8px;">
+                    <button id="createBtn" text="Tạo nháp" icon="vaadin:plus"/>
+                    <button id="editBtn" text="Sửa" icon="vaadin:edit"/>
+                    <button id="readBtn" text="Xem" icon="vaadin:eye"/>
+                    <button id="removeBtn" text="Xoá" icon="vaadin:trash"/>
+                    <button id="retryBtn" text="Retry gửi liên thông" icon="vaadin:refresh"/>
+                    <button id="bulkSyncBtn" text="Đồng bộ nhiều đơn…" icon="vaadin:cloud-upload"/>
+                </hbox>
+
+                <dataGrid id="donThuocsDataGrid"
+                          width="100%"
+                          minHeight="20em"
+                          dataContainer="donThuocsDc"
+                          columnReorderingAllowed="true">
+                    <emptyStateComponent>
+                        <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                            <h2 text="Chưa có đơn thuốc"/>
+                        </vbox>
+                    </emptyStateComponent>
+                    <columns resizable="true">
+                        <column property="maDonThuoc"/>
+                        <column property="hoVaTenBenhNhan"/>
+                        <column property="ngayKe"/>
+                        <column property="ngayTaiKham"/>
+                        <column property="trangThai"/>
+                        <column property="loaiDon"/>
+                        <column property="hinhThucDieuTri"/>
+                        <column property="soLuongThuocTrongDon"/>
+                        <column property="tenBacSi"/>
+                        <column key="actionsColumn" width="7em" flexGrow="0" sortable="false"/>
+                    </columns>
+                </dataGrid>
+                <simplePagination id="pagination" dataLoader="donThuocsDl" alignSelf="END" css="margin-top: 8px;"/>
+            </vbox>
+
+            <hbox id="lookupActions" visible="false">
+                <button id="selectButton" action="selectAction"/>
+                <button id="discardButton" action="discardAction"/>
+            </hbox>
+        </vbox>
+    </layout>
+</view>

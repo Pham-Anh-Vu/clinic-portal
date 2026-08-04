@@ -87,6 +87,33 @@ public class BenhNhan {
     @Column(name = "ten_file_so_da_ky")
     private String tenFileSoDaKy;
 
+    @Column(name = "ma_dinh_danh_cong_dan", length = 32)
+    private String maDinhDanhCongDan;
+
+    @Column(name = "ma_so_the_bao_hiem_y_te", length = 32)
+    private String maSoTheBaoHiemYTe;
+
+    @Column(name = "ma_dinh_danh_y_te", length = 64)
+    private String maDinhDanhYTe;
+
+    @Column(name = "can_nang")
+    private Double canNang;
+
+    @Column(name = "so_thang_tuoi")
+    private Integer soThangTuoi;
+
+    @Column(name = "nguoi_giam_ho_ho_ten", length = 255)
+    private String nguoiGiamHoHoTen;
+
+    @Column(name = "nguoi_giam_ho_quan_he", length = 64)
+    private String nguoiGiamHoQuanHe;
+
+    @Column(name = "nguoi_giam_ho_so_dien_thoai", length = 32)
+    private String nguoiGiamHoSoDienThoai;
+
+    @Column(name = "nguoi_giam_ho_so_cccd", length = 32)
+    private String nguoiGiamHoSoCccd;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"updatedAt\"")
     private Date updatedAt;
@@ -272,6 +299,78 @@ public class BenhNhan {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getMaDinhDanhCongDan() {
+        return maDinhDanhCongDan;
+    }
+
+    public void setMaDinhDanhCongDan(String maDinhDanhCongDan) {
+        this.maDinhDanhCongDan = maDinhDanhCongDan;
+    }
+
+    public String getMaSoTheBaoHiemYTe() {
+        return maSoTheBaoHiemYTe;
+    }
+
+    public void setMaSoTheBaoHiemYTe(String maSoTheBaoHiemYTe) {
+        this.maSoTheBaoHiemYTe = maSoTheBaoHiemYTe;
+    }
+
+    public String getMaDinhDanhYTe() {
+        return maDinhDanhYTe;
+    }
+
+    public void setMaDinhDanhYTe(String maDinhDanhYTe) {
+        this.maDinhDanhYTe = maDinhDanhYTe;
+    }
+
+    public Double getCanNang() {
+        return canNang;
+    }
+
+    public void setCanNang(Double canNang) {
+        this.canNang = canNang;
+    }
+
+    public Integer getSoThangTuoi() {
+        return soThangTuoi;
+    }
+
+    public void setSoThangTuoi(Integer soThangTuoi) {
+        this.soThangTuoi = soThangTuoi;
+    }
+
+    public String getNguoiGiamHoHoTen() {
+        return nguoiGiamHoHoTen;
+    }
+
+    public void setNguoiGiamHoHoTen(String nguoiGiamHoHoTen) {
+        this.nguoiGiamHoHoTen = nguoiGiamHoHoTen;
+    }
+
+    public String getNguoiGiamHoQuanHe() {
+        return nguoiGiamHoQuanHe;
+    }
+
+    public void setNguoiGiamHoQuanHe(String nguoiGiamHoQuanHe) {
+        this.nguoiGiamHoQuanHe = nguoiGiamHoQuanHe;
+    }
+
+    public String getNguoiGiamHoSoDienThoai() {
+        return nguoiGiamHoSoDienThoai;
+    }
+
+    public void setNguoiGiamHoSoDienThoai(String nguoiGiamHoSoDienThoai) {
+        this.nguoiGiamHoSoDienThoai = nguoiGiamHoSoDienThoai;
+    }
+
+    public String getNguoiGiamHoSoCccd() {
+        return nguoiGiamHoSoCccd;
+    }
+
+    public void setNguoiGiamHoSoCccd(String nguoiGiamHoSoCccd) {
+        this.nguoiGiamHoSoCccd = nguoiGiamHoSoCccd;
     }
 
     @PrePersist

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://danhMucImportDialogView.title">
+    <data>
+        <collection id="previewDc"
+                    class="com.company.clinicportal.service.ImportPreviewRow"/>
+    </data>
+    <layout>
+        <vbox spacing="true" width="100%" padding="true">
+            <span id="dialogTitle" text="Import danh mục"/>
+            <upload id="upload" dropAllowed="true"/>
+            <dataGrid id="previewDataGrid" width="100%" height="20em" dataContainer="previewDc">
+                <emptyStateComponent>
+                    <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                        <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                        <h2 text="Chưa có dữ liệu"/>
+                    </vbox>
+                </emptyStateComponent>
+            </dataGrid>
+            <hbox id="detailActions" justifyContent="END" spacing="true">
+                <button id="downloadTemplateButton" text="Tải template" icon="vaadin:download"/>
+                <button id="importButton" text="Import"/>
+                <button id="cancelButton" text="Hủy"/>
+            </hbox>
+        </vbox>
+    </layout>
+</view>

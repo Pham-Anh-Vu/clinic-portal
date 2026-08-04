@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://lienThongSyncDialogView.title"
+      focusComponent="donThuocsDataGrid">
+    <data readOnly="true">
+        <collection id="donThuocsDc" class="com.company.clinicportal.entity.DonThuoc">
+            <fetchPlan extends="_base"/>
+            <loader id="donThuocsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from DonThuoc e order by e.ngayKe desc]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout spacing="true" padding="true">
+        <hbox id="filterBox" spacing="true" alignItems="END">
+            <comboBox id="modeCombo" label="Chế độ" required="true"/>
+            <button id="scanBtn" text="Quét" icon="vaadin:search"/>
+            <button id="syncBtn" text="Đồng bộ đã chọn" icon="vaadin:cloud-upload-o"/>
+            <button id="syncAllBtn" text="Đồng bộ tất cả" icon="vaadin:cloud-upload"/>
+        </hbox>
+        <dataGrid id="donThuocsDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  multiSelect="true"
+                  dataContainer="donThuocsDc">
+            <emptyStateComponent>
+                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                    <h2 text="Không có đơn nào"/>
+                </vbox>
+            </emptyStateComponent>
+            <columns resizable="true">
+                <column property="maDonThuoc"/>
+                <column property="hoVaTenBenhNhan"/>
+                <column property="ngayKe"/>
+                <column property="trangThai"/>
+                <column property="lastError"/>
+                <column property="lanGuiLienThong"/>
+                <column property="lanGuiCuoiAt"/>
+                <column property="maDonThuocQg"/>
+            </columns>
+        </dataGrid>
+        <hbox id="actionsBox" justifyContent="END" spacing="true">
+            <button id="closeBtn" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

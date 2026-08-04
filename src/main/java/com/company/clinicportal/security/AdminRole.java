@@ -17,7 +17,10 @@ public interface AdminRole {
     @EntityAttributePolicy(entityName = "*", attributes = "*", action = EntityAttributePolicyAction.MODIFY)
     @ViewPolicy(viewIds = "*")
     @SpecificPolicy(resources = "*")
-    @MenuPolicy(menuIds = {"LichHen.list", "LichDieuTri.list", "NhanSu.list", "PhieuChiDinh.list", "ThuThuat.list", "DmDichVu.list", "BenhNhan.list", "SoBenhAn.list"})
+    @MenuPolicy(menuIds = {"LichHen.list", "LichDieuTri.list", "NhanSu.list", "PhieuChiDinh.list", "ThuThuat.list", "DmDichVu.list", "BenhNhan.list", "SoBenhAn.list",
+            "ltcs_CoSoKhamChuaBenhLienThong.list", "ltcs_LienThongDonThuocLog.list",
+            "ltcs_LienThongDonThuocOutbox.list",
+            "ltcs_DmThuoc.list", "ltcs_Icd10.list", "ltcs_DonThuoc.list", "ltcs_DanhMucImportDialog"})
     void screens();
 
 }

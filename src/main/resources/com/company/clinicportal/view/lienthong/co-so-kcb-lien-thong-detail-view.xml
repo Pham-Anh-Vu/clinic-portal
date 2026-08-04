@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://coSoKhamChuaBenhLienThongDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="coSoKhamChuaBenhLienThongDc"
+                  class="com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong">
+            <fetchPlan extends="_base"/>
+            <loader/>
+        </instance>
+    </data>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout>
+        <formLayout id="form" dataContainer="coSoKhamChuaBenhLienThongDc">
+            <textField id="maLienThongField" property="maLienThong" required="true"
+                       label="msg://com.company.clinicportal.lienthong.entity/CoSoKhamChuaBenhLienThong.maLienThong"/>
+            <textField id="maCoSoKcbField" property="maCoSoKcb"
+                       label="msg://com.company.clinicportal.lienthong.entity/CoSoKhamChuaBenhLienThong.maCoSoKcb"/>
+            <textField id="tenCoSoField" property="tenCoSo" required="true"
+                       label="msg://com.company.clinicportal.lienthong.entity/CoSoKhamChuaBenhLienThong.tenCoSo"/>
+            <comboBox id="environmentField" property="environment"
+                      label="msg://com.company.clinicportal.lienthong.entity/CoSoKhamChuaBenhLienThong.environment"
+                      required="true"/>
+            <passwordField id="passwordField" label="Mật khẩu (chỉ nhập khi tạo mới)" required="false"/>
+            <checkbox id="activeField" property="active"
+                      label="msg://com.company.clinicportal.lienthong.entity/CoSoKhamChuaBenhLienThong.active"/>
+        </formLayout>
+        <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://donThuocChiTietEditDialog.title">
+    <data>
+        <instance id="chiTietDc" class="com.company.clinicportal.entity.DonThuocChiTiet">
+            <fetchPlan extends="_base"/>
+            <loader id="chiTietDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout expand="actionsBox" spacing="false" padding="false">
+        <vbox width="100%" height="100%" spacing="true" padding="false">
+            <!-- Card styled theo DmThuocListView -->
+            <vbox spacing="false" width="100%"
+                  css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; padding: 16px; background: var(--lumo-base-color);">
+
+                <!-- HEADER -->
+                <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
+                      css="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--lumo-primary-color);">
+                    <hbox spacing="true" alignItems="CENTER">
+                        <icon icon="vaadin:pills" size="20px"
+                              color="var(--lumo-primary-color)"/>
+                        <h3 text="msg://donThuocChiTietEditDialog.header"
+                            css="margin: 0; color: var(--lumo-primary-color); font-weight: bold;"/>
+                    </hbox>
+                    <span text="msg://donThuocChiTietEditDialog.requiredHint"
+                          class="text-secondary"
+                          css="font-size: var(--lumo-font-size-s);"/>
+                </hbox>
+
+                <!-- FORM -->
+                <formLayout id="form" dataContainer="chiTietDc" width="100%">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                        <responsiveStep minWidth="48em" columns="2"/>
+                    </responsiveSteps>
+
+                    <entityPicker id="dmThuocField" property="dmThuoc" colspan="2" width="100%"
+                                  required="true">
+                        <actions>
+                            <action id="entityLookup" type="entity_lookup">
+                                <properties>
+                                    <property name="viewId" value="ltcs_DmThuoc.list"/>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
+                            </action>
+                            <action id="entityClear" type="entity_clear"/>
+                        </actions>
+                    </entityPicker>
+
+                    <textField id="maThuocSnapshotField" property="maThuocSnapshot" readOnly="true"
+                               label="msg://donThuocChiTietEditDialog.codeLabel"/>
+                    <textField id="donViTinhSnapshotField" property="donViTinhSnapshot" readOnly="true"
+                               label="msg://donThuocChiTietEditDialog.unitLabel"/>
+                    <textField id="soLuongField" property="soLuong" required="true"
+                               label="msg://donThuocChiTietEditDialog.qtyLabel"/>
+                    <textArea id="cachDungField" property="cachDung" colspan="2" height="100px"
+                              label="msg://donThuocChiTietEditDialog.usageLabel"/>
+                </formLayout>
+
+                <!-- FOOTER -->
+                <hbox id="actionsBox" justifyContent="END" spacing="true" width="100%"
+                      css="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--lumo-contrast-10pct);">
+                    <button id="cancelBtn" action="closeAction" text="Hủy bỏ" icon="vaadin:close" themeName="tertiary"/>
+                    <button id="saveBtn" action="saveAction" text="Lưu dòng thuốc" icon="vaadin:check" themeName="primary"/>
+                </hbox>
+            </vbox>
+        </vbox>
+    </layout>
+</view>

@@ -89,6 +89,8 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
     private TypedTextField<String> tuoiFieldRead;
     @Autowired
     private MetadataTools metadataTools;
+    @Autowired
+    private com.company.clinicportal.service.BenhNhanValidator benhNhanValidator;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -286,6 +288,27 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
     @Subscribe(id = "buoiDieuTrisDl", target = Target.DATA_LOADER)
     public void onBuoiDieuTrisLoaded(CollectionLoader.PostLoadEvent<BuoiDieuTri> event) {
         renderStatusChart();
+    }
+
+    @Subscribe
+    public void onBeforeSave(BeforeSaveEvent event) {
+        java.util.List<String> errors = new java.util.ArrayList<>();
+        benhNhanValidator.validate(getEditedEntity(), errors, null);
+        if (!errors.isEmpty()) {
+            String msg = errors.stream()
+                    .map(this::resolveMessage)
+                    .reduce((a, b) -> a + "\n" + b)
+                    .orElse("");
+            throw new ValidationException(msg);
+        }
+    }
+
+    private String resolveMessage(String key) {
+        try {
+            return messages.getMessage(key);
+        } catch (Exception ignored) {
+            return key;
+        }
     }
 
     private void renderStatusChart() {

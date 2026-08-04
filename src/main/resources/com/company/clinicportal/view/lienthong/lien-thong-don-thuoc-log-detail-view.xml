@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://lienThongDonThuocLogDetailView.title"
+      focusComponent="form">
+    <data readOnly="true">
+        <instance id="lienThongDonThuocLogDc"
+                  class="com.company.clinicportal.lienthong.entity.LienThongDonThuocLog">
+            <fetchPlan extends="_base"/>
+            <loader readOnly="true"/>
+        </instance>
+    </data>
+    <actions>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout spacing="true" padding="true">
+        <html id="summary"/>
+        <formLayout id="form" dataContainer="lienThongDonThuocLogDc" readOnly="true">
+            <textField property="api"/>
+            <textField property="correlationId"/>
+            <textField property="maDonThuoc"/>
+            <integerField property="httpStatus"/>
+            <integerField property="latencyMs"/>
+            <textField property="outcome"/>
+            <checkbox property="retryable"/>
+            <dateTimePicker property="createdAt"/>
+        </formLayout>
+        <vbox spacing="true" width="100%">
+            <h3 text="Request (masked)"/>
+            <codeEditor id="requestEditor" readOnly="true" height="20em"/>
+            <h3 text="Response (masked)"/>
+            <codeEditor id="responseEditor" readOnly="true" height="20em"/>
+        </vbox>
+        <hbox id="detailActions" justifyContent="END" alignSelf="END">
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

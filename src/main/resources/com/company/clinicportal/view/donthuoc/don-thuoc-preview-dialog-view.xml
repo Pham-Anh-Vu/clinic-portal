@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://donThuocPreviewDialogView.title"
+      focusComponent="contentDiv">
+    <layout expand="contentDivBox" padding="false" spacing="false">
+        <div id="contentDivBox" width="100%" height="100%">
+            <div id="contentDiv" width="100%"/>
+        </div>
+        <hbox id="printBox" justifyContent="END" spacing="true" padding="true" classNames="no-print">
+            <button id="printButton" text="In / Xuất PDF" icon="vaadin:print"/>
+            <button id="closeButton" text="Đóng" icon="vaadin:close"/>
+        </hbox>
+    </layout>
+</view>

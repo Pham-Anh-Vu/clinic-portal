@@ -34,6 +34,9 @@
             <dateTimePicker id="updatedAtField" property="updatedAt"/>
             <textField id="updatedByIdField" property="updatedById"/>
         </formLayout>
+        <hbox id="lienThongBtnBox" spacing="true" padding="true" alignItems="CENTER">
+            <button id="keDonThuocButton" text="Kê đơn thuốc" icon="vaadin:pill"/>
+        </hbox>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>

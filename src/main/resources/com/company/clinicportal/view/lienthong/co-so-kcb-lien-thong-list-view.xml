@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://coSoKhamChuaBenhLienThongListView.title"
+      focusComponent="coSoKhamChuaBenhLienThongsDataGrid">
+    <data readOnly="true">
+        <collection id="coSoKhamChuaBenhLienThongsDc"
+                    class="com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong">
+            <fetchPlan extends="_base"/>
+            <loader id="coSoKhamChuaBenhLienThongsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from ltcs_CoSoKhamChuaBenhLienThong e order by e.maLienThong]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="coSoKhamChuaBenhLienThongsDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="coSoKhamChuaBenhLienThongsDataGrid.createAction"/>
+            <button id="editButton" action="coSoKhamChuaBenhLienThongsDataGrid.editAction"/>
+            <button id="removeButton" action="coSoKhamChuaBenhLienThongsDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="coSoKhamChuaBenhLienThongsDl"/>
+        </hbox>
+        <dataGrid id="coSoKhamChuaBenhLienThongsDataGrid"
+                  width="100%"
+                  columnReorderingAllowed="true"
+                  minHeight="20em"
+                  dataContainer="coSoKhamChuaBenhLienThongsDc">
+            <emptyStateComponent>
+                <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                    <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                    <h2 text="Chưa có dữ liệu"/>
+                </vbox>
+            </emptyStateComponent>
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="maLienThong"/>
+                <column property="maCoSoKcb"/>
+                <column property="tenCoSo"/>
+                <column property="environment"/>
+                <column property="active"/>
+                <column property="tokenExpiresAt"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

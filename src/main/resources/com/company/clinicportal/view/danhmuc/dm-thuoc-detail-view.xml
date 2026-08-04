@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://dmThuocDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="dmThuocDc" class="com.company.clinicportal.entity.DmThuoc">
+            <fetchPlan extends="_base"/>
+            <loader/>
+        </instance>
+    </data>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout>
+        <formLayout id="form" dataContainer="dmThuocDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="60em" columns="2"/>
+            </responsiveSteps>
+            <textField property="maThuoc" required="true" colspan="2"/>
+            <textField property="tenThuoc" required="true" colspan="2"/>
+            <textField property="hoatChat" colspan="2"/>
+            <textField property="donViTinh"/>
+            <textField property="hamLuong"/>
+            <textArea property="ghiChu" colspan="2"/>
+        </formLayout>
+        <hbox id="detailActions" justifyContent="END">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

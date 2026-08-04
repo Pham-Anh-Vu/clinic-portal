@@ -5,18 +5,23 @@ import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.ChiTietDieuTriFileDinhKem;
+import com.company.clinicportal.entity.DonThuoc;
 import com.company.clinicportal.entity.LichSuThanhToan;
+import com.company.clinicportal.entity.PhieuDieuTri;
 import com.company.clinicportal.entity.ToDieuTri;
 import com.company.clinicportal.entity.ToDieuTriKyThuat;
 import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.enumentity.TinhTheoGia;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
+import com.company.clinicportal.service.DonThuocService;
 import com.company.clinicportal.service.TinhKpiChiTietService;
 import com.company.clinicportal.service.ToDieuTriPrintService;
 import com.company.clinicportal.view.benhnhan.SoBenhAnPreviewDialogView;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
+import com.company.clinicportal.view.donthuoc.DonThuocDetailView;
+import com.company.clinicportal.view.donthuoc.DonThuocQuickAddDialog;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.AbstractField;
@@ -58,6 +63,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Route(value = "chi-tiet-dieu-tri-sbas/:id", layout = MainView.class)
 @ViewController(id = "ChiTietDieuTriSBA.detail")
@@ -66,6 +73,7 @@ import java.util.*;
 @DialogMode(height = "100%", width = "80%")
 public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuTri> {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("d.M.yyyy");
+    private static final Logger log = LoggerFactory.getLogger(ChiTietDieuTriSBADetailView.class);
     private boolean toDieuTriColumnsConfigured = false;
 
     private BenhNhan idBenhNhan = null;
@@ -115,6 +123,20 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private TinhKpiChiTietService tinhKpiChiTietService;
     @Autowired
     private ChiTietDieuTriPaymentSummaryService paymentSummaryService;
+    @Autowired
+    private DonThuocService donThuocService;
+
+    /** Tên bác sĩ mặc định khi tạo đơn thuốc nhanh từ chi tiết phiếu điều trị. */
+    private static final String DEFAULT_TEN_BAC_SI = "BS. Đặng Thị Hà";
+
+    @ViewComponent
+    private DataGrid<DonThuoc> donThuocsDataGrid;
+    @ViewComponent
+    private CollectionLoader<DonThuoc> donThuocsDl;
+    @ViewComponent
+    private CollectionContainer<DonThuoc> donThuocsDc;
+    @ViewComponent
+    private JmixButton addDonThuocButton;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -192,7 +214,104 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             toDieuTrisDl.load();
         }
 
+        // Load danh sách đơn thuốc của chi tiết phiếu điều trị hiện tại và cấu hình cột thao tác.
+        if (getEditedEntity() != null && getEditedEntity().getId() != null) {
+            donThuocsDl.setParameter("idChiTietDieuTri", getEditedEntity());
+            donThuocsDl.load();
+        }
+        configureDonThuocGridColumns();
+
         recalculatePaymentFields();
+    }
+
+    private void configureDonThuocGridColumns() {
+        if (donThuocsDataGrid == null) {
+            return;
+        }
+        // Đảm bảo chỉ add cột Thao tác một lần (tránh duplicate khi view reload).
+        if (donThuocsDataGrid.getColumnByKey("thaoTacDonThuocColumn") == null) {
+            Grid.Column<DonThuoc> thaoTacColumn = donThuocsDataGrid.addComponentColumn(this::buildDonThuocActionsCell);
+            thaoTacColumn.setKey("thaoTacDonThuocColumn");
+            thaoTacColumn.setHeader("Thao tác");
+            thaoTacColumn.setWidth("9em");
+            thaoTacColumn.setFlexGrow(0);
+            thaoTacColumn.setSortable(false);
+        }
+    }
+
+    private HorizontalLayout buildDonThuocActionsCell(DonThuoc donThuoc) {
+        HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
+        layout.setSpacing(false);
+        layout.setPadding(false);
+
+        JmixButton openButton = uiComponents.create(JmixButton.class);
+        openButton.setIcon(com.vaadin.flow.component.icon.VaadinIcon.EYE.create());
+        openButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL,
+                com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY);
+        openButton.setTitle("Mở xem");
+        openButton.addClickListener(e -> openDonThuocDetail(donThuoc));
+
+        JmixButton editButton = uiComponents.create(JmixButton.class);
+        editButton.setIcon(com.vaadin.flow.component.icon.VaadinIcon.EDIT.create());
+        editButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL,
+                com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY);
+        editButton.setTitle("Sửa");
+        editButton.addClickListener(e -> openDonThuocDetail(donThuoc));
+
+        JmixButton delButton = uiComponents.create(JmixButton.class);
+        delButton.setIcon(com.vaadin.flow.component.icon.VaadinIcon.TRASH.create());
+        delButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL,
+                com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR,
+                com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY);
+        delButton.setTitle("Xoá");
+        delButton.addClickListener(e -> confirmAndDeleteDonThuoc(donThuoc));
+
+        layout.add(openButton, editButton, delButton);
+        return layout;
+    }
+
+    /** PostLoad handler để đảm bảo cột thao tác luôn được cấu hình sau khi data load. */
+    @Subscribe(id = "donThuocsDl", target = Target.DATA_LOADER)
+    public void onDonThuocsDlPostLoad(final io.jmix.flowui.model.CollectionLoader.PostLoadEvent<DonThuoc> event) {
+        configureDonThuocGridColumns();
+    }
+
+    private void confirmAndDeleteDonThuoc(DonThuoc donThuoc) {
+        if (donThuoc == null || donThuoc.getId() == null) return;
+        String ma = donThuoc.getMaDonThuoc();
+        dialogs.createOptionDialog()
+                .withHeader("Xoá đơn thuốc")
+                .withText("Bạn có chắc muốn xoá đơn \"" + ma + "\"?")
+                .withActions(
+                        new DialogAction(DialogAction.Type.NO),
+                        new DialogAction(DialogAction.Type.YES).withHandler(e -> {
+                            try {
+                                dataManager.remove(donThuoc);
+                                notifications.create("Đã xoá đơn " + ma)
+                                        .withType(Notifications.Type.SUCCESS).show();
+                                donThuocsDl.load();
+                            } catch (Exception ex) {
+                                log.error("Không thể xoá đơn thuốc id={}", donThuoc.getId(), ex);
+                                notifications.create("Không thể xoá: " + ex.getMessage())
+                                        .withType(Notifications.Type.ERROR).show();
+                            }
+                        })
+                )
+                .withWidth("320px")
+                .open();
+    }
+
+    private void openDonThuocDetail(DonThuoc donThuoc) {
+        if (donThuoc == null || donThuoc.getId() == null) {
+            return;
+        }
+        // Mở dialog QuickAdd (header đơn + grid dòng thuốc + Lưu nháp / Phát hành / Huỷ đơn)
+        // ở chế độ SỬA đơn thuốc đã có. Controller tự load đơn từ DB theo id.
+        DialogWindow<DonThuocQuickAddDialog> window = dialogWindows.view(this, DonThuocQuickAddDialog.class)
+                .withViewConfigurer(v -> ((DonThuocQuickAddDialog) v).setDonThuocId(donThuoc.getId()))
+                .build();
+        window.addAfterCloseListener(e -> donThuocsDl.load());
+        window.open();
     }
 
     @Subscribe(id = "lichSuThanhToansDl", target = Target.DATA_LOADER)
@@ -269,6 +388,42 @@ if (!saveContext.getEntitiesToSave().isEmpty()) {
     @Subscribe("toDieuTrisDataGrid.create")
     public void onToDieuTrisDataGridCreate(final ActionPerformedEvent event) {
         openToDieuTriDetail(null, true);
+    }
+
+    /**
+     * Bấm "Thêm mới đơn thuốc" trên tab ĐƠN THUỐC → tạo DonThuoc nháp với 4 trường auto-fill
+     * (Chuẩn đoán từ ChiTietDieuTri.chuanDoan, Hình thức ĐT = NGOAI_TRU, Ngày kê = hôm nay,
+     * Bác sĩ kê đơn = BS. Đặng Thị Hà), rồi mở màn chi tiết để nhập dòng thuốc.
+     */
+    @Subscribe("addDonThuocButton")
+    public void onAddDonThuocButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+        ChiTietDieuTri chiTietDieuTri = getEditedEntity();
+        if (chiTietDieuTri == null) {
+            return;
+        }
+        if (chiTietDieuTri.getIdBenhNhan() == null) {
+            notifications.create("Phiếu điều trị chưa có bệnh nhân, không thể tạo đơn thuốc.")
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+        try {
+            // Mở dialog "Thêm mới đơn thuốc" — màn full đủ 9 trường header + 3 datagrid
+            // (ICD, danh sách thuốc, đợt dùng). Sau khi đóng luôn reload grid đơn thuốc
+            // — không cần mở DonThuocDetailView nữa.
+            DialogWindow<?> window = dialogWindows.view(this, "DonThuocQuickAddDialog")
+                    .build();
+            com.company.clinicportal.view.donthuoc.DonThuocQuickAddDialog view =
+                    (com.company.clinicportal.view.donthuoc.DonThuocQuickAddDialog) window.getView();
+            view.setChiTietDieuTri(chiTietDieuTri);
+            window.addAfterCloseListener(closeEvent -> donThuocsDl.load());
+            window.open();
+        } catch (Exception ex) {
+            log.error("Không thể mở dialog thêm đơn thuốc từ ChiTietDieuTri id={}", chiTietDieuTri.getId(), ex);
+            notifications.create("Không thể tạo đơn thuốc: " + ex.getMessage())
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+        }
     }
 
     @Subscribe("printToDieuTriButton")

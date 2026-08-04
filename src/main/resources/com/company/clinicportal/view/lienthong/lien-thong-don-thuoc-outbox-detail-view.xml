@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://lienThongDonThuocOutboxDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="lienThongDonThuocOutboxDc"
+                  class="com.company.clinicportal.lienthong.entity.LienThongDonThuocOutbox">
+            <fetchPlan extends="_base"/>
+            <loader id="lienThongDonThuocOutboxDl" readOnly="true"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout spacing="true" padding="true">
+        <formLayout id="form" dataContainer="lienThongDonThuocOutboxDc" readOnly="true">
+            <textField property="maDonThuoc"/>
+            <textField property="api"/>
+            <textField property="status"/>
+            <textField property="idempotencyKey"/>
+            <textField property="attempt"/>
+            <textField property="maxAttempt"/>
+            <textField property="nextAttemptAt"/>
+            <textField property="lockedBy"/>
+            <textField property="lockedAt"/>
+            <textField property="createdAt"/>
+            <textField property="updatedAt"/>
+            <textArea property="lastError" rows="4"/>
+        </formLayout>
+        <hbox id="actionsBox" justifyContent="END" spacing="true">
+            <button id="retryBtn" text="Retry" icon="vaadin:refresh"/>
+            <button id="closeBtn" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

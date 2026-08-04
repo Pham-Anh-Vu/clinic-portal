@@ -69,6 +69,26 @@
                 </property>
             </fetchPlan>
         </collection>
+        <collection id="donThuocsDc" class="com.company.clinicportal.entity.DonThuoc">
+            <loader id="donThuocsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from DonThuoc e
+                              where e.chiTietDieuTri = :idChiTietDieuTri
+                              order by e.ngayKe desc, e.createdAt desc]]>
+                </query>
+            </loader>
+            <fetchPlan>
+                <property name="id"/>
+                <property name="maDonThuoc"/>
+                <property name="ngayKe"/>
+                <property name="trangThai"/>
+                <property name="hinhThucDieuTri"/>
+                <property name="tenBacSi"/>
+                <property name="loaiDon"/>
+                <property name="soLuongThuocTrongDon"/>
+                <property name="createdAt"/>
+            </fetchPlan>
+        </collection>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -464,6 +484,58 @@
                     <hbox width="100%" justifyContent="END" padding="true">
                         <button id="printToDieuTriButton" text="In tờ điều trị" icon="PRINT"/>
                     </hbox>
+                </vbox>
+            </tab>
+            <tab id="tab4" label="ĐƠN THUỐC">
+                <vbox width="100%">
+                    <vbox width="100%" alignItems="START" padding="false"
+                          spacing="false" classNames="tab-5-grid">
+                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                              width="100%"
+                              css="border-bottom: 2px solid var(--lumo-primary-color);">
+                            <hbox classNames="buttons-panel" width="100%">
+                                <div width="100%" classNames="all-control-auto-pay">
+                                    <div classNames="title-grid">
+                                        <span text="DANH SÁCH ĐƠN THUỐC"/>
+                                    </div>
+                                    <div classNames="function-flex-end">
+                                        <button id="addDonThuocButton" text="Thêm mới đơn thuốc"
+                                                icon="vaadin:plus" classNames="action-button create"/>
+                                        <button action="donThuocsDataGrid.refresh" classNames="action-button refresh"/>
+                                    </div>
+                                </div>
+                            </hbox>
+                        </vbox>
+                        <vbox padding="false" classNames="grid-data">
+                            <formLayout
+                                    css="border: 1px #BFBFBF solid; border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                                <responsiveSteps>
+                                    <responsiveStep minWidth="0" columns="1"/>
+                                </responsiveSteps>
+                                <dataGrid id="donThuocsDataGrid"
+                                          dataContainer="donThuocsDc"
+                                          width="100%">
+                                    <emptyStateComponent>
+                                        <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
+                                            <h2 text="Chưa có đơn thuốc"/>
+                                        </vbox>
+                                    </emptyStateComponent>
+                                    <actions>
+                                        <action id="refresh" type="list_refresh"/>
+                                    </actions>
+                                    <columns resizable="true">
+                                        <column property="maDonThuoc" header="Mã đơn thuốc"/>
+                                        <column property="ngayKe" header="Ngày kê"/>
+                                        <column property="tenBacSi" header="Bác sĩ kê đơn"/>
+                                        <column property="hinhThucDieuTri" header="Hình thức ĐT"/>
+                                        <column property="trangThai" header="Trạng thái"/>
+                                        <column property="soLuongThuocTrongDon" header="SL thuốc"/>
+                                    </columns>
+                                </dataGrid>
+                            </formLayout>
+                        </vbox>
+                    </vbox>
                 </vbox>
             </tab>
             <tab id="tab2" label="TỔNG KẾT ĐIỀU TRỊ">

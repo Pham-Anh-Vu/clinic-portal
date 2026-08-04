@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://icd10DetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="icd10Dc" class="com.company.clinicportal.entity.Icd10">
+            <fetchPlan extends="_base"/>
+            <loader/>
+        </instance>
+    </data>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout>
+        <formLayout id="form" dataContainer="icd10Dc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="60em" columns="3"/>
+            </responsiveSteps>
+            <textField property="maIcd" required="true"/>
+            <textField property="tenBenh" required="true" colspan="2"/>
+            <textField property="tenBenhEn" colspan="3"/>
+            <textField property="chuong"/>
+            <textField property="nhomChinh"/>
+            <textField property="nhomPhu"/>
+            <integerField property="phienBan"/>
+            <textArea property="moTa" colspan="3"/>
+        </formLayout>
+        <hbox id="detailActions" justifyContent="END">
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

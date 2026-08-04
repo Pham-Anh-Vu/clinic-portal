@@ -17,10 +17,10 @@ public class TblKhachhang {
     private Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "\"createdAt\"")
+    @Column(name = "\"createdat\"")
     private Date createdAt;
 
-    @Column(name = "\"createdById\"")
+    @Column(name = "\"createdbyid\"")
     private Long createdById;
 
     @Column(name = "\"diaChi\"")
@@ -40,10 +40,10 @@ public class TblKhachhang {
     private String soDienThoai;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "\"updatedAt\"")
+    @Column(name = "\"updatedat\"")
     private Date updatedAt;
 
-    @Column(name = "\"updatedById\"")
+    @Column(name = "\"updatedbyid\"")
     private Long updatedById;
 
     public Long getUpdatedById() {

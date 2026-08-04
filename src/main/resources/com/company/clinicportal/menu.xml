@@ -12,6 +12,7 @@
         <item view="PhieuChiDinh.list" title="msg://com.company.clinicportal.view.benhnhan/phieuChiDinhListView.title" icon="vaadin:file-text"/>
         <item view="ThuThuat.list" title="msg://com.company.clinicportal.view.buoidieutri/thuThuatListView.title" icon="vaadin:wrench"/>
         <item view="DmDichVu.list" title="msg://com.company.clinicportal.view.dmdichvu/dmDichVuListView.title" icon="vaadin:list"/>
+        <item view="ltcs_DonThuoc.list" title="msg://com.company.clinicportal.lienthong.menu.donThuocList.title" icon="vaadin:list"/>
     </menu>
 
     <menu id="patient" description="msg://fis.pbcap.finexbackoffice/menu_config.patient.description"
@@ -23,6 +24,26 @@
 
     <menu id="system" description="msg://com.company.clinicportal/system" icon="vaadin:cog" title="msg://com.company.clinicportal/system">
         <item view="User.list" title="msg://com.company.clinicportal/system.createAccount" icon="vaadin:clipboard-user"/>
+    </menu>
+
+    <menu id="lienthong" description="msg://com.company.clinicportal.lienthong.menu.lienThong.title"
+          icon="vaadin:exchange"
+          title="msg://com.company.clinicportal.lienthong.menu.lienThong.title">
+        <item view="ltcs_CoSoKhamChuaBenhLienThong.list" title="msg://com.company.clinicportal.lienthong.menu.lienThongCoSo.title" icon="vaadin:building"/>
+        <item view="ltcs_LienThongDonThuocOutbox.list" title="msg://com.company.clinicportal.lienthong.menu.lienThongOutbox.title" icon="vaadin:upload"/>
+        <item view="ltcs_LienThongDonThuocLog.list" title="msg://com.company.clinicportal.lienthong.menu.lienThongLog.title" icon="vaadin:list"/>
+    </menu>
+
+    <menu id="donthuoc" description="msg://com.company.clinicportal.lienthong.menu.donThuoc.title"
+          icon="vaadin:pill"
+          title="msg://com.company.clinicportal.lienthong.menu.donThuoc.title">
+    </menu>
+
+    <menu id="danhmuc" description="msg://com.company.clinicportal.lienthong.menu.danhMuc.title"
+          icon="vaadin:book"
+          title="msg://com.company.clinicportal.lienthong.menu.danhMuc.title">
+        <item view="ltcs_DmThuoc.list" title="msg://com.company.clinicportal.lienthong.menu.danhMucThuoc.title" icon="vaadin:pill"/>
+        <item view="ltcs_Icd10.list" title="msg://com.company.clinicportal.lienthong.menu.danhMucIcd10.title" icon="vaadin:clipboard-text"/>
     </menu>
 
 <!--    <menu id="application" title="msg://com.company.clinicportal/menu.application.title" opened="true" >-->

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://donThuocDetailView.title"
+      focusComponent="formHeader">
+    <data>
+        <instance id="donThuocDc" class="com.company.clinicportal.entity.DonThuoc">
+            <fetchPlan extends="_base">
+                <property name="chiTiets" fetchPlan="_base"/>
+                <property name="chanDoans" fetchPlan="_base"/>
+                <property name="dotDungs" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader/>
+        </instance>
+        <collection id="chiTietsDc" class="com.company.clinicportal.entity.DonThuocChiTiet">
+            <fetchPlan extends="_base"/>
+            <loader id="chiTietsDl">
+                <query>
+                    <![CDATA[select e from DonThuocChiTiet e where e.donThuoc = :donThuoc order by e.stt]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="chanDoansDc" class="com.company.clinicportal.entity.DonThuocChanDoan">
+            <fetchPlan extends="_base"/>
+            <loader id="chanDoansDl">
+                <query>
+                    <![CDATA[select e from DonThuocChanDoan e where e.donThuoc = :donThuoc order by e.stt]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="dotDungsDc" class="com.company.clinicportal.entity.DonThuocDotDung">
+            <fetchPlan extends="_base"/>
+            <loader id="dotDungsDl">
+                <query>
+                    <![CDATA[select e from DonThuocDotDung e where e.donThuoc = :donThuoc order by e.soDot]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout>
+        <vbox id="formHeader" width="100%" spacing="true" padding="true">
+            <h3 text="Thông tin đơn thuốc"/>
+            <formLayout dataContainer="donThuocDc">
+                <responsiveSteps>
+                    <responsiveStep minWidth="0" columns="1"/>
+                    <responsiveStep minWidth="60em" columns="3"/>
+                </responsiveSteps>
+                <textField property="maDonThuoc" readOnly="true"/>
+                <select property="loaiDon"/>
+                <select property="hinhThucDieuTri"/>
+                <datePicker property="ngayKe"/>
+                <datePicker property="ngayTaiKham"/>
+                <select property="trangThai" readOnly="true"/>
+                <textField property="tenBacSi" colspan="3"/>
+                <textArea property="loiDan" colspan="3" height="6em"/>
+            </formLayout>
+        </vbox>
+
+        <vbox id="bnInfo" width="100%" spacing="false" padding="true">
+            <h4 text="Thông tin bệnh nhân (snapshot)"/>
+            <formLayout dataContainer="donThuocDc">
+                <responsiveSteps>
+                    <responsiveStep minWidth="0" columns="2"/>
+                    <responsiveStep minWidth="60em" columns="4"/>
+                </responsiveSteps>
+                <textField property="hoVaTenBenhNhan"/>
+                <textField property="maDinhDanhYTe"/>
+                <textField property="maDinhDanhCongDan"/>
+                <textField property="soDienThoai"/>
+                <datePicker property="ngaySinh"/>
+                <textField property="gioiTinh"/>
+                <textField property="canNang"/>
+                <textField property="soThangTuoi"/>
+                <textField property="nguoiGiamHoHoTen"/>
+                <textField property="nguoiGiamHoQuanHe"/>
+                <textField property="nguoiGiamHoSoDienThoai"/>
+                <textArea property="diaChi" colspan="4"/>
+            </formLayout>
+        </vbox>
+
+        <vbox id="chanDoanBox" width="100%" spacing="true" padding="true">
+            <hbox spacing="true" alignItems="CENTER">
+                <h4 text="Chẩn đoán (ICD-10)"/>
+                <button id="addChanDoanButton" text="Thêm chẩn đoán" icon="vaadin:plus"/>
+                <button id="removeChanDoanButton" text="Xoá chẩn đoán" icon="vaadin:minus"/>
+            </hbox>
+            <dataGrid id="chanDoanDataGrid" width="100%" minHeight="10em" dataContainer="chanDoansDc" editorEnabled="true">
+                <columns resizable="true">
+                    <column property="stt" width="5em"/>
+                    <column property="icd10" header="Mã ICD" editable="true">
+                        <entityPicker/>
+                    </column>
+                    <column property="maIcdSnapshot" header="Mã ICD (snapshot)" editable="false"/>
+                    <column property="tenIcdSnapshot" header="Tên bệnh" editable="false"/>
+                    <column property="ketLuan" header="Kết luận" editable="true"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+
+        <vbox id="thuocBox" width="100%" spacing="true" padding="true">
+            <hbox spacing="true" alignItems="CENTER">
+                <h4 text="Dòng thuốc"/>
+                <button id="addThuocButton" text="Thêm thuốc" icon="vaadin:plus"/>
+                <button id="removeThuocButton" text="Xoá thuốc" icon="vaadin:minus"/>
+            </hbox>
+            <dataGrid id="chiTietDataGrid" width="100%" minHeight="12em" dataContainer="chiTietsDc" editorEnabled="true">
+                <columns resizable="true">
+                    <column property="stt" width="5em"/>
+                    <column property="dmThuoc" header="Mã thuốc (chọn)" editable="true">
+                        <entityPicker/>
+                    </column>
+                    <column property="maThuocSnapshot" header="Mã thuốc" editable="false"/>
+                    <column property="tenThuocSnapshot" header="Tên thuốc" editable="false"/>
+                    <column property="bietDuocSnapshot" header="Biệt dược" editable="false"/>
+                    <column property="hamLuongSnapshot" header="Hàm lượng" editable="false"/>
+                    <column property="donViTinhSnapshot" header="Đơn vị" editable="false"/>
+                    <column property="soLuong" editable="true"/>
+                    <column property="lieuDung" editable="true"/>
+                    <column property="tanSuat" editable="true"/>
+                    <column property="thoiGianDung" editable="true"/>
+                    <column property="duongDung" editable="true"/>
+                    <column property="cachDung" editable="true"/>
+                    <column property="ghiChu" editable="true"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+
+        <vbox id="dotDungBox" width="100%" spacing="true" padding="true">
+            <hbox spacing="true" alignItems="CENTER">
+                <h4 text="Đợt dùng thuốc (YHCT)"/>
+                <button id="addDotDungButton" text="Thêm đợt" icon="vaadin:plus"/>
+                <button id="removeDotDungButton" text="Xoá đợt" icon="vaadin:minus"/>
+            </hbox>
+            <dataGrid id="dotDungDataGrid" width="100%" minHeight="8em" dataContainer="dotDungsDc">
+                <columns resizable="true">
+                    <column property="soDot" width="5em"/>
+                    <column property="tuNgay"/>
+                    <column property="denNgay"/>
+                    <column property="soThangThuoc"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+
+        <hbox id="actionsBox" justifyContent="END" spacing="true" padding="true">
+            <button id="previewButton" text="Preview / In" icon="vaadin:eye"/>
+            <button id="issueButton" text="Lưu &amp; phát hành" icon="vaadin:check"/>
+            <button id="cancelButton" text="Huỷ đơn" icon="vaadin:close"/>
+            <button id="saveAndCloseButton" action="saveAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>
