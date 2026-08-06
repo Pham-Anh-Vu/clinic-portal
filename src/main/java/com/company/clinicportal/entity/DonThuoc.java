@@ -203,6 +203,41 @@ public class DonThuoc {
     @Column(name = "retry_count")
     private Integer retryCount;
 
+    /**
+     * Trạng thái tổng quát của liên thông:
+     * <ul>
+     *     <li>{@code PENDING} — đã lên lịch gửi, chưa thử hoặc đang thử lại.</li>
+     *     <li>{@code SENT} — BYT xác nhận đã nhận đơn (HTTP 200 + "thành công").</li>
+     *     <li>{@code FAILED} — lần gửi gần nhất thất bại nhưng chưa đạt ngưỡng bỏ.</li>
+     *     <li>{@code GIVEN_UP} — đã vượt {@code retryCount >= MAX_ATTEMPTS}, không gửi nữa.</li>
+     * </ul>
+     */
+    @Column(name = "lien_thong_status", length = 16)
+    private String lienThongStatus;
+
+    /**
+     * Số lần đã THỬ (count cả lần success/fail). Scheduler/view đọc
+     * field này để quyết định có tiếp tục gửi hay không.
+     * Ngưỡng tối đa: {@link #MAX_LIEN_THONG_ATTEMPTS}.
+     */
+    @Column(name = "so_lan_thu_lien_thong")
+    private Integer soLanThuLienThong;
+
+    /** Thời điểm gửi liên thông lần cuối (mọi attempt). */
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "lien_thong_last_attempt_at")
+    private Date lienThongLastAttemptAt;
+
+    /** Checksum BYT trả về khi gửi thành công (giúp đối chiếu). */
+    @Column(name = "lien_thong_checksum", length = 128)
+    private String lienThongChecksum;
+
+    /**
+     * Ngưỡng tối đa số lần thử gửi liên thông. Sau khi vượt ngưỡng,
+     * scheduler sẽ bỏ qua đơn (status = {@code GIVEN_UP}) để tránh spam server BYT.
+     */
+    public static final int MAX_LIEN_THONG_ATTEMPTS = 5;
+
     @Composition
     @OneToMany(mappedBy = "donThuoc", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("stt ASC")
@@ -376,6 +411,24 @@ public class DonThuoc {
     public void setNgayDongBoCuoiAt(Date ngayDongBoCuoiAt) { this.ngayDongBoCuoiAt = ngayDongBoCuoiAt; }
     public String getPhanHoiCuoi() { return phanHoiCuoi; }
     public void setPhanHoiCuoi(String phanHoiCuoi) { this.phanHoiCuoi = phanHoiCuoi; }
+
+    public String getLienThongStatus() { return lienThongStatus; }
+    public void setLienThongStatus(String lienThongStatus) { this.lienThongStatus = lienThongStatus; }
+    public Integer getSoLanThuLienThong() { return soLanThuLienThong; }
+    public void setSoLanThuLienThong(Integer soLanThuLienThong) { this.soLanThuLienThong = soLanThuLienThong; }
+    public Date getLienThongLastAttemptAt() { return lienThongLastAttemptAt; }
+    public void setLienThongLastAttemptAt(Date lienThongLastAttemptAt) { this.lienThongLastAttemptAt = lienThongLastAttemptAt; }
+    public String getLienThongChecksum() { return lienThongChecksum; }
+    public void setLienThongChecksum(String lienThongChecksum) { this.lienThongChecksum = lienThongChecksum; }
+
+    /**
+     * Check đơn đã được đánh dấu bỏ (số lần thử vượt ngưỡng).
+     * Scheduler/view sẽ bỏ qua đơn này để tránh spam server BYT.
+     */
+    public boolean isLienThongGivenUp() {
+        Integer n = soLanThuLienThong;
+        return n != null && n >= MAX_LIEN_THONG_ATTEMPTS;
+    }
 
     public List<DonThuocChiTiet> getChiTiets() { return chiTiets; }
     public void setChiTiets(List<DonThuocChiTiet> chiTiets) { this.chiTiets = chiTiets; }

@@ -1,12 +1,22 @@
 package com.company.clinicportal.lienthong;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,10 +38,20 @@ public class LienThongHttpClient {
 
     private final LienThongProperties properties;
     private final RestClient restClient;
+    private final ObjectMapper objectMapper;
+    private final HttpClient rawHttpClient;
 
-    public LienThongHttpClient(LienThongProperties properties, RestClient lienThongRestClient) {
+    public LienThongHttpClient(LienThongProperties properties,
+                               RestClient lienThongRestClient,
+                               @Qualifier("lienThongObjectMapper") ObjectMapper objectMapper) {
         this.properties = properties;
         this.restClient = lienThongRestClient;
+        this.objectMapper = objectMapper;
+        // HttpClient native — dùng để đọc raw response body mà KHÔNG bị Jackson converter ép kiểu
+        // (BYT 808 trả 200 OK + application/json, RestClient extract String/byte[] fail)
+        this.rawHttpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofMillis(Math.max(1000, properties.getConnectTimeoutMs())))
+                .build();
     }
 
     public <T> T post(String path, Object body, Class<T> responseType, String bearerToken) {
@@ -69,17 +89,79 @@ public class LienThongHttpClient {
     }
 
     /**
-     * POST rồi trả raw String body — dùng khi BYT trả chuỗi plain text
-     * thay vì JSON (ví dụ: "Gửi đơn thuốc thành công" HTTP 200).
+     * POST rồi trả raw String body — dùng cho các endpoint BYT 808/QĐ-BYT trả JSON/plain text
+     * (ví dụ: "/api/v1/gui-don-thuoc" trả 200 OK + {@code {"success":"...","checksum":"..."}}).
+     *
+     * <p><b>Tại sao không dùng RestClient:</b> {@code RestClient.body(String.class)} và
+     * {@code RestClient.toEntity(byte[].class)} đều mặc định dùng JacksonHttpMessageConverter.
+     * Khi content-type là application/json nhưng target type là String/byte[], converter ném
+     * {@code RestClientException: Error while extracting response for type [...] and content
+     * type [application/json]} dù HTTP status 200 OK. Điều này khiến đơn thuốc đã được BYT
+     * lưu thành công lại bị báo cáo là fail.</p>
+     *
+     * <p>Cách fix: bỏ qua toàn bộ Jackson extractor, dùng
+     * {@link java.net.http.HttpClient} native để đọc raw body (bytes/UTF-8) và chỉ
+     * tự throw {@link HttpStatusCodeException} khi status >= 400 (để flow retry/audit
+     * hoạt động như cũ).</p>
      */
     public String postForString(String path, Object body, String bearerToken) {
         return executeWithRetry(() -> {
-            var req = restClient.post().uri(path)
-                    .header(HDR_CORRELATION, newCorrelationId());
-            if (bearerToken != null && !bearerToken.isBlank()) {
-                req = req.header(HDR_AUTHORIZATION, "bearer " + bearerToken);
+            String correlationId = newCorrelationId();
+            String url = properties.getApiBaseUrl() + path;
+            byte[] bodyBytes;
+            try {
+                bodyBytes = objectMapper.writeValueAsBytes(body);
+            } catch (JsonProcessingException e) {
+                throw new RestClientException("Serialize body failed: " + e.getMessage(), e);
             }
-            return req.body(body).retrieve().body(String.class);
+
+            HttpRequest.Builder b = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofMillis(Math.max(1000, properties.getReadTimeoutMs())))
+                    .header("Content-Type", "application/json")
+                    .header(HDR_CORRELATION, correlationId)
+                    .header("Accept", "application/json, text/plain, */*");
+            if (bearerToken != null && !bearerToken.isBlank()) {
+                b.header(HDR_AUTHORIZATION, "bearer " + bearerToken);
+            }
+            HttpRequest req = b.POST(HttpRequest.BodyPublishers.ofByteArray(bodyBytes)).build();
+
+            HttpResponse<byte[]> resp;
+            try {
+                resp = rawHttpClient.send(req, HttpResponse.BodyHandlers.ofByteArray());
+            } catch (java.io.IOException io) {
+                // Bọc lại thành RestClientException để retry theo flow cũ
+                throw new RestClientException("I/O error calling " + url + ": " + io.getMessage(), io);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new RestClientException("Interrupted calling " + url, ie);
+            }
+
+            int status = resp.statusCode();
+            byte[] payload = resp.body();
+            String text = payload == null ? "" : new String(payload, StandardCharsets.UTF_8);
+
+            if (status >= 400) {
+                // Tái tạo HttpStatusCodeException để các catch-block phía trên (HttpStatusCodeException
+                // + recordFailure) vẫn hoạt động như cũ — dùng HttpClientErrorException cho 4xx,
+                // HttpServerErrorException cho 5xx (đều extend HttpStatusCodeException).
+                byte[] errBody = text == null ? new byte[0] : payload;
+                if (status >= 500) {
+                    throw new org.springframework.web.client.HttpServerErrorException(
+                            org.springframework.http.HttpStatus.valueOf(status),
+                            status + " " + text,
+                            org.springframework.http.HttpHeaders.EMPTY,
+                            errBody,
+                            StandardCharsets.UTF_8);
+                }
+                throw new org.springframework.web.client.HttpClientErrorException(
+                        org.springframework.http.HttpStatus.valueOf(status),
+                        status + " " + text,
+                        org.springframework.http.HttpHeaders.EMPTY,
+                        errBody,
+                        StandardCharsets.UTF_8);
+            }
+            return text;
         }, "POST " + path);
     }
 
@@ -95,7 +177,11 @@ public class LienThongHttpClient {
                 HttpStatusCode status = (ex instanceof org.springframework.web.client.RestClientResponseException rcre)
                         ? rcre.getStatusCode() : null;
                 if (!isRetryable(status)) {
-                    log.warn("[LienThong] {} attempt={} status={} không retry.", label, attempt, status);
+                    // Log đầy đủ nguyên nhân parse-fail / non-retryable để debug
+                    log.warn("[LienThong] {} attempt={} status={} không retry. Cause: {} {}",
+                            label, attempt, status,
+                            ex.getClass().getSimpleName(),
+                            ex.getMessage() != null ? ex.getMessage().replace('\n', ' ') : "");
                     throw ex;
                 }
                 log.warn("[LienThong] {} attempt={} status={} sẽ retry sau {}ms", label, attempt, status, backoff);
@@ -108,7 +194,7 @@ public class LienThongHttpClient {
     }
 
     private boolean isRetryable(HttpStatusCode status) {
-        if (status == null) return true; // network/timeout
+        if (status == null) return false; // parse fail / unknown — không retry vì có thể request đã tới server
         int v = status.value();
         if (v == 408 || v == 429) return true;
         return v >= 500 && v < 600;

@@ -23,7 +23,7 @@
                     <responsiveStep minWidth="0" columns="1"/>
                     <responsiveStep minWidth="60em" columns="3"/>
                 </responsiveSteps>
-                <textField property="maDonThuoc" readOnly="true"/>
+<!--                <textField property="maDonThuoc" readOnly="true"/>-->
                 <select id="loaiDonField" property="loaiDon" label="Loại đơn"
                         optionsEnum="com.company.clinicportal.enumentity.LoaiDon" required="true"/>
                 <select property="hinhThucDieuTri" label="Hình thức điều trị"
@@ -37,88 +37,107 @@
             </formLayout>
         </vbox>
 
-        <vbox id="chanDoanBox" width="100%" spacing="false" padding="true"
-              css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; background: var(--lumo-base-color);">
-            <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
-                  css="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--lumo-primary-color);">
-                <hbox spacing="true" alignItems="CENTER">
-                    <icon icon="vaadin:stethoscope" size="18px" color="var(--lumo-primary-color)"/>
-                    <h4 text="CHẨN ĐOÁN ICD-10"
-                        css="margin: 0; color: var(--lumo-primary-color); font-weight: bold;"/>
-                    <span id="chanDoanCountLabel" themeName="badge"/>
+        <vbox width="100%" alignItems="START" padding="false"
+              spacing="false" classNames="tab-5-grid">
+            <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                  width="100%">
+                <hbox classNames="buttons-panel" width="100%">
+                    <div width="100%" classNames="all-control-auto-pay">
+                        <div classNames="title-grid">
+                            <span text="CHẨN ĐOÁN ICD-10"/>
+                            <span id="chanDoanCountLabel" themeName="badge" visible="false"/>
+                        </div>
+                        <div classNames="function-flex-end">
+                            <button id="addChanDoanButton" text="Thêm chẩn đoán" icon="vaadin:plus" themeName="primary"
+                                    action="chanDoanDataGrid.create"/>
+                        </div>
+                    </div>
                 </hbox>
-                <button id="addChanDoanButton" text="Thêm chẩn đoán" icon="vaadin:plus" themeName="primary"
-                    action="chanDoanDataGrid.create"/>
-            </hbox>
-            <dataGrid id="chanDoanDataGrid" width="100%" minHeight="140px" dataContainer="chanDoansDc"
-                      editorEnabled="true">
-                <actions>
-                    <action id="create" type="list_create" text="Thêm chẩn đoán"/>
-                    <action id="edit" type="list_edit" text="Chi tiết"/>
-                    <action id="remove" type="list_remove" text="Xóa"/>
-                </actions>
-                <emptyStateComponent>
-                    <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
-                        <icon icon="vaadin:file-o" size="36px" color="var(--lumo-tertiary-text-color)"/>
-                        <span text="Chưa có chẩn đoán"/>
-                    </vbox>
-                </emptyStateComponent>
-                <columns resizable="true">
-                    <column property="stt" width="3em" header="STT"/>
-                    <column property="icd10" header="ICD-10" editable="true" width="10em">
-                        <entityPicker/>
-                    </column>
-                    <column property="maIcdSnapshot" header="Mã ICD" editable="false" width="7em"/>
-                    <column property="tenIcdSnapshot" header="Tên bệnh" editable="false"/>
-                    <column property="ketLuan" header="Kết luận" editable="true">
-                        <textField/>
-                    </column>
-                </columns>
-            </dataGrid>
+            </vbox>
+            <vbox padding="false" classNames="grid-data">
+                <formLayout
+                        css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                    </responsiveSteps>
+                    <dataGrid id="chanDoanDataGrid" width="100%" minHeight="140px" dataContainer="chanDoansDc">
+                        <actions>
+                            <action id="create" type="list_create" text="Thêm chẩn đoán"/>
+                            <action id="edit" type="list_edit" text="Chi tiết"/>
+                            <action id="remove" type="list_remove" text="Xóa"/>
+                        </actions>
+                        <emptyStateComponent>
+                            <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                <icon icon="vaadin:file-o" size="36px" color="var(--lumo-tertiary-text-color)"/>
+                                <span text="Chưa có chẩn đoán"/>
+                            </vbox>
+                        </emptyStateComponent>
+                        <columns resizable="true">
+                            <column property="stt" width="3em" header="STT"/>
+                            <column property="icd10" header="ICD-10" editable="true" width="10em">
+                            </column>
+                            <column property="maIcdSnapshot" header="Mã ICD" editable="false" width="7em"/>
+                            <column property="tenIcdSnapshot" header="Tên bệnh" editable="false"/>
+                            <column property="ketLuan" header="Kết luận" editable="true">
+                            </column>
+                        </columns>
+                    </dataGrid>
+                </formLayout>
+            </vbox>
         </vbox>
 
-        <vbox id="thuocBox" width="100%" spacing="false" padding="true"
-              css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; background: var(--lumo-base-color);">
-            <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
-                  css="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--lumo-primary-color);">
-                <hbox spacing="true" alignItems="CENTER">
-                    <icon icon="vaadin:pill" size="18px" color="var(--lumo-primary-color)"/>
-                    <h4 text="DANH SÁCH THUỐC"
-                        css="margin: 0; color: var(--lumo-primary-color); font-weight: bold;"/>
-                    <span id="thuocCountLabel" themeName="badge"/>
+        <vbox width="100%" alignItems="START" padding="false"
+              spacing="false" classNames="tab-5-grid">
+            <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                  width="100%">
+                <hbox classNames="buttons-panel" width="100%">
+                    <div width="100%" classNames="all-control-auto-pay">
+                        <div classNames="title-grid">
+                            <span text="DANH SÁCH THUỐC"/>
+                            <span id="thuocCountLabel" themeName="badge"  visible="false"/>
+                        </div>
+                        <div classNames="function-flex-end">
+                            <button id="addThuocButton" text="Thêm thuốc" icon="vaadin:plus" themeName="primary"
+                                    action="chiTietDataGrid.create"/>
+                        </div>
+                    </div>
                 </hbox>
-                <button id="addThuocButton" text="Thêm thuốc" icon="vaadin:plus" themeName="primary"
-                    action="chiTietDataGrid.create"/>
-            </hbox>
-            <dataGrid id="chiTietDataGrid" width="100%" minHeight="220px" dataContainer="chiTietsDc"
-                      editorEnabled="true"
-                      css="padding: 8px 0 0 0;">
-                <actions>
-                    <action id="create" type="list_create" text="Thêm thuốc"/>
-                    <action id="edit" type="list_edit" text="Chi tiết"/>
-                    <action id="remove" type="list_remove" text="Xóa"/>
-                </actions>
-                <emptyStateComponent>
-                    <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
-                        <icon icon="vaadin:file-o" size="40px" color="var(--lumo-tertiary-text-color)"/>
-                        <span text="Chưa có thuốc nào"/>
-                    </vbox>
-                </emptyStateComponent>
-                <columns resizable="true">
-                    <column property="stt" width="3em" header="STT"/>
-                    <column property="tenThuocSnapshot" header="Thuốc"/>
-                    <column property="maThuocSnapshot" header="Mã thuốc" width="8em"/>
-                    <column property="donViTinhSnapshot" header="Đơn vị tính" width="7em"/>
-                    <column property="soLuong" header="Số lượng" width="6em" editable="true">
-                        <textField/>
-                    </column>
-                    <column property="cachDung" header="Cách dùng" editable="true">
-                        <textField/>
-                    </column>
-                    <column key="actionsColumn" header="Thao tác" width="7em" flexGrow="0"/>
-                </columns>
-            </dataGrid>
+            </vbox>
+            <vbox padding="false" classNames="grid-data">
+                <formLayout
+                        css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                    </responsiveSteps>
+                    <dataGrid id="chiTietDataGrid" width="100%" minHeight="220px" dataContainer="chiTietsDc"
+                              css="padding: 8px 0 0 0;">
+                        <actions>
+                            <action id="create" type="list_create" text="Thêm thuốc"/>
+                            <action id="edit" type="list_edit" text="Chi tiết"/>
+                            <action id="remove" type="list_remove" text="Xóa"/>
+                        </actions>
+                        <emptyStateComponent>
+                            <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
+                                <icon icon="vaadin:file-o" size="40px" color="var(--lumo-tertiary-text-color)"/>
+                                <span text="Chưa có thuốc nào"/>
+                            </vbox>
+                        </emptyStateComponent>
+                        <columns resizable="true">
+                            <column property="stt" width="3em" header="STT"/>
+                            <column property="tenThuocSnapshot" header="Thuốc"/>
+                            <column property="maThuocSnapshot" header="Mã thuốc" width="8em"/>
+                            <column property="donViTinhSnapshot" header="Đơn vị tính" width="7em"/>
+                            <column property="soLuong" header="Số lượng" width="6em" editable="true">
+                            </column>
+                            <column property="cachDung" header="Cách dùng" editable="true">
+                            </column>
+                            <column key="actionsColumn" header="Thao tác" width="7em" flexGrow="0"/>
+                        </columns>
+                    </dataGrid>
+                </formLayout>
+            </vbox>
         </vbox>
+
 
         <hbox id="actionsBox" justifyContent="END" spacing="true" width="100%">
             <button id="cancelDonBtn" text="Huỷ đơn" icon="vaadin:close"/>

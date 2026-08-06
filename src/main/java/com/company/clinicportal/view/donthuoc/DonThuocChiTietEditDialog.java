@@ -60,6 +60,7 @@ public class DonThuocChiTietEditDialog extends StandardDetailView<DonThuocChiTie
     /**
      * Khi user chọn thuốc từ danh mục → điền các trường snapshot.
      * Dùng AbstractField.ComponentValueChangeEvent (fired khi user chọn entity).
+     * Đồng thời gọi pickDrug để check trùng và đảm bảo snapshot đầy đủ.
      */
     @Subscribe("dmThuocField")
     public void onDmThuocFieldComponentValueChange(
@@ -72,10 +73,16 @@ public class DonThuocChiTietEditDialog extends StandardDetailView<DonThuocChiTie
             donViTinhSnapshotField.setValue(null);
             return;
         }
-        maThuocSnapshotField.setValue(dm.getMaThuoc());
-        tenThuocSnapshotField.setValue(dm.getTenThuoc());
-        bietDuocSnapshotField.setValue(dm.getBietDuoc());
-        donViTinhSnapshotField.setValue(dm.getDonViTinh());
+        try {
+            donThuocService.pickDrug(getEditedEntity(), dm);
+            maThuocSnapshotField.setValue(dm.getMaThuoc());
+            tenThuocSnapshotField.setValue(dm.getTenThuoc());
+            bietDuocSnapshotField.setValue(dm.getBietDuoc());
+            donViTinhSnapshotField.setValue(dm.getDonViTinh());
+        } catch (IllegalStateException dup) {
+            notifications.create(dup.getMessage())
+                    .withType(Notifications.Type.WARNING).show();
+        }
     }
 
     @Subscribe("soLuongField")

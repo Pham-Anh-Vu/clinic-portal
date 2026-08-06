@@ -44,8 +44,6 @@
                 <hbox id="buttonsPanel" classNames="buttons-panel" justifyContent="END" css="margin-top: 8px;">
                     <button id="importButton" text="Import" icon="vaadin:upload"/>
                     <button id="createButton" action="dmThuocsDataGrid.createAction" icon="vaadin:plus"/>
-                    <button id="editButton" action="dmThuocsDataGrid.editAction" icon="vaadin:edit"/>
-                    <button id="removeButton" action="dmThuocsDataGrid.removeAction" icon="vaadin:trash"/>
                     <button id="refreshButton" action="dmThuocsDataGrid.refreshAction" icon="vaadin:refresh"/>
                 </hbox>
                 <dataGrid id="dmThuocsDataGrid"
@@ -75,10 +73,7 @@
                         <column property="bietDuoc"/>
                         <column property="hoatChat"/>
                         <column property="donViTinh"/>
-                        <column property="hamLuong"/>
-                        <column property="importedAt">
-                            <dateRenderer format="dd/MM/yyyy HH:mm"/>
-                        </column>
+                        <column property="hamLuong" header="Hoạt chất"/>
                     </columns>
                 </dataGrid>
                 <simplePagination id="pagination" dataLoader="dmThuocsDl" alignSelf="END" css="margin-top: 8px;"/>

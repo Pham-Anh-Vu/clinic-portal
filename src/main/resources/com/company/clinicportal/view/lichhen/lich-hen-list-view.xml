@@ -117,7 +117,9 @@
                         </emptyStateComponent>
                         <actions>
                             <action id="createAction" type="list_create">
-                                <properties><property name="openMode" value="DIALOG"/></properties>
+                                <properties>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
                             </action>
                             <action id="editAction" type="list_edit"/>
                             <action id="removeAction" type="list_remove"/>

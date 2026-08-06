@@ -34,6 +34,8 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
@@ -147,6 +149,20 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionLoader<DonThuoc> donThuocsDl;
     @ViewComponent
     private CollectionContainer<DonThuoc> donThuocsDc;
+
+    /**
+     * Renderer hiển thị tiếng Việt cho cột "Trạng thái" đơn thuốc: chuyển {@code trangThai}
+     * (String ID như {@code PHAT_HANH}, {@code CHO_GUI}) sang {@link TrangThaiDonThuoc}
+     * rồi lấy {@code tenHienThi}. Cột XML dùng {@code key="trangThaiLabel"} không bind
+     * property — giá trị do renderer cung cấp.
+     */
+    @Supply(to = "donThuocsDataGrid.trangThaiLabel", subject = "renderer")
+    private Renderer<DonThuoc> donThuocsDataGridTrangThaiLabelRenderer() {
+        return new TextRenderer<>(dt -> {
+            TrangThaiDonThuoc e = TrangThaiDonThuoc.fromId(dt.getTrangThai());
+            return e == null ? dt.getTrangThai() : e.getTenHienThi();
+        });
+    }
     @ViewComponent
     private JmixButton addDonThuocButton;
     @ViewComponent
@@ -514,20 +530,25 @@ if (!saveContext.getEntitiesToSave().isEmpty()) {
                 .show();
 
         int success = 0, fail = 0;
-        StringBuilder errors = new StringBuilder();
+        // Chỉ theo dõi các đơn THÀNH CÔNG để liệt kê trong message thông báo.
+        java.util.List<String> successCodes = new java.util.ArrayList<>();
+        // Lỗi chỉ đếm + log; không đẩy raw JSON/Unicode vào notification (gây rối UI).
+        java.util.List<String> failMuteMessages = new java.util.ArrayList<>();
 
         for (DonThuoc dt : danhSach) {
             // Load lại entity từ DB với fetch plan đầy đủ, tránh lazy fetch trên detached object
             UUID donThuocId = dt.getId();
             if (donThuocId == null) {
                 fail++;
-                errors.append("• ").append(dt.getMaDonThuoc()).append(": đơn chưa được lưu\n");
+                failMuteMessages.add(dt.getMaDonThuoc() + ": chưa lưu");
+                log.warn("[DongBo] Bỏ qua đơn chưa được lưu.");
                 continue;
             }
             List<String> validationErrors = donThuocService.validateForIssue(donThuocId);
             if (!validationErrors.isEmpty()) {
                 fail++;
-                errors.append("• ").append(dt.getMaDonThuoc()).append(": ").append(String.join(", ", validationErrors)).append("\n");
+                failMuteMessages.add(dt.getMaDonThuoc() + ": validation");
+                log.warn("[DongBo] Đơn {} không hợp lệ: {}", dt.getMaDonThuoc(), validationErrors);
                 continue;
             }
             // Load lại DonThuoc managed từ DB để gọi service gửi liên thông (cần lazy access bên trong)
@@ -552,18 +573,19 @@ if (!saveContext.getEntitiesToSave().isEmpty()) {
 
                 if (result.success) {
                     success++;
+                    successCodes.add(dt.getMaDonThuoc());
                     log.info("[DongBo] Gửi thành công maDonThuoc={} httpStatus={}",
                             dt.getMaDonThuoc(), result.httpStatus);
                 } else {
                     fail++;
-                    String errMsg = result.response != null ? result.response.message : "HTTP " + result.httpStatus;
-                    errors.append("• ").append(dt.getMaDonThuoc()).append(": ").append(errMsg).append("\n");
+                    failMuteMessages.add(dt.getMaDonThuoc() + ": HTTP " + result.httpStatus);
                     log.warn("[DongBo] Gửi thất bại maDonThuoc={} httpStatus={} msg={}",
-                            dt.getMaDonThuoc(), result.httpStatus, errMsg);
+                            dt.getMaDonThuoc(), result.httpStatus,
+                            result.response != null ? result.response.message : "");
                 }
             } catch (Exception ex) {
                 fail++;
-                errors.append("• ").append(dt.getMaDonThuoc()).append(": ").append(ex.getMessage()).append("\n");
+                failMuteMessages.add(dt.getMaDonThuoc() + ": exception");
                 log.error("[DongBo] Lỗi khi gửi maDonThuoc=" + dt.getMaDonThuoc(), ex);
             }
         }
@@ -571,18 +593,24 @@ if (!saveContext.getEntitiesToSave().isEmpty()) {
         dongBoDonThuocButton.setEnabled(true);
         donThuocsDl.load();
 
+        // Liệt kê các mã đơn THÀNH CÔNG (định dạng gọn, không raw JSON).
+        String successListStr = successCodes.isEmpty() ? "" :
+                "\nThành công: " + String.join(", ", successCodes);
+
         if (success > 0 && fail == 0) {
-            notifications.create("Đồng bộ thành công " + success + " đơn thuốc!")
+            notifications.create("Đồng bộ thành công " + success + " đơn thuốc." + successListStr)
                     .withType(Notifications.Type.SUCCESS)
+                    .withDuration(6000)
                     .show();
         } else if (success > 0 && fail > 0) {
-            notifications.create("Đồng bộ: " + success + " OK, " + fail + " lỗi. Xem log để chi tiết.")
+            notifications.create("Đồng bộ: " + success + " thành công, " + fail + " thất bại. Xem log để chi tiết." + successListStr)
                     .withType(Notifications.Type.WARNING)
+                    .withDuration(6000)
                     .show();
         } else {
-            notifications.create("Đồng bộ thất bại. " + fail + " lỗi.\n" + errors)
+            notifications.create("Đồng bộ thất bại " + fail + " đơn. Xem log để chi tiết.")
                     .withType(Notifications.Type.ERROR)
-                    .withDuration(8000)
+                    .withDuration(4000)
                     .show();
         }
     }

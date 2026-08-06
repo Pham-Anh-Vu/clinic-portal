@@ -531,7 +531,7 @@
                                         <column property="ngayKe" header="Ngày kê"/>
                                         <column property="tenBacSi" header="Bác sĩ kê đơn"/>
                                         <column property="hinhThucDieuTri" header="Hình thức ĐT"/>
-                                        <column property="trangThai" header="Trạng thái"/>
+                                        <column key="trangThaiLabel" header="Trạng thái"/>
                                         <column property="soLuongThuocTrongDon" header="SL thuốc"/>
                                     </columns>
                                 </dataGrid>

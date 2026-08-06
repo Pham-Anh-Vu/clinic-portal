@@ -37,7 +37,7 @@
                 <column property="maDonThuoc"/>
                 <column property="hoVaTenBenhNhan"/>
                 <column property="ngayKe"/>
-                <column property="trangThai"/>
+                <column key="trangThaiLabel" header="msg://lienThongSyncDialogView.column.trangThai"/>
                 <column property="lastError"/>
                 <column property="lanGuiLienThong"/>
                 <column property="lanGuiCuoiAt"/>

@@ -230,6 +230,7 @@
                     -->
 
 
+            <!-- TẠM ẨN: KPI & TRỌNG SỐ
             <vbox width="100%" alignItems="START" padding="false"
                   spacing="false" classNames="tab-5-grid">
                 <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
@@ -257,6 +258,7 @@
                     </formLayout>
                 </vbox>
             </vbox>
+            -->
 
             <vbox width="100%" alignItems="START" padding="false"
                   spacing="false" classNames="tab-5-grid">

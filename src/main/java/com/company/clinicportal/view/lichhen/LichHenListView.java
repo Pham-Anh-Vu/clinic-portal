@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.action.list.CreateAction;
 import io.jmix.flowui.action.list.RemoveAction;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -45,6 +46,10 @@ public class LichHenListView extends StandardListView<LichHen> {
     private DataGrid<LichHen> lichHensDataGrid2;
     @ViewComponent("lichHensDataGrid2.removeAction")
     private RemoveAction<LichHen> lichHensDataGrid2RemoveAction;
+    @ViewComponent("lichHensDataGrid.createAction")
+    private CreateAction<LichHen> lichHensDataGridCreateAction;
+    @ViewComponent("lichHensDataGrid2.createAction")
+    private CreateAction<LichHen> lichHensDataGrid2CreateAction;
     @ViewComponent
     private CollectionLoader<LichHen> lichHensDl_1;
 
@@ -130,6 +135,16 @@ public class LichHenListView extends StandardListView<LichHen> {
                 })
                 .setHeader("Thao tác")
                 .setAutoWidth(true);
+
+        lichHensDataGridCreateAction.setAfterCloseHandler(closeEvent -> {
+            // Sau khi dialog tạo mới đóng, refresh loader để áp dụng bộ lọc currentDate
+            lichHensDl.setParameter("currentDate", new Date());
+            lichHensDl.load();
+        });
+
+        lichHensDataGrid2CreateAction.setAfterCloseHandler(closeEvent -> {
+            lichHensDl_1.load();
+        });
     }
 
 

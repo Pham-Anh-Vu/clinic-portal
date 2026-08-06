@@ -1,9 +1,12 @@
 package com.company.clinicportal.view.lienthong;
 
 import com.company.clinicportal.entity.DonThuoc;
+import com.company.clinicportal.enumentity.TrangThaiDonThuoc;
 import com.company.clinicportal.lienthong.LienThongOutboxService;
 import com.company.clinicportal.service.DonThuocService;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import io.jmix.core.DataManager;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -62,6 +65,20 @@ public class LienThongSyncDialogView extends StandardView {
         if (scanBtn != null) scanBtn.addClickListener(e -> scan());
         if (syncBtn != null) syncBtn.addClickListener(e -> sync(false));
         if (syncAllBtn != null) syncAllBtn.addClickListener(e -> sync(true));
+    }
+
+    /**
+     * Renderer hiển thị tiếng Việt cho cột "Trạng thái": chuyển {@code trangThai} (String ID như
+     * {@code PHAT_HANH}, {@code CHO_GUI}) sang tên hiển thị của enum {@link TrangThaiDonThuoc}
+     * (ví dụ: "Đã phát hành", "Chờ gửi"). Cột XML dùng {@code key="trangThaiLabel"} không bind
+     * property — giá trị do renderer cung cấp.
+     */
+    @Supply(to = "donThuocsDataGrid.trangThaiLabel", subject = "renderer")
+    private Renderer<DonThuoc> donThuocsDataGridTrangThaiLabelRenderer() {
+        return new TextRenderer<>(dt -> {
+            TrangThaiDonThuoc e = TrangThaiDonThuoc.fromId(dt.getTrangThai());
+            return e == null ? dt.getTrangThai() : e.getTenHienThi();
+        });
     }
 
     private void scan() {

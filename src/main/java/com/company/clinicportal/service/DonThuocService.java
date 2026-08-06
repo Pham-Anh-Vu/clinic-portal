@@ -4,6 +4,7 @@ import com.company.clinicportal.entity.*;
 import com.company.clinicportal.enumentity.LoaiDon;
 import com.company.clinicportal.enumentity.TrangThaiDonThuoc;
 import io.jmix.core.DataManager;
+import io.jmix.core.EntitySet;
 import io.jmix.core.SaveContext;
 import io.jmix.core.security.CurrentAuthentication;
 import org.slf4j.Logger;
@@ -183,6 +184,8 @@ public class DonThuocService {
             }
             dt.setSoDotDung(dots);
         }
+        // Pattern Jmix chuẩn cho @Composition + CascadeType.ALL: chỉ cần save parent
+        // (eclipse-link tự cascade children theo FK order). KHÔNG save riêng children.
         SaveContext ctx = new SaveContext().saving(dt);
         dataManager.save(ctx);
         return dt;

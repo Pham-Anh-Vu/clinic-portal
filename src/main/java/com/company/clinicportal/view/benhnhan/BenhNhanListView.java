@@ -3,6 +3,7 @@ package com.company.clinicportal.view.benhnhan;
 import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.ChiTietDieuTri;
+import com.company.clinicportal.entity.LichHen;
 import com.company.clinicportal.view.buoidieutri.ThuThuatDetailView;
 import com.company.clinicportal.view.chitietdieutri.ChiTietDieuTriListView;
 import com.company.clinicportal.view.main.MainView;
@@ -117,8 +118,16 @@ public class BenhNhanListView extends StandardListView<BenhNhan> {
             deleteButton.addClickListener(e -> {
                 Optional<ChiTietDieuTri> chiTietDieuTri = dataManager.load(ChiTietDieuTri.class).query("select e from ChiTietDieuTri e where e.idBenhNhan = :idBenhNhan")
                                 .parameter("idBenhNhan", benhNhan).optional();
+                Optional<LichHen> lichHen = dataManager.load(LichHen.class).query("select e from LichHen e where e.idBenhNhan = :idBenhNhan")
+                        .parameter("idBenhNhan", benhNhan).optional();
                 if(chiTietDieuTri.isPresent()){
                     notifications.create("Không thể xóa. Khách hàng đã được lập phiếu chỉ định.")
+                            .withThemeVariant(NotificationVariant.LUMO_WARNING)
+                            .withPosition(Notification.Position.TOP_END)
+                            .show();
+                }
+                else if(lichHen.isPresent()) {
+                    notifications.create("Không thể xóa. Khách hàng đã có lịch hẹn.")
                             .withThemeVariant(NotificationVariant.LUMO_WARNING)
                             .withPosition(Notification.Position.TOP_END)
                             .show();

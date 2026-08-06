@@ -51,15 +51,36 @@ public class DonThuocChanDoanEditDialog extends StandardDetailView<DonThuocChanD
     @Subscribe("icd10Field")
     public void onIcd10FieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<EntityPicker<Icd10>, Icd10> event) {
         Icd10 icd10 = event.getValue();
-        maIcdSnapshotField.setValue(icd10.getMaIcd());
-        tenIcdSnapshotField.setValue(icd10.getTenBenh());
+        if (icd10 == null) {
+            return;
+        }
+        try {
+            // pickDiagnosis: check duplicate + set snapshot fields (maIcd/tenIcd)
+            donThuocService.pickDiagnosis(getEditedEntity(), icd10);
+            // EntityPicker trong dialog không bind 2 chiều với snapshot fields khi
+            // entity set từ service → ép set UI để hiển thị ngay.
+            maIcdSnapshotField.setValue(icd10.getMaIcd());
+            tenIcdSnapshotField.setValue(icd10.getTenBenh());
+        } catch (IllegalStateException ex) {
+            notifications.create(ex.getMessage())
+                    .withType(Notifications.Type.WARNING).show();
+        }
     }
 
     @Subscribe("icd10Field")
     public void onIcd10FieldCustomValueSet(final CustomValueSetEvent<EntityPicker<Icd10>, Icd10> event) {
         Icd10 icd10 = event.getSource().getValue();
-        maIcdSnapshotField.setValue(icd10.getMaIcd());
-        tenIcdSnapshotField.setValue(icd10.getTenBenh());
+        if (icd10 == null) {
+            return;
+        }
+        try {
+            donThuocService.pickDiagnosis(getEditedEntity(), icd10);
+            maIcdSnapshotField.setValue(icd10.getMaIcd());
+            tenIcdSnapshotField.setValue(icd10.getTenBenh());
+        } catch (IllegalStateException ex) {
+            notifications.create(ex.getMessage())
+                    .withType(Notifications.Type.WARNING).show();
+        }
     }
 
     private void refreshSaveButton() {

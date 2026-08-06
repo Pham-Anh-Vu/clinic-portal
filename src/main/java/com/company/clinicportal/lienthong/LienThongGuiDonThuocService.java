@@ -4,6 +4,8 @@ import com.company.clinicportal.entity.DonThuoc;
 import com.company.clinicportal.lienthong.dto.DonThuocMappingService;
 import com.company.clinicportal.lienthong.dto.GuiDonThuocRequest;
 import com.company.clinicportal.lienthong.dto.GuiDonThuocResponse;
+import com.company.clinicportal.enumentity.TrangThaiDonThuoc;
+import com.company.clinicportal.entity.DonThuoc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.core.DataManager;
@@ -45,6 +47,12 @@ public class LienThongGuiDonThuocService {
 
     private static final Logger log = LoggerFactory.getLogger(LienThongGuiDonThuocService.class);
 
+    /** Trạng thái liên thông — lưu vào cột don_thuoc.lien_thong_status. */
+    public static final String LT_STATUS_PENDING   = "PENDING";
+    public static final String LT_STATUS_SENT      = "SENT";
+    public static final String LT_STATUS_FAILED    = "FAILED";
+    public static final String LT_STATUS_GIVEN_UP  = "GIVEN_UP";
+
     private final LienThongProperties properties;
     private final LienThongHttpClient httpClient;
     private final DonThuocTokenService tokenService;
@@ -73,6 +81,18 @@ public class LienThongGuiDonThuocService {
             throw new LienThongApiException("Liên thông đang tắt.", 0, null, null);
         }
         if (dt == null) throw new LienThongApiException("DonThuoc null", 0, null, null);
+
+        // Audit guard: bỏ qua đơn đã vượt ngưỡng gửi liên thông
+        // (tránh spam server BYT, thường do lỗi config dữ liệu / payload sai nghiêm trọng).
+        if (dt.isLienThongGivenUp()) {
+            log.warn("[LienThong] BỎ QUA gửi maDonThuoc={} — đã thử {} lần >= {} (status={}). " +
+                    "Không gửi tiếp để tránh spam BYT.",
+                    dt.getMaDonThuoc(),
+                    dt.getSoLanThuLienThong(),
+                    DonThuoc.MAX_LIEN_THONG_ATTEMPTS,
+                    dt.getLienThongStatus());
+            return new GuiDonThuocResult(false, 0, null, null, "GIVEN_UP-" + dt.getMaDonThuoc());
+        }
 
         // Lấy doctor token theo FSD: token gửi đơn thuốc phải lấy từ /api/auth/dang-nhap-bac-si
         String token = tokenService.getDoctorToken(maLienThongCoSo, maLienThongBacSi, passwordBacSi);
@@ -222,18 +242,38 @@ public class LienThongGuiDonThuocService {
 
     private void applyResponse(DonThuoc dt, GuiDonThuocResponse resp, String idempotencyKey, String error) {
         dt.setIdempotencyKey(idempotencyKey);
+        // Tăng số lần đã THỬ (mỗi lần send() gọi API = 1 attempt).
+        int previous = dt.getSoLanThuLienThong() == null ? 0 : dt.getSoLanThuLienThong();
+        int soLanThu = previous + 1;
+        dt.setSoLanThuLienThong(soLanThu);
         dt.setLanGuiLienThong((dt.getLanGuiLienThong() == null ? 0 : dt.getLanGuiLienThong()) + 1);
-        dt.setLanGuiCuoiAt(Date.from(Instant.now()));
+        Date now = Date.from(Instant.now());
+        dt.setLanGuiCuoiAt(now);
+        dt.setLienThongLastAttemptAt(now);
         if (resp != null && resp.isSuccess()) {
-            dt.setTrangThaiEnum(com.company.clinicportal.enumentity.TrangThaiDonThuoc.PHAT_HANH);
+            dt.setTrangThaiEnum(TrangThaiDonThuoc.PHAT_HANH);
             dt.setLastError(null);
             // BYT không trả mã đơn quốc gia trong body thành công → dùng mã local
             dt.setMaDonThuocQg(dt.getMaDonThuoc());
-            dt.setNgayDongBoCuoiAt(Date.from(Instant.now()));
+            dt.setNgayDongBoCuoiAt(now);
             dt.setPhanHoiCuoi(resp.message);
-        } else if (error != null) {
-            dt.setLastError(truncate(error, 1000));
-            // không đổi trạng thái đơn từ DA_GUI → vẫn cho retry
+            dt.setLienThongStatus(LT_STATUS_SENT);
+            if (resp.checksum != null && !resp.checksum.isBlank()) {
+                dt.setLienThongChecksum(resp.checksum);
+            }
+        } else {
+            // Thất bại: phân biệt FAILED (còn retry) vs GIVEN_UP (đã đạt ngưỡng)
+            if (error != null) {
+                dt.setLastError(truncate(error, 1000));
+            }
+            if (soLanThu >= DonThuoc.MAX_LIEN_THONG_ATTEMPTS) {
+                dt.setLienThongStatus(LT_STATUS_GIVEN_UP);
+                log.warn("[LienThong] Đơn {} đã thử {}/{} lần — đánh dấu GIVEN_UP, " +
+                        "không gửi nữa ở đợt sau.", dt.getMaDonThuoc(),
+                        soLanThu, DonThuoc.MAX_LIEN_THONG_ATTEMPTS);
+            } else {
+                dt.setLienThongStatus(LT_STATUS_FAILED);
+            }
         }
         dataManager.save(new SaveContext().saving(dt));
     }

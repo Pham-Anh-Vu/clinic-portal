@@ -23,10 +23,10 @@
             </responsiveSteps>
             <textField property="maThuoc" required="true" colspan="2"/>
             <textField property="tenThuoc" required="true" colspan="2"/>
-            <textField property="bietDuoc" colspan="2"/>
-            <textField property="hoatChat" colspan="2"/>
-            <textField property="donViTinh"/>
-            <textField property="hamLuong"/>
+            <textField property="bietDuoc"  required="true" colspan="2"/>
+            <textField property="hoatChat"  required="true" colspan="2"/>
+            <textField property="donViTinh" required="true" />
+            <textField property="hamLuong" required="true" />
             <textArea property="ghiChu" colspan="2"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END">
