@@ -185,6 +185,16 @@ public class ChiTietDieuTri {
     @Column(name = "trong_so_kham_luong_gia")
     private Double trongSoKhamLuongGia;
 
+    @JoinColumn(name = "CHUAN_DOAN_ICD_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Icd10 chuanDoanIcd;
+
+    @Column(name = "chuan_doan_ma_icd", length = 32)
+    private String chuanDoanMaIcd;
+
+    @Column(name = "chuan_doan_ten_icd", length = 512)
+    private String chuanDoanTenIcd;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"updatedAt\"")
     private Date updatedAt;
@@ -598,6 +608,30 @@ public class ChiTietDieuTri {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Icd10 getChuanDoanIcd() {
+        return chuanDoanIcd;
+    }
+
+    public void setChuanDoanIcd(Icd10 chuanDoanIcd) {
+        this.chuanDoanIcd = chuanDoanIcd;
+    }
+
+    public String getChuanDoanMaIcd() {
+        return chuanDoanMaIcd;
+    }
+
+    public void setChuanDoanMaIcd(String chuanDoanMaIcd) {
+        this.chuanDoanMaIcd = chuanDoanMaIcd;
+    }
+
+    public String getChuanDoanTenIcd() {
+        return chuanDoanTenIcd;
+    }
+
+    public void setChuanDoanTenIcd(String chuanDoanTenIcd) {
+        this.chuanDoanTenIcd = chuanDoanTenIcd;
     }
 
     @PrePersist

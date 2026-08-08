@@ -2,12 +2,14 @@ package com.company.clinicportal.view.chitietdieutri;
 
 import com.company.clinicportal.entity.BenhNhan;
 import com.company.clinicportal.entity.ChiTietDieuTri;
+import com.company.clinicportal.entity.Icd10;
 import com.company.clinicportal.entity.LichHen;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.EntityStates;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
+import io.jmix.flowui.component.valuepicker.EntityPicker;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +24,8 @@ import java.util.Date;
 public class PhieuChiDinhDetailView extends StandardDetailView<ChiTietDieuTri> {
     @ViewComponent
     private TypedDateTimePicker<Date> ngayChiDinhField;
+    @ViewComponent
+    private EntityPicker<Icd10> chuanDoanIcdField;
 
     public Long idBenhNhan;
     @Autowired
@@ -42,6 +46,18 @@ public class PhieuChiDinhDetailView extends StandardDetailView<ChiTietDieuTri> {
             getEditedEntity().setIdBenhNhan(benhNhan);
             applyDefaultsFromLatestAppointment();
         }
+    }
+
+    @Subscribe("chuanDoanIcdField")
+    public void onChuanDoanIcdFieldValueChange(final EntityPicker.ValueChangeEvent<Icd10> event) {
+        Icd10 icd = event.getValue();
+        if (icd == null) {
+            getEditedEntity().setChuanDoanMaIcd(null);
+            getEditedEntity().setChuanDoanTenIcd(null);
+            return;
+        }
+        getEditedEntity().setChuanDoanMaIcd(icd.getMaIcd());
+        getEditedEntity().setChuanDoanTenIcd(icd.getTenBenh());
     }
 
     private void applyDefaultsFromLatestAppointment() {

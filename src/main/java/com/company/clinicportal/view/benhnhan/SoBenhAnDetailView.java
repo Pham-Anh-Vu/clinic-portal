@@ -415,7 +415,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         }
 
         Map<String, String> values = new HashMap<>();
-        values.put("${ChiTietDieuTri.chuanDoan}", safeText(ctdt.getChuanDoan()));
+        values.put("${ChiTietDieuTri.chuanDoan}", resolveChuanDoanForReport(ctdt));
         values.put("${ChiTietDieuTri.chuanDoanRaVien}", safeText(ctdt.getChuanDoanRaVien()));
         values.put("${ChiTietDieuTri.daXuLy}", safeText(ctdt.getDaXuLy()));
         values.put("${ChiTietDieuTri.dienBienBenh}", safeText(ctdt.getDienBienBenh()));
@@ -663,6 +663,29 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
             return benhNhan.getNgayKhamBenh();
         }
         return null;
+    }
+
+    /**
+     * Ưu tiên giá trị chuẩn đoán ICD cho placeholder {@code ${ChiTietDieuTri.chuanDoan}} trong báo cáo.
+     * Nếu có ICD (mã + tên) → fill "{Mã ICD} - {Tên bệnh}".
+     * Nếu không có ICD → fallback sang trường chuẩn đoán thường.
+     */
+    private String resolveChuanDoanForReport(ChiTietDieuTri ctdt) {
+        if (ctdt == null) {
+            return "";
+        }
+        String maIcd = safeText(ctdt.getChuanDoanMaIcd()).trim();
+        String tenIcd = safeText(ctdt.getChuanDoanTenIcd()).trim();
+        if (!maIcd.isEmpty() && !tenIcd.isEmpty()) {
+            return maIcd + " - " + tenIcd;
+        }
+        if (!maIcd.isEmpty()) {
+            return maIcd;
+        }
+        if (!tenIcd.isEmpty()) {
+            return tenIcd;
+        }
+        return safeText(ctdt.getChuanDoan());
     }
 
     private String formatNgayGioBuoiDieuTri(BuoiDieuTri buoi) {

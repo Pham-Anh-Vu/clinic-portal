@@ -73,20 +73,20 @@ public class BenhNhanValidator {
         if (bn.getCanNang() != null && (bn.getCanNang() < 0 || bn.getCanNang() > 500)) {
             errors.add("bn.canNangOutOfRange");
         }
-//        int age = roughAgeInYears != null ? roughAgeInYears : roughAgeFromNgaySinh(bn.getNgaySinh());
+        int age = roughAgeInYears != null ? roughAgeInYears : roughAgeFromNgaySinh(bn.getNgaySinh());
         // Người giám hộ bắt buộc nếu bệnh nhân dưới 18 tuổi.
-//        if (age >= 0 && age < 18) {
-//            if (isBlank(bn.getNguoiGiamHoHoTen())) {
-//                errors.add("bn.giamHoHoTenRequired");
-//            }
-//            if (isBlank(bn.getNguoiGiamHoQuanHe())) {
-//                errors.add("bn.giamHoQuanHeRequired");
-//            }
-//            if (!isBlank(bn.getNguoiGiamHoSoDienThoai())
-//                    && !GUARDIAN_PHONE_PATTERN.matcher(bn.getNguoiGiamHoSoDienThoai().trim()).matches()) {
-//                errors.add("bn.giamHoSdtInvalid");
-//            }
-//        }
+        if (age >= 0 && age < 18) {
+            if (isBlank(bn.getHoTenNguoiThan())) {
+                errors.add("bn.giamHoHoTenRequired");
+            }
+            if (isBlank(bn.getQuanHeVoiBenhNhan())) {
+                errors.add("bn.giamHoQuanHeRequired");
+            }
+            if (!isBlank(bn.getSdtNguoiThan())
+                    && !GUARDIAN_PHONE_PATTERN.matcher(bn.getNguoiGiamHoSoDienThoai().trim()).matches()) {
+                errors.add("bn.giamHoSdtInvalid");
+            }
+        }
     }
 
     private static boolean isBlank(String s) {

@@ -129,15 +129,31 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
         dialogWindow.getView().setIdBenhNhan(idBenhNhan);
         dialogWindow.setWidth("80%");
         dialogWindow.setHeight("100%");
-        
-        // Reload datagrid after dialog closes
+
+        // Reload datagrid after dialog closes; nếu save thành công -> auto mở màn chi tiết phiếu điều trị
         dialogWindow.addAfterCloseListener(event1 -> {
             if (idBenhNhan != null) {
                 chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
                 chiTietDieuTrisDl.load();
             }
+            if (event1.closedWith(StandardOutcome.SAVE)) {
+                ChiTietDieuTri saved = dialogWindow.getView().getEditedEntity();
+                if (saved != null && saved.getId() != null) {
+                    DialogWindow<ChiTietDieuTriDetailView> detailWindow = dialogWindows.detail(this, ChiTietDieuTri.class)
+                            .withViewClass(ChiTietDieuTriDetailView.class)
+                            .editEntity(saved)
+                            .build();
+                    detailWindow.addAfterCloseListener(detailClose -> {
+                        if (idBenhNhan != null) {
+                            chiTietDieuTrisDl.setParameter("idBenhNhan", idBenhNhan);
+                            chiTietDieuTrisDl.load();
+                        }
+                    });
+                    detailWindow.open();
+                }
+            }
         });
-        
+
         dialogWindow.open();
     }
 

@@ -7,6 +7,9 @@
                   class="com.company.clinicportal.entity.ChiTietDieuTri">
             <fetchPlan>
                 <property name="chuanDoan"/>
+                <property name="chuanDoanIcd" fetchPlan="_base"/>
+                <property name="chuanDoanMaIcd"/>
+                <property name="chuanDoanTenIcd"/>
                 <property name="gioHenMacDinh"/>
                 <property name="idNhanSu" fetchPlan="_base"/>
                 <property name="ngayChiDinh"/>
@@ -19,6 +22,14 @@
             <loader id="nhanSusDl" readOnly="true">
                 <query>
                     <![CDATA[select e from NhanSu e where e.chucVu = 'Bác sĩ']]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
+        <collection id="icd10sDc" class="com.company.clinicportal.entity.Icd10">
+            <loader id="icd10sDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from Icd10 e order by e.maIcd]]>
                 </query>
             </loader>
             <fetchPlan extends="_base"/>
@@ -42,6 +53,18 @@
             <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh" required="true"/>
             <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
 <!--            <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2" required="true"/>-->
+            <entityPicker id="chuanDoanIcdField" property="chuanDoanIcd" colspan="2" width="100%"
+                          label="Chuẩn đoán ICD">
+                <actions>
+                    <action id="entityLookup" type="entity_lookup">
+                        <properties>
+                            <property name="openMode" value="DIALOG"/>
+                            <property name="viewId" value="ltcs_Icd10.list"/>
+                        </properties>
+                    </action>
+                    <action id="entityClear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
             <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2" required="true"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
