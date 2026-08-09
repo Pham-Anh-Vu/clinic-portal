@@ -50,6 +50,17 @@ public class LichHenDetailView extends StandardDetailView<LichHen> {
         updateTuoiField();
     }
 
+    /**
+     * Ngăn framework tự động merge entity vừa lưu vào DataContext của parent list view.
+     * Việc này đảm bảo tab "Lịch hẹn mới" (có filter theo ngày hiện tại) không hiển thị
+     * lịch hẹn vừa tạo trước khi loader được reload. Parent list view sẽ tự gọi
+     * loader.load() trong afterCloseHandler để reload dữ liệu theo filter.
+     */
+    @Subscribe
+    public void onInit(final InitEvent event) {
+        setReloadSaved(false);
+    }
+
     @Autowired
     private UiComponents uiComponents;
 

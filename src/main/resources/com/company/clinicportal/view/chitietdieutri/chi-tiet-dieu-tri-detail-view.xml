@@ -16,11 +16,20 @@
                     <property name="thoiGianTaiKham"/>
                 </property>
                 <property name="idNhanSu" fetchPlan="_base"/>
+                <property name="dsChanDoanIcd" fetchPlan="_base"/>
             </fetchPlan>
             <collection id="chiTietDichVuDc" property="chiTietDichVu"/>
             <collection id="fileDinhKemDc" property="fileDinhKem"/>
             <loader id="chiTietDieuTriDl"/>
         </instance>
+        <collection id="icd10sDc" class="com.company.clinicportal.entity.Icd10">
+            <loader id="icd10sDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from Icd10 e order by e.maIcd]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
         <collection id="lichSuThanhToansDc" class="com.company.clinicportal.entity.LichSuThanhToan">
             <loader id="lichSuThanhToansDl" readOnly="true">
                 <query>
@@ -120,6 +129,11 @@
                         <textArea id="trieuChungField" height="9.5em" property="trieuChung"/>
                         <textArea id="chuanDoanField" height="9.5em" property="chuanDoan"/>
                         <textField id="idNhanSuField" property="idNhanSu.hoTen" colspan="2" readOnly="true" label="Bác sĩ chỉ định"/>
+                        <multiSelectComboBox id="dsChanDoanIcdField" property="dsChanDoanIcd"
+                                             itemsContainer="icd10sDc"
+                                             colspan="4" width="100%"
+                                             label="Chuẩn đoán ICD"
+                                             readOnly="true"/>
                         <hbox id="trangThaiBox"
                               alignItems="CENTER"
                               spacing="true"/>

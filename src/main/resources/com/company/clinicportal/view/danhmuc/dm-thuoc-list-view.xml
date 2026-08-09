@@ -70,10 +70,9 @@
                     <columns resizable="true">
                         <column property="maThuoc"/>
                         <column property="tenThuoc"/>
-                        <column property="bietDuoc"/>
-                        <column property="hoatChat"/>
+                        <column property="bietDuoc" header="msg://com.company.clinicportal.entity/DmThuoc.bietDuoc"/>
+                        <column property="phanLoai"/>
                         <column property="donViTinh"/>
-                        <column property="hamLuong" header="Hoạt chất"/>
                     </columns>
                 </dataGrid>
                 <simplePagination id="pagination" dataLoader="dmThuocsDl" alignSelf="END" css="margin-top: 8px;"/>

@@ -44,11 +44,11 @@
                 <hbox classNames="buttons-panel" width="100%">
                     <div width="100%" classNames="all-control-auto-pay">
                         <div classNames="title-grid">
-                            <span text="CHẨN ĐOÁN ICD-10"/>
+                            <span text="CHUẨN ĐOÁN ICD-10"/>
                             <span id="chanDoanCountLabel" themeName="badge" visible="false"/>
                         </div>
                         <div classNames="function-flex-end">
-                            <button id="addChanDoanButton" text="Thêm chẩn đoán" icon="vaadin:plus" themeName="primary"
+                            <button id="addChanDoanButton" text="Thêm chUẩn đoán" icon="vaadin:plus" themeName="primary"
                                     action="chanDoanDataGrid.create"/>
                         </div>
                     </div>
@@ -62,14 +62,14 @@
                     </responsiveSteps>
                     <dataGrid id="chanDoanDataGrid" width="100%" minHeight="140px" dataContainer="chanDoansDc">
                         <actions>
-                            <action id="create" type="list_create" text="Thêm chẩn đoán"/>
+                            <action id="create" type="list_create" text="Thêm chuẩn đoán"/>
                             <action id="edit" type="list_edit" text="Chi tiết"/>
                             <action id="remove" type="list_remove" text="Xóa"/>
                         </actions>
                         <emptyStateComponent>
                             <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
                                 <icon icon="vaadin:file-o" size="36px" color="var(--lumo-tertiary-text-color)"/>
-                                <span text="Chưa có chẩn đoán"/>
+                                <span text="Chưa có chuẩn đoán"/>
                             </vbox>
                         </emptyStateComponent>
                         <columns resizable="true">

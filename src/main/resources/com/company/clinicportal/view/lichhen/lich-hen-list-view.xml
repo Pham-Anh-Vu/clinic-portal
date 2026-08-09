@@ -16,7 +16,7 @@
                     <![CDATA[
                         select e
                         from LichHen e
-                        where e.ngayHen = :currentDate
+                        where @dateEquals(e.ngayHen, :currentDate)
                     ]]>
                 </query>
             </loader>
@@ -75,7 +75,9 @@
                         </emptyStateComponent>
                         <actions>
                             <action id="createAction" type="list_create" text="Thêm lịch">
-                                <properties><property name="openMode" value="DIALOG"/></properties>
+                                <properties>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
                             </action>
                             <action id="editAction" type="list_edit" text="Sửa"/>
                             <action id="removeAction" type="list_remove" text="Xóa"/>

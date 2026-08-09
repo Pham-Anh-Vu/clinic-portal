@@ -345,7 +345,8 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
                     .id(chiTietDieuTri.getId())
                     .fetchPlan(fp -> fp
                             .addFetchPlan("_base")
-                            .add("idPhieuDieuTri", p -> p.addFetchPlan("_base")))
+                            .add("idPhieuDieuTri", p -> p.addFetchPlan("_base"))
+                            .add("dsChanDoanIcd", p -> p.addFetchPlan("_base")))
                     .optional()
                     .orElse(chiTietDieuTri);
         }
@@ -419,7 +420,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         values.put("${ChiTietDieuTri.chuanDoanRaVien}", safeText(ctdt.getChuanDoanRaVien()));
         values.put("${ChiTietDieuTri.daXuLy}", safeText(ctdt.getDaXuLy()));
         values.put("${ChiTietDieuTri.dienBienBenh}", safeText(ctdt.getDienBienBenh()));
-        values.put("${ChiTietDieuTri.huongDieuTri}", tenDichVuText);
+        values.put("${ChiTietDieuTri.huongDieuTri}", safeText(ctdt.getHuongDieuTri()));
         values.put("${ChiTietDieuTri.tinhTrangBenhNhan}", safeText(ctdt.getTinhTrangBenhNhan()));
         values.put("${ChiTietDieuTri.kbBoPhan}", safeText(ctdt.getKbBoPhan()));
         values.put("${ChiTietDieuTri.ketQuaCanLamSang}", safeText(ctdt.getKetQuaCanLamSang()));
@@ -667,23 +668,16 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
     /**
      * Ưu tiên giá trị chuẩn đoán ICD cho placeholder {@code ${ChiTietDieuTri.chuanDoan}} trong báo cáo.
-     * Nếu có ICD (mã + tên) → fill "{Mã ICD} - {Tên bệnh}".
+     * Nếu có danh sách ICD (mã + tên) → fill chuỗi "{Mã ICD} - {Tên bệnh}" ghép bằng ", ".
      * Nếu không có ICD → fallback sang trường chuẩn đoán thường.
      */
     private String resolveChuanDoanForReport(ChiTietDieuTri ctdt) {
         if (ctdt == null) {
             return "";
         }
-        String maIcd = safeText(ctdt.getChuanDoanMaIcd()).trim();
-        String tenIcd = safeText(ctdt.getChuanDoanTenIcd()).trim();
-        if (!maIcd.isEmpty() && !tenIcd.isEmpty()) {
-            return maIcd + " - " + tenIcd;
-        }
-        if (!maIcd.isEmpty()) {
-            return maIcd;
-        }
-        if (!tenIcd.isEmpty()) {
-            return tenIcd;
+        String icdText = ctdt.getDsChanDoanIcdText();
+        if (icdText != null && !icdText.isBlank()) {
+            return icdText;
         }
         return safeText(ctdt.getChuanDoan());
     }

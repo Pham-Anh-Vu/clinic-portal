@@ -21,12 +21,14 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="60em" columns="2"/>
             </responsiveSteps>
-            <textField property="maThuoc" required="true" colspan="2"/>
-            <textField property="tenThuoc" required="true" colspan="2"/>
-            <textField property="bietDuoc"  required="true" colspan="2"/>
-            <textField property="hoatChat"  required="true" colspan="2"/>
+            <textField property="maThuoc" required="true"/>
+            <textField property="tenThuoc" required="true"/>
+            <select property="phanLoai" required="true"
+                    itemsEnum="com.company.clinicportal.enumentity.PhanLoaiThuoc"
+                    label="msg://com.company.clinicportal.entity/DmThuoc.phanLoai"/>
             <textField property="donViTinh" required="true" />
-            <textField property="hamLuong" required="true" />
+            <textField property="bietDuoc" colspan="2" required="true"
+                       label="msg://com.company.clinicportal.entity/DmThuoc.bietDuoc"/>
             <textArea property="ghiChu" colspan="2"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END">

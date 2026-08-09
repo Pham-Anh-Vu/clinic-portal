@@ -63,7 +63,7 @@
                 <hbox id="actionsBox" justifyContent="END" spacing="true" width="100%"
                       css="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--lumo-contrast-10pct);">
                     <button id="cancelBtn" action="closeAction" text="Hủy bỏ" icon="vaadin:close" themeName="tertiary"/>
-                    <button id="saveBtn" action="saveAction" text="Lưu chẩn đoán" icon="vaadin:check" themeName="primary"/>
+                    <button id="saveBtn" action="saveAction" text="Lưu chuẩn đoán" icon="vaadin:check" themeName="primary"/>
                 </hbox>
             </vbox>
         </vbox>

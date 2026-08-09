@@ -27,10 +27,10 @@ public class CatalogTemplateService {
 
     private byte[] buildDmThuocTemplate() {
         String[] headers = {
-                "Mã thuốc", "Tên thuốc", "Hoạt chất", "Đơn vị tính", "Hàm lượng", "Ghi chú"
+                "Mã thuốc", "Tên thuốc – Hàm lượng", "Hoạt chất", "Đơn vị tính", "Phân loại", "Ghi chú"
         };
         String[] sample = {
-                "VD001", "Paracetamol 500mg", "Paracetamol", "Viên", "500mg", "Mẫu - xoá dòng này trước khi import"
+                "VD001", "Paracetamol 500mg", "Panadol", "Viên", "Thuốc", "Mẫu - xoá dòng này trước khi import"
         };
         return writeWorkbook(headers, sample);
     }

@@ -144,7 +144,6 @@ public class DonThuocChiTiet {
         this.tenThuocSnapshot = dm.getTenThuoc();
         this.bietDuocSnapshot = dm.getBietDuoc();
         this.donViTinhSnapshot = dm.getDonViTinh();
-        this.hamLuongSnapshot = dm.getHamLuong();
         this.dangBaoCheSnapshot = dm.getDangBaoChe();
         this.soDangKySnapshot = dm.getSoDangKy();
     }

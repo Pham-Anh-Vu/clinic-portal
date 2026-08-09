@@ -1,6 +1,7 @@
 package com.company.clinicportal.service;
 
 import com.company.clinicportal.entity.DmThuoc;
+import com.company.clinicportal.enumentity.PhanLoaiThuoc;
 import io.jmix.core.DataManager;
 import io.jmix.core.SaveContext;
 import org.apache.poi.ss.usermodel.*;
@@ -11,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.io.InputStream;
+import java.security.SecureRandom;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,16 +24,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Import danh mục thuốc từ Excel (.xlsx). Dùng cho MVP khi chưa đồng bộ từ danh mục BYT.
+ * Import danh mục thuốc / vật tư từ Excel (.xlsx). Dùng cho MVP khi chưa đồng bộ từ danh mục BYT.
  *
- * Cột Excel kỳ vọng (dòng 1 = header, 7 trường):
- * A: ma_thuoc (tùy chọn)   - để trống sẽ tự sinh từ hoat_chat + ten_thuoc
- * B: ten_thuoc (*)           - tên thuốc (bắt buộc)
+ * Cột Excel kỳ vọng (dòng 1 = header, 5 trường):
+ * A: ma_thuoc (tùy chọn)   - để trống sẽ tự sinh từ biet_duoc + ten_thuoc
+ * B: ten_thuoc (*)           - tên thuốc / vật tư (bắt buộc)
  * C: biet_duoc              - biệt dược (tên thương mại)
- * D: hoat_chat              - hoạt chất
- * E: don_vi_tinh            - viên/ống/gói/chai/hộp/tuýp/ml/g/mg/liều
- * F: ham_luong              - hàm lượng
- * G: ghi_chu                - ghi chú
+ * D: don_vi_tinh            - viên/ống/gói/chai/hộp/tuýp/ml/g/mg/liều
+ * E: phan_loai (*)          - Thuốc | Mỹ phẩm | TPCN | VTYT
+ * F: ghi_chu                - ghi chú
  */
 @Service
 public class DmThuocImportService {
@@ -108,21 +108,29 @@ public class DmThuocImportService {
 
     private DmThuoc parseRow(Row row, int rowNumber, Set<String> usedMaThuocInBatch) {
         DmThuoc e = dataManager.create(DmThuoc.class);
-        // Cột Excel (7 trường - header tiếng Việt):
-        // A: Mã thuốc       (tùy chọn - để trống sẽ tự sinh từ Hoạt chất + Tên thuốc)
+        // Cột Excel (5 trường - header tiếng Việt):
+        // A: Mã thuốc       (tùy chọn - để trống sẽ tự sinh từ Biệt dược + Tên thuốc)
         // B: Tên thuốc      (bắt buộc)
         // C: Biệt dược      (tên thương mại)
-        // D: Hoạt chất
-        // E: Đơn vị tính
-        // F: Hàm lượng
-        // G: Ghi chú
+        // D: Đơn vị tính
+        // E: Phân loại      (Thuốc | Mỹ phẩm | TPCN | VTYT) - bắt buộc
+        // F: Ghi chú
         String maThuocRaw = nullIfBlank(readString(row.getCell(0)));
         String tenThuoc = nullIfBlank(readString(row.getCell(1)));
         if (tenThuoc == null) throw new IllegalArgumentException("ten_thuoc (cột B) bắt buộc");
 
+        String bietDuoc = nullIfBlank(readString(row.getCell(2)));
+        String phanLoaiRaw = nullIfBlank(readString(row.getCell(4)));
+        if (phanLoaiRaw == null) throw new IllegalArgumentException("phan_loai (cột E) bắt buộc");
+        PhanLoaiThuoc phanLoai = PhanLoaiThuoc.fromId(phanLoaiRaw);
+        if (phanLoai == null) {
+            throw new IllegalArgumentException("phan_loai '" + phanLoaiRaw
+                    + "' không hợp lệ (chỉ chấp nhận: Thuốc, Mỹ phẩm, TPCN, VTYT)");
+        }
+
         String maThuoc;
         if (maThuocRaw == null) {
-            maThuoc = generateMaThuoc(tenThuoc, nullIfBlank(readString(row.getCell(3))), usedMaThuocInBatch);
+            maThuoc = generateMaThuoc(tenThuoc, bietDuoc, usedMaThuocInBatch);
         } else {
             maThuoc = maThuocRaw;
         }
@@ -132,11 +140,10 @@ public class DmThuocImportService {
         usedMaThuocInBatch.add(maThuoc);
         e.setMaThuoc(maThuoc);
         e.setTenThuoc(tenThuoc);
-        e.setBietDuoc(nullIfBlank(readString(row.getCell(2))));
-        e.setHoatChat(nullIfBlank(readString(row.getCell(3))));
-        e.setDonViTinh(nullIfBlank(readString(row.getCell(4))));
-        e.setHamLuong(nullIfBlank(readString(row.getCell(5))));
-        e.setGhiChu(nullIfBlank(readString(row.getCell(6))));
+        e.setBietDuoc(bietDuoc);
+        e.setDonViTinh(nullIfBlank(readString(row.getCell(3))));
+        e.setPhanLoai(phanLoai);
+        e.setGhiChu(nullIfBlank(readString(row.getCell(5))));
         return e;
     }
 
@@ -144,12 +151,12 @@ public class DmThuocImportService {
 
     /**
      * Sinh ma_thuoc tự động theo quy tắc:
-     * <pre>UPPER(slug(hoat_chat)) "-" UPPER(slug(ten_thuoc)) [- suffix3]</pre>
+     * <pre>UPPER(slug(biet_duoc)) "-" UPPER(slug(ten_thuoc)) [- suffix3]</pre>
      * Nếu trùng với ma_thuoc đã dùng trong batch hoặc trong DB, cộng suffix
      * ngẫu nhiên 3 ký tự chữ-số (in hoa) cho đến khi hết trùng (tối đa 10 lần thử).
      */
-    String generateMaThuoc(String tenThuoc, String hoatChat, Set<String> usedInBatch) {
-        String base = slug(hoatChat) + "-" + slug(tenThuoc);
+    String generateMaThuoc(String tenThuoc, String bietDuoc, Set<String> usedInBatch) {
+        String base = slug(bietDuoc) + "-" + slug(tenThuoc);
         if (base.length() > 60) base = base.substring(0, 60);
         if (base.endsWith("-")) base = base.substring(0, base.length() - 1);
         String candidate = base;
@@ -253,7 +260,7 @@ public class DmThuocImportService {
             Cell c = row.getCell(i);
             if (c != null && c.getCellType() != CellType.BLANK) return false;
         }
-        return true;
+        return false;
     }
 
     public static class ImportSummary {

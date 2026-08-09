@@ -108,7 +108,7 @@ public class DonThuocDetailView extends StandardDetailView<DonThuoc> {
         removeThuocButton.addClickListener(e -> removeSelected(chiTietDataGrid, chiTietsDl, "Chọn dòng thuốc để xoá"));
         addChanDoanButton.addClickListener(e -> donThuocService.addDiagnosis(getEditedEntity(), null,
                 nextStt(chanDoansDc), null));
-        removeChanDoanButton.addClickListener(e -> removeSelected(chanDoanDataGrid, chanDoansDl, "Chọn chẩn đoán để xoá"));
+        removeChanDoanButton.addClickListener(e -> removeSelected(chanDoanDataGrid, chanDoansDl, "Chọn chuẩn đoán để xoá"));
         addDotDungButton.addClickListener(e -> {
             com.company.clinicportal.entity.DonThuocDotDung dd = dataManager.create(com.company.clinicportal.entity.DonThuocDotDung.class);
             dd.setDonThuoc(getEditedEntity());

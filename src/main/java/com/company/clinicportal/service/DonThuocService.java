@@ -299,7 +299,7 @@ public class DonThuocService {
                 .parameter("self", cd.getId())
                 .one();
         if (dup != null && dup > 0L) {
-            throw new IllegalStateException("Chẩn đoán " + icd.getMaIcd() + " đã có trong đơn.");
+            throw new IllegalStateException("Chuẩn đoán " + icd.getMaIcd() + " đã có trong đơn.");
         }
         cd.snapshotFrom(icd);
         return cd;

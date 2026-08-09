@@ -1,5 +1,6 @@
 package com.company.clinicportal.entity;
 
+import com.company.clinicportal.enumentity.PhanLoaiThuoc;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -38,17 +39,18 @@ public class DmThuoc {
     @Column(name = "biet_duoc", length = 512)
     private String bietDuoc;
 
-    @Column(name = "hoat_chat", length = 512)
-    private String hoatChat;
+    /**
+     * Phân loại danh mục (Thuốc / Mỹ phẩm / TPCN / VTYT).
+     * Lưu trực tiếp {@code id} của enum {@link PhanLoaiThuoc} dưới dạng VARCHAR.
+     */
+    @Column(name = "phan_loai", length = 32)
+    private String phanLoai;
 
     @Column(name = "nhom_thuoc", length = 128)
     private String nhomThuoc;
 
     @Column(name = "don_vi_tinh", length = 32)
     private String donViTinh;
-
-    @Column(name = "ham_luong", length = 128)
-    private String hamLuong;
 
     @Column(name = "dang_bao_che", length = 128)
     private String dangBaoChe;
@@ -137,14 +139,16 @@ public class DmThuoc {
     public void setTenThuoc(String tenThuoc) { this.tenThuoc = tenThuoc; }
     public String getBietDuoc() { return bietDuoc; }
     public void setBietDuoc(String bietDuoc) { this.bietDuoc = bietDuoc; }
-    public String getHoatChat() { return hoatChat; }
-    public void setHoatChat(String hoatChat) { this.hoatChat = hoatChat; }
+    public PhanLoaiThuoc getPhanLoai() {
+        return phanLoai == null ? null : PhanLoaiThuoc.fromId(phanLoai);
+    }
+    public void setPhanLoai(PhanLoaiThuoc phanLoai) {
+        this.phanLoai = phanLoai == null ? null : phanLoai.getId();
+    }
     public String getNhomThuoc() { return nhomThuoc; }
     public void setNhomThuoc(String nhomThuoc) { this.nhomThuoc = nhomThuoc; }
     public String getDonViTinh() { return donViTinh; }
     public void setDonViTinh(String donViTinh) { this.donViTinh = donViTinh; }
-    public String getHamLuong() { return hamLuong; }
-    public void setHamLuong(String hamLuong) { this.hamLuong = hamLuong; }
     public String getDangBaoChe() { return dangBaoChe; }
     public void setDangBaoChe(String dangBaoChe) { this.dangBaoChe = dangBaoChe; }
     public String getSdkSgbh() { return sdkSgbh; }

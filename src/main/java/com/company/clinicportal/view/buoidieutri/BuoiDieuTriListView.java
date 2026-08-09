@@ -89,7 +89,7 @@ public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
 
                     // Nút Sửa
                     JmixButton editButton = uiComponents.create(JmixButton.class);
-                    if(buoiDieuTri.getTrangThai().equals(TrangThaiBuoiDieuTri.DA_THUC_HIEN))editButton.setEnabled(false);
+//                    if(buoiDieuTri.getTrangThai().equals(TrangThaiBuoiDieuTri.DA_THUC_HIEN))editButton.setEnabled(false);
                     editButton.setText("Sửa");
                     editButton.addClickListener(e -> {
                         DialogWindow<BuoiDieuTriDetailView> window = dialogWindows.detail(this, BuoiDieuTri.class)

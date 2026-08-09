@@ -238,8 +238,8 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         DonThuocChanDoan selected = chanDoanDataGrid.getSingleSelectedItem();
         if (selected != null) {
             dialogs.createOptionDialog()
-                    .withHeader("Xoá chẩn đoán")
-                    .withText("Bạn có chắc muốn xoá chẩn đoán này?")
+                    .withHeader("Xoá chuẩn đoán")
+                    .withText("Bạn có chắc muốn xoá chuẩn đoán này?")
                     .withActions(
                             new io.jmix.flowui.action.DialogAction(
                                     io.jmix.flowui.action.DialogAction.Type.NO),
@@ -248,7 +248,7 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                                     .withHandler(e -> {
                                         chanDoansDc.getMutableItems().remove(selected);
                                         updateChanDoanCountLabel();
-                                        notifications.create("Đã xoá chẩn đoán")
+                                        notifications.create("Đã xoá chuẩn đoán")
                                                 .withType(Notifications.Type.SUCCESS).show();
                                     }))
                     .withWidth("320px")
@@ -320,7 +320,7 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         delBtn.addClickListener(e -> {
             chanDoansDc.getMutableItems().remove(cd);
             updateChanDoanCountLabel();
-            notifications.create("Đã xoá chẩn đoán")
+            notifications.create("Đã xoá chuẩn đoán")
                     .withType(Notifications.Type.SUCCESS).show();
         });
 

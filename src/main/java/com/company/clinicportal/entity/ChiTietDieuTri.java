@@ -1,13 +1,20 @@
 package com.company.clinicportal.entity;
 
 import io.jmix.core.FileRef;
+import io.jmix.core.DeletePolicy;
+import io.jmix.core.entity.annotation.OnDelete;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
 
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @DdlGeneration(value = DdlGeneration.DbScriptGenerationMode.DISABLED)
 @JmixEntity
@@ -26,12 +33,23 @@ public class ChiTietDieuTri {
     private List<ChiTietDichVu> chiTietDichVu;
 
     @Composition
-    @OneToMany(mappedBy = "chiTietDieuTri")
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "chiTietDieuTri", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChiTietDieuTriFileDinhKem> fileDinhKem;
 
     @Composition
     @OneToMany(mappedBy = "chiTietDieuTri")
     private List<ToDieuTri> toDieuTri;
+
+    /**
+     * Danh sách chuẩn đoán ICD-10 gắn với chi tiết điều trị (cho phép chọn nhiều).
+     * Quan hệ ManyToMany qua bảng trung gian tự động sinh bởi JPA (chi_tiet_dieu_tri_icd_link).
+     */
+    @JoinTable(name = "chi_tiet_dieu_tri_icd_link",
+            joinColumns = @JoinColumn(name = "ID_CHI_TIET_DIEU_TRI"),
+            inverseJoinColumns = @JoinColumn(name = "ID_ICD10"))
+    @ManyToMany
+    private Set<Icd10> dsChanDoanIcd = new LinkedHashSet<>();
 
     @Column(name = "chuan_doan")
     @Lob
@@ -185,16 +203,6 @@ public class ChiTietDieuTri {
     @Column(name = "trong_so_kham_luong_gia")
     private Double trongSoKhamLuongGia;
 
-    @JoinColumn(name = "CHUAN_DOAN_ICD_ID")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Icd10 chuanDoanIcd;
-
-    @Column(name = "chuan_doan_ma_icd", length = 32)
-    private String chuanDoanMaIcd;
-
-    @Column(name = "chuan_doan_ten_icd", length = 512)
-    private String chuanDoanTenIcd;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"updatedAt\"")
     private Date updatedAt;
@@ -224,6 +232,40 @@ public class ChiTietDieuTri {
 
     public void setToDieuTri(List<ToDieuTri> toDieuTri) {
         this.toDieuTri = toDieuTri;
+    }
+
+    public Set<Icd10> getDsChanDoanIcd() {
+        return dsChanDoanIcd;
+    }
+
+    public void setDsChanDoanIcd(Set<Icd10> dsChanDoanIcd) {
+        this.dsChanDoanIcd = dsChanDoanIcd;
+    }
+
+    /**
+     * Helper: chuỗi "Mã - Tên" ghép cho từng ICD, ngăn cách bằng ", ".
+     * Sử dụng khi in báo cáo / hiển thị text, nếu không có ICD thì trả về chuỗi rỗng.
+     */
+    public String getDsChanDoanIcdText() {
+        if (dsChanDoanIcd == null || dsChanDoanIcd.isEmpty()) {
+            return "";
+        }
+        return dsChanDoanIcd.stream()
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(icd -> icd.getMaIcd() == null ? "" : icd.getMaIcd()))
+                .map(icd -> {
+                    String ma = icd.getMaIcd();
+                    String ten = icd.getTenBenh();
+                    if (ma != null && !ma.isBlank() && ten != null && !ten.isBlank()) {
+                        return ma + " - " + ten;
+                    }
+                    if (ma != null && !ma.isBlank()) {
+                        return ma;
+                    }
+                    return ten != null ? ten : "";
+                })
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.joining(", "));
     }
 
     public void setIdNhanSu(NhanSu idNhanSu) {
@@ -610,30 +652,6 @@ public class ChiTietDieuTri {
         this.id = id;
     }
 
-    public Icd10 getChuanDoanIcd() {
-        return chuanDoanIcd;
-    }
-
-    public void setChuanDoanIcd(Icd10 chuanDoanIcd) {
-        this.chuanDoanIcd = chuanDoanIcd;
-    }
-
-    public String getChuanDoanMaIcd() {
-        return chuanDoanMaIcd;
-    }
-
-    public void setChuanDoanMaIcd(String chuanDoanMaIcd) {
-        this.chuanDoanMaIcd = chuanDoanMaIcd;
-    }
-
-    public String getChuanDoanTenIcd() {
-        return chuanDoanTenIcd;
-    }
-
-    public void setChuanDoanTenIcd(String chuanDoanTenIcd) {
-        this.chuanDoanTenIcd = chuanDoanTenIcd;
-    }
-
     @PrePersist
     private void onCreateAuditFields() {
         Date now = new Date();
@@ -658,5 +676,4 @@ public class ChiTietDieuTri {
             updatedById = createdById != null ? createdById : 0L;
         }
     }
-
 }

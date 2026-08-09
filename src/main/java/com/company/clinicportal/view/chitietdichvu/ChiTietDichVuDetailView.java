@@ -27,6 +27,10 @@ public class ChiTietDichVuDetailView extends StandardDetailView<ChiTietDichVu> {
     private TypedTextField<Long> giaLeField;
     @ViewComponent
     private TypedTextField<Long> giaField;
+    @ViewComponent
+    protected TypedTextField<Long> soLuongField;
+    @ViewComponent
+    protected TypedTextField<Long> khoangCachBuoiDieuTriField;
 
     @Subscribe("tinhTheoGia")
     public void onTinhTheoGiaComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixSelect<TinhTheoGia>, TinhTheoGia> event) {
@@ -37,6 +41,29 @@ public class ChiTietDichVuDetailView extends StandardDetailView<ChiTietDichVu> {
         else {
             giaField.setVisible(false);
             giaLeField.setVisible(true);
+        }
+    }
+
+    /**
+     * Validate giá trị số buổi / khoảng cách buổi điều trị tại thời điểm save:
+     *   - Không cho phép nhập số buổi (soLuong) < 1.
+     *   - Không cho phép nhập khoảng cách buổi điều trị (khoangCachBuoiDieuTri) <= 0.
+     * Lỗi hiển thị inline dưới field tương ứng, form không bị lưu.
+     */
+    @Subscribe
+    public void onValidation(final ValidationEvent event) {
+        ChiTietDichVu entity = getEditedEntity();
+
+        Long soLuong = entity.getSoLuong();
+        if (soLuong != null && soLuong < 1) {
+            event.getErrors().add(soLuongField,
+                    "Số buổi phải lớn hơn 0");
+        }
+
+        Long khoangCach = entity.getKhoangCachBuoiDieuTri();
+        if (khoangCach != null && khoangCach < 1) {
+            event.getErrors().add(khoangCachBuoiDieuTriField,
+                    "Khoảng cách buổi điều trị phải lớn hơn 0");
         }
     }
 }

@@ -17,10 +17,14 @@ import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.action.list.CreateAction;
 import io.jmix.flowui.action.list.RemoveAction;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
+import io.jmix.flowui.util.RemoveOperation;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -52,6 +56,10 @@ public class LichHenListView extends StandardListView<LichHen> {
     private CreateAction<LichHen> lichHensDataGrid2CreateAction;
     @ViewComponent
     private CollectionLoader<LichHen> lichHensDl_1;
+    @ViewComponent
+    private CollectionContainer<LichHen> lichHensDc;
+    @ViewComponent
+    private CollectionContainer<LichHen> lichHensDc_1;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -135,18 +143,38 @@ public class LichHenListView extends StandardListView<LichHen> {
                 })
                 .setHeader("Thao tác")
                 .setAutoWidth(true);
-
-        lichHensDataGridCreateAction.setAfterCloseHandler(closeEvent -> {
-            // Sau khi dialog tạo mới đóng, refresh loader để áp dụng bộ lọc currentDate
-            lichHensDl.setParameter("currentDate", new Date());
-            lichHensDl.load();
-        });
-
-        lichHensDataGrid2CreateAction.setAfterCloseHandler(closeEvent -> {
-            lichHensDl_1.load();
-        });
     }
 
+    @Install(to = "lichHensDataGrid.createAction", subject = "afterSaveHandler")
+    private void lichHensDataGridCreateActionAfterSaveHandler(final LichHen lichHen) {
+        lichHensDc.getMutableItems().clear();
+        lichHensDl.setParameter("currentDate", new Date());
+        lichHensDl.load();
+
+        lichHensDc_1.getMutableItems().clear();
+        lichHensDl_1.load();
+    }
+
+    @Install(to = "lichHensDataGrid.removeAction", subject = "afterActionPerformedHandler")
+    private void lichHensDataGridRemoveActionAfterActionPerformedHandler(final RemoveOperation.AfterActionPerformedEvent<LichHen> afterActionPerformedEvent) {
+        lichHensDc.getMutableItems().clear();
+        lichHensDl.setParameter("currentDate", new Date());
+        lichHensDl.load();
+
+        lichHensDc_1.getMutableItems().clear();
+        lichHensDl_1.load();
+    }
+
+
+    @Install(to = "lichHensDataGrid.editAction", subject = "afterSaveHandler")
+    private void lichHensDataGridEditActionAfterSaveHandler(final LichHen lichHen) {
+        lichHensDc.getMutableItems().clear();
+        lichHensDl.setParameter("currentDate", new Date());
+        lichHensDl.load();
+
+        lichHensDc_1.getMutableItems().clear();
+        lichHensDl_1.load();
+    }
 
     @Supply(to = "lichHensDataGrid.hinhThuc", subject = "renderer")
     private Renderer<LichHen> lichHensDataGridHinhThucRenderer() {

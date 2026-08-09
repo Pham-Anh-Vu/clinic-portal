@@ -14,6 +14,7 @@ import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.enumentity.TinhTheoGia;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import com.company.clinicportal.enumentity.TrangThaiDonThuoc;
+import com.company.clinicportal.lienthong.LienThongGuiDonThuocService;
 import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
 import com.company.clinicportal.service.DonThuocService;
 import com.company.clinicportal.service.TinhKpiChiTietService;
@@ -52,6 +53,7 @@ import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.kit.action.Action;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionContainer;
@@ -85,6 +87,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private BenhNhan idBenhNhan = null;
     @ViewComponent
     private DataGrid<ChiTietDichVu> chiTietDichVusDataGrid;
+    @ViewComponent("chiTietDichVusDataGrid.remove")
+    private Action chiTietDichVusRemoveAction;
     @Autowired
     private UiComponents uiComponents;
     @Autowired
@@ -125,8 +129,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionContainer<ToDieuTri> toDieuTrisDc;
     @ViewComponent
     private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
-    @Autowired
-    private TinhKpiChiTietService tinhKpiChiTietService;
+//    @Autowired
+//    private TinhKpiChiTietService tinhKpiChiTietService;
     @Autowired
     private ChiTietDieuTriPaymentSummaryService paymentSummaryService;
     @Autowired
@@ -204,26 +208,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                 .setSortable(true);
 
         // ✅ Column Thao tác
-        Grid.Column<ChiTietDichVu> actionColumn = chiTietDichVusDataGrid.addComponentColumn(chiTietDichVu -> {
-                    JmixButton button = uiComponents.create(JmixButton.class);
-                    button.setText("Chi tiết");
-
-                    button.addClickListener(e -> {
-                        if (chiTietDichVu != null && chiTietDichVu.getId() != null) {
-
-                            DialogWindow<View<?>> window =
-                                    dialogWindows.view(this, "BuoiDieuTri.list")
-                                            .build();
-
-                            BuoiDieuTriListView view = (BuoiDieuTriListView) window.getView();
-                            view.setIdChiTietDichVu(chiTietDichVu.getId());
-
-                            window.open();
-                        }
-                    });
-
-                    return button;
-                }).setHeader("Thao tác")
+        Grid.Column<ChiTietDichVu> actionColumn = chiTietDichVusDataGrid.addComponentColumn(this::buildChiTietDichVuActionsCell)
+                .setHeader("Thao tác")
                 .setKey("actionColumn")
                 .setAutoWidth(true);
 
@@ -300,6 +286,45 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         return layout;
     }
 
+    /**
+     * Cột "Thao tác" cho bảng CHỈ ĐỊNH DỊCH VỤ (text-only, theo pattern của các màn khác):
+     * - "Chi tiết" — mở danh sách buổi điều trị của dịch vụ.
+     * - "Xóa" — xóa dịch vụ khỏi chỉ định (tận dụng action list_remove của grid).
+     */
+    private HorizontalLayout buildChiTietDichVuActionsCell(ChiTietDichVu chiTietDichVu) {
+        HorizontalLayout actions = uiComponents.create(HorizontalLayout.class);
+        actions.setSpacing(true);
+        actions.setPadding(false);
+
+        // Nút Chi tiết
+        JmixButton editButton = uiComponents.create(JmixButton.class);
+        editButton.setText("Chi tiết");
+        editButton.addClickListener(e -> {
+            if (chiTietDichVu != null && chiTietDichVu.getId() != null) {
+                DialogWindow<View<?>> window =
+                        dialogWindows.view(this, "BuoiDieuTri.list")
+                                .build();
+                BuoiDieuTriListView view = (BuoiDieuTriListView) window.getView();
+                view.setIdChiTietDichVu(chiTietDichVu.getId());
+                window.open();
+            }
+        });
+
+        // Nút Xóa
+        JmixButton deleteButton = uiComponents.create(JmixButton.class);
+        deleteButton.setText("Xóa");
+        deleteButton.addClickListener(e -> {
+            if (chiTietDichVu == null || chiTietDichVu.getId() == null) {
+                return;
+            }
+            chiTietDichVusDataGrid.select(chiTietDichVu);
+            chiTietDichVusRemoveAction.actionPerform(chiTietDichVusDataGrid);
+        });
+
+        actions.add(editButton, deleteButton);
+        return actions;
+    }
+
     /** PostLoad handler để đảm bảo cột thao tác luôn được cấu hình sau khi data load. */
     @Subscribe(id = "donThuocsDl", target = Target.DATA_LOADER)
     public void onDonThuocsDlPostLoad(final io.jmix.flowui.model.CollectionLoader.PostLoadEvent<DonThuoc> event) {
@@ -360,21 +385,38 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         window.addAfterCloseListener(event1 -> {
             if (event1.closedWith(StandardOutcome.SAVE)) {
                 ChiTietDichVu saved = event1.getView().getEditedEntity();
+                Long soLuong = saved.getSoLuong();
+                Long khoangCachBuoiDieuTri = saved.getKhoangCachBuoiDieuTri();
+                Date ngayBatDau = saved.getNgayBatDau();
+
+                // Validate theo quy tắc nghiệp vụ:
+                //   soLuong > 1  && khoangCachBuoiDieuTri == 0  -> báo lỗi, không lưu gì cả.
+                if (soLuong != null && soLuong > 1
+                        && (khoangCachBuoiDieuTri == null || khoangCachBuoiDieuTri == 0)) {
+                    notifications.create("Khoảng cách buổi điều trị phải lớn hơn 0")
+                            .withType(Notifications.Type.ERROR)
+                            .show();
+                    return;
+                }
+
                 saved.setIdChiTietPhieuDieuTri(getEditedEntity());
                 saved.setCreatedAt(LocalDateTime.now());
                 ChiTietDichVu persisted = dataManager.save(saved);
 
-                Long soLuong = persisted.getSoLuong();
-                Date ngayBatDau = persisted.getNgayBatDau();
-                Long khoangCachBuoiDieuTri = persisted.getKhoangCachBuoiDieuTri();
-
+                // Sinh buổi điều trị:
+                //   - soLuong >= 1, có ngày bắt đầu và bệnh nhân.
+                //   - khoangCachBuoiDieuTri có thể = 0 (áp dụng cho soLuong = 1, mọi buổi đều = ngayBatDau)
+                //     hoặc > 0 (các buổi cách nhau khoangCach ngày).
                 if (soLuong != null && soLuong > 0
                         && ngayBatDau != null
-                        && khoangCachBuoiDieuTri != null && khoangCachBuoiDieuTri > 0
                         && persisted.getIdChiTietPhieuDieuTri() != null
                         && persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan() != null) {
 
                     SaveContext saveContext = new SaveContext();
+
+                    long stepDays = (khoangCachBuoiDieuTri != null && khoangCachBuoiDieuTri > 0)
+                            ? khoangCachBuoiDieuTri
+                            : 0L;
 
                     for (int i = 0; i < soLuong; i++) {
                         BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
@@ -384,24 +426,21 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
                         Calendar ngayThucHienCal = Calendar.getInstance();
                         ngayThucHienCal.setTime(ngayBatDau);
-                        ngayThucHienCal.add(Calendar.DAY_OF_MONTH, (int) (khoangCachBuoiDieuTri * i));
+                        ngayThucHienCal.add(Calendar.DAY_OF_MONTH, (int) (stepDays * i));
                         buoiDieuTri.setNgayThucHien(ngayThucHienCal.getTime());
                         buoiDieuTri.setTrangThai(TrangThaiBuoiDieuTri.CHUA_THUC_HIEN);
 
                         saveContext.saving(buoiDieuTri);
                     }
 
-if (!saveContext.getEntitiesToSave().isEmpty()) {
-                    dataManager.save(saveContext);
-                    if (getEditedEntity().getId() != null) {
-                        tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
+                    if (!saveContext.getEntitiesToSave().isEmpty()) {
+                        dataManager.save(saveContext);
                     }
                 }
-            }
 
-            chiTietDichVuDc.getMutableItems().add(loadChiTietDichVuForGrid(persisted.getId()));
-            recalculatePaymentFields();
-        }
+                chiTietDichVuDc.getMutableItems().add(loadChiTietDichVuForGrid(persisted.getId()));
+                recalculatePaymentFields();
+            }
         });
         window.open();
     }
@@ -861,13 +900,13 @@ if (!saveContext.getEntitiesToSave().isEmpty()) {
         recalculatePaymentFields();
     }
 
-    @Subscribe
-    public void onValidation(final ValidationEvent event) {
-        String validationError = buildTrongSoValidationError();
-        if (validationError != null) {
-            event.getErrors().add(validationError);
-        }
-    }
+//    @Subscribe
+//    public void onValidation(final ValidationEvent event) {
+//        String validationError = buildTrongSoValidationError();
+//        if (validationError != null) {
+//            event.getErrors().add(validationError);
+//        }
+//    }
 
     private void recalculatePaymentFields() {
         long tongTien = 0L;
@@ -1061,10 +1100,10 @@ if (!saveContext.getEntitiesToSave().isEmpty()) {
         paymentSummaryService.applyTotals(getEditedEntity());
     }
 
-    @Subscribe
-    public void onAfterSave(final AfterSaveEvent event) {
-        if (getEditedEntity().getId() != null) {
-            tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
-        }
-    }
+//    @Subscribe
+//    public void onAfterSave(final AfterSaveEvent event) {
+//        if (getEditedEntity().getId() != null) {
+//            tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
+//        }
+//    }
 }

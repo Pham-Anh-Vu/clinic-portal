@@ -7,14 +7,12 @@
                   class="com.company.clinicportal.entity.ChiTietDieuTri">
             <fetchPlan>
                 <property name="chuanDoan"/>
-                <property name="chuanDoanIcd" fetchPlan="_base"/>
-                <property name="chuanDoanMaIcd"/>
-                <property name="chuanDoanTenIcd"/>
                 <property name="gioHenMacDinh"/>
                 <property name="idNhanSu" fetchPlan="_base"/>
                 <property name="ngayChiDinh"/>
                 <property name="tenPhieuDieuTri"/>
                 <property name="trieuChung"/>
+                <property name="dsChanDoanIcd" fetchPlan="_base"/>
             </fetchPlan>
             <loader id="chiTietDieuTriDl"/>
         </instance>
@@ -53,19 +51,12 @@
             <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh" required="true"/>
             <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
 <!--            <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2" required="true"/>-->
-            <entityPicker id="chuanDoanIcdField" property="chuanDoanIcd" colspan="2" width="100%"
-                          label="Chuẩn đoán ICD">
-                <actions>
-                    <action id="entityLookup" type="entity_lookup">
-                        <properties>
-                            <property name="openMode" value="DIALOG"/>
-                            <property name="viewId" value="ltcs_Icd10.list"/>
-                        </properties>
-                    </action>
-                    <action id="entityClear" type="entity_clear"/>
-                </actions>
-            </entityPicker>
             <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2" required="true"/>
+            <multiSelectComboBox id="dsChanDoanIcdField" property="dsChanDoanIcd"
+                                 itemsContainer="icd10sDc"
+                                 colspan="2" width="100%"
+                                 label="Chuẩn đoán ICD"
+                                 clearButtonVisible="true"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>
