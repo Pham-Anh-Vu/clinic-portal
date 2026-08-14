@@ -102,10 +102,10 @@ public class DonThuocPreviewDialogView extends StandardView {
           .append("</table>");
 
         // Chẩn đoán
-        sb.append("<h3>II. Chuẩn đoán</h3>");
+        sb.append("<h3>II. Chẩn đoán</h3>");
         List<DonThuocChanDoan> cds = donThuoc.getChanDoans();
         if (cds == null || cds.isEmpty()) {
-            sb.append("<p><i>Chưa có chuẩn đoán.</i></p>");
+            sb.append("<p><i>Chưa có chẩn đoán.</i></p>");
         } else {
             sb.append("<table><thead><tr><th>STT</th><th>Mã ICD</th><th>Tên bệnh</th><th>Kết luận</th></tr></thead><tbody>");
             for (DonThuocChanDoan cd : cds) {

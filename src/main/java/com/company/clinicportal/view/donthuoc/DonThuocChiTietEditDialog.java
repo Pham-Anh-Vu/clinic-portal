@@ -8,9 +8,11 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.Notifications;
+import io.jmix.flowui.component.combobox.EntityComboBox;
+import io.jmix.flowui.component.select.JmixSelect;
 import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.component.valuepicker.EntityPicker;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ public class DonThuocChiTietEditDialog extends StandardDetailView<DonThuocChiTie
     private Notifications notifications;
 
     @ViewComponent
-    private EntityPicker<DonThuocChiTiet> dmThuocField;
+    private CollectionLoader<DmThuoc> dmThuocsDl;
     @ViewComponent
     private TypedTextField<BigDecimal> soLuongField;
     @ViewComponent
@@ -54,17 +56,20 @@ public class DonThuocChiTietEditDialog extends StandardDetailView<DonThuocChiTie
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        // Load lại danh sách thuốc mỗi lần mở dialog để đảm bảo luôn có dữ liệu mới nhất
+        // từ danh mục (phòng trường hợp cache của DataLoadCoordinator bị stale).
+        dmThuocsDl.load();
         refreshSaveButton();
     }
 
+
+
     /**
-     * Khi user chọn thuốc từ danh mục → điền các trường snapshot.
-     * Dùng AbstractField.ComponentValueChangeEvent (fired khi user chọn entity).
+     * Khi user chọn thuốc từ dropdown → điền các trường snapshot.
      * Đồng thời gọi pickDrug để check trùng và đảm bảo snapshot đầy đủ.
      */
     @Subscribe("dmThuocField")
-    public void onDmThuocFieldComponentValueChange(
-            final AbstractField.ComponentValueChangeEvent<EntityPicker<DmThuoc>, DmThuoc> event) {
+    public void onDmThuocFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<EntityComboBox<DmThuoc>, DmThuoc> event) {
         DmThuoc dm = event.getValue();
         if (dm == null) {
             maThuocSnapshotField.setValue(null);

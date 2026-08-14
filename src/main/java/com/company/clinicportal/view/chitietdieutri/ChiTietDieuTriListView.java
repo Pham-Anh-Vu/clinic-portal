@@ -127,8 +127,8 @@ public class ChiTietDieuTriListView extends StandardListView<ChiTietDieuTri> {
                 .newEntity()
                 .build();
         dialogWindow.getView().setIdBenhNhan(idBenhNhan);
-        dialogWindow.setWidth("80%");
-        dialogWindow.setHeight("100%");
+        dialogWindow.setWidth("60%");
+        dialogWindow.setHeight("90%");
 
         // Reload datagrid after dialog closes; nếu save thành công -> auto mở màn chi tiết phiếu điều trị
         dialogWindow.addAfterCloseListener(event1 -> {

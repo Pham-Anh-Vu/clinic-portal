@@ -123,13 +123,13 @@ public class BenhNhanListView extends StandardListView<BenhNhan> {
                 if(chiTietDieuTri.isPresent()){
                     notifications.create("Không thể xóa. Khách hàng đã được lập phiếu chỉ định.")
                             .withThemeVariant(NotificationVariant.LUMO_WARNING)
-                            .withPosition(Notification.Position.TOP_END)
+                            .withPosition(Notification.Position.TOP_START)
                             .show();
                 }
                 else if(lichHen.isPresent()) {
                     notifications.create("Không thể xóa. Khách hàng đã có lịch hẹn.")
                             .withThemeVariant(NotificationVariant.LUMO_WARNING)
-                            .withPosition(Notification.Position.TOP_END)
+                            .withPosition(Notification.Position.TOP_START)
                             .show();
                 }else{
                     benhNhansDataGrid.select(benhNhan);

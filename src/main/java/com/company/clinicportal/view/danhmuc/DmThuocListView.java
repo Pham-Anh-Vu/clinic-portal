@@ -1,11 +1,18 @@
 package com.company.clinicportal.view.danhmuc;
 
 import com.company.clinicportal.entity.DmThuoc;
+import com.company.clinicportal.entity.DonThuoc;
+import com.company.clinicportal.entity.DonThuocChiTiet;
 import com.company.clinicportal.view.danhmuc.DanhMucImportDialogView;
 import com.company.clinicportal.view.main.MainView;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.DataManager;
 import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.action.list.RemoveAction;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -35,6 +42,12 @@ public class DmThuocListView extends StandardListView<DmThuoc> {
 
     @ViewComponent("dmThuocsDataGrid.removeAction")
     private RemoveAction<DmThuoc> dmThuocsDataGridRemoveAction;
+    @Autowired
+    private DataManager dataManager;
+    @Autowired
+    private Notifications notifications;
+    @ViewComponent
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -55,6 +68,15 @@ public class DmThuocListView extends StandardListView<DmThuoc> {
             JmixButton deleteButton = uiComponents.create(JmixButton.class);
             deleteButton.setText("Xóa");
             deleteButton.addClickListener(e -> {
+                DonThuocChiTiet donThuocChiTiet = dataManager.load(DonThuocChiTiet.class).query("select e from DonThuocChiTiet e where e.dmThuoc = :dmThuoc").parameter("dmThuoc", dmThuoc).optional().orElse(null);
+
+                if(donThuocChiTiet != null){
+                    notifications.create(messageBundle.getMessage("DonThuocChiTiet.deleted"))
+                            .withThemeVariant(NotificationVariant.LUMO_WARNING)
+                            .withPosition(Notification.Position.TOP_START)
+                            .show();
+                }
+
                 dmThuocsDataGrid.select(dmThuoc);
                 dmThuocsDataGridRemoveAction.execute();
             });
@@ -68,7 +90,7 @@ public class DmThuocListView extends StandardListView<DmThuoc> {
     }
 
     @Subscribe("importButton")
-    public void onImportButtonClick(com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+    public void onImportButtonClick(ClickEvent<JmixButton> event) {
         dialogWindows.view(this, DanhMucImportDialogView.class)
                 .withViewConfigurer(view -> ((DanhMucImportDialogView) view).setKind(DanhMucImportDialogView.KIND_THUOC))
                 .open()

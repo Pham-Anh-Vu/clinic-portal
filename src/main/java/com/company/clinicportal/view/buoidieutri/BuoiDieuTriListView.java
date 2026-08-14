@@ -38,7 +38,7 @@ import java.util.List;
 @ViewController(id = "BuoiDieuTri.list")
 @ViewDescriptor(path = "buoi-dieu-tri-list-view.xml")
 @LookupComponent("buoiDieuTrisDataGrid")
-@DialogMode(width = "80%", height = "100%")
+@DialogMode(width = "50%", height = "80%")
 public class BuoiDieuTriListView extends StandardListView<BuoiDieuTri> {
     public Long idChiTietDichVu = null;
 

@@ -138,6 +138,14 @@ public class DonThuocService {
             dt.setChanDoanText(chuanDoan.trim());
         }
 
+        // Khởi tạo sẵn 1 đợt dùng thuốc (soDot = 1) cho form 3 trường trong dialog.
+        // KHÔNG save ở đây - chỉ tạo entity in-memory, persist cùng lúc với dt khi user
+        // nhấn Lưu nháp / Lưu & phát hành (EclipseLink cascade ALL qua dt.getDotDungs()).
+        DonThuocDotDung dd = dataManager.create(DonThuocDotDung.class);
+        dd.setDonThuoc(dt);
+        dd.setSoDot(1);
+        dt.getDotDungs().add(dd);
+
         // KHÔNG save ở đây - chỉ tạo entity in-memory, lưu khi user nhấn Lưu/Lưu nháp
         // dataManager.save(ctx);
         return dt;
@@ -299,7 +307,7 @@ public class DonThuocService {
                 .parameter("self", cd.getId())
                 .one();
         if (dup != null && dup > 0L) {
-            throw new IllegalStateException("Chuẩn đoán " + icd.getMaIcd() + " đã có trong đơn.");
+            throw new IllegalStateException("Chẩn đoán " + icd.getMaIcd() + " đã có trong đơn.");
         }
         cd.snapshotFrom(icd);
         return cd;
@@ -367,7 +375,8 @@ public class DonThuocService {
         if (dt.getLoaiDon() == null) {
             errors.add("loaiDon-required");
         }
-        if (dt.getHinhThucDieuTri() == null) {
+        if (dt.getHinhThucDieuTri() == null
+                && dt.getLoaiDon() == com.company.clinicportal.enumentity.LoaiDon.THUONG) {
             errors.add("hinhThucDieuTri-required");
         }
         List<DonThuocChiTiet> lines = dt.getChiTiets();
@@ -391,6 +400,26 @@ public class DonThuocService {
         List<DonThuocChanDoan> cds = dt.getChanDoans();
         if (cds == null || cds.isEmpty()) {
             errors.add("chanDoan-empty");
+        }
+        // Số thang thuốc chỉ bắt buộc đối với đơn y học cổ truyền (loại y).
+        if (dt.getLoaiDon() == LoaiDon.Y_HOC_CO_TRUYEN) {
+            List<DonThuocDotDung> dds = dt.getDotDungs();
+            if (dds == null || dds.isEmpty()) {
+                errors.add("dotDung-required");
+            } else {
+                for (DonThuocDotDung dd : dds) {
+                    if (dd == null) {
+                        continue;
+                    }
+                    if (dd.getTuNgay() == null || dd.getDenNgay() == null) {
+                        errors.add("dotDung-ngay-required");
+                    }
+                    if (dd.getSoThangThuoc() == null) {
+                        errors.add("dotDung-soThangThuoc-required");
+                    }
+                    break; // chỉ cần check đợt đầu (BYT spec là single object)
+                }
+            }
         }
         return errors;
     }

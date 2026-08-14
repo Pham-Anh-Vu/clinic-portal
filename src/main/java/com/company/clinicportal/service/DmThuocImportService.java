@@ -121,7 +121,7 @@ public class DmThuocImportService {
 
         String bietDuoc = nullIfBlank(readString(row.getCell(2)));
         String phanLoaiRaw = nullIfBlank(readString(row.getCell(4)));
-        if (phanLoaiRaw == null) throw new IllegalArgumentException("phan_loai (cột E) bắt buộc");
+//        if (phanLoaiRaw == null) throw new IllegalArgumentException("phan_loai (cột E) bắt buộc");
         PhanLoaiThuoc phanLoai = PhanLoaiThuoc.fromId(phanLoaiRaw);
         if (phanLoai == null) {
             throw new IllegalArgumentException("phan_loai '" + phanLoaiRaw

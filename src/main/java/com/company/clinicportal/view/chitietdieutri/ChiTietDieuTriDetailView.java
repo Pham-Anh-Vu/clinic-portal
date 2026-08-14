@@ -36,7 +36,9 @@ import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.multiselectcombobox.JmixMultiSelectComboBox;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.kit.action.Action;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -58,7 +60,7 @@ import java.util.*;
 @ViewController(id = "ChiTietDieuTri.detail")
 @ViewDescriptor(path = "chi-tiet-dieu-tri-detail-view.xml")
 @EditedEntityContainer("chiTietDieuTriDc")
-@DialogMode(width = "80%", height = "100%")
+@DialogMode(width = "60%", height = "90%")
 public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri> {
     @ViewComponent
     private DataGrid<ChiTietDichVu> chiTietDichVusDataGrid;
@@ -103,6 +105,10 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
     private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
     @ViewComponent
     private InstanceLoader<ChiTietDieuTri> chiTietDieuTriDl;
+    @ViewComponent
+    private JmixTextArea chuanDoanField;
+    @ViewComponent
+    private JmixMultiSelectComboBox<com.company.clinicportal.entity.Icd10> dsChanDoanIcdField;
     // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
     // @ViewComponent
     // private CollectionLoader<BuoiDieuTri> buoiDieuTrisDl;
@@ -204,6 +210,7 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
         }
 
         autoFillTongKetDieuTriFields();
+        toggleDiagnosisFields();
 
         // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
         // buoiDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
@@ -261,6 +268,38 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
         }
         if (chiTietDieuTri.getChuanDoanRaVien() == null || chiTietDieuTri.getChuanDoanRaVien().isBlank()) {
             chiTietDieuTri.setChuanDoanRaVien(resolveChuanDoanRaVien(chiTietDieuTri));
+        }
+    }
+
+    /**
+     * Ẩn/hiện hai trường "Chẩn đoán ban đầu" và "Chẩn đoán ICD" theo quy tắc:
+     * <ul>
+     *     <li>Nếu {@code dsChanDoanIcd} có giá trị → hiện dsChanDoanIcdField, ẩn chuanDoanField.</li>
+     *     <li>Nếu {@code dsChanDoanIcd} rỗng và {@code chuanDoan} có giá trị → ẩn dsChanDoanIcdField, hiện chuanDoanField.</li>
+     *     <li>Nếu cả hai đều rỗng → hiện chuanDoanField, ẩn dsChanDoanIcdField.</li>
+     * </ul>
+     */
+    private void toggleDiagnosisFields() {
+        if (chuanDoanField == null || dsChanDoanIcdField == null) {
+            return;
+        }
+        ChiTietDieuTri chiTietDieuTri = getEditedEntity();
+        boolean hasIcd = chiTietDieuTri != null
+                && chiTietDieuTri.getDsChanDoanIcd() != null
+                && !chiTietDieuTri.getDsChanDoanIcd().isEmpty();
+        boolean hasChuanDoan = chiTietDieuTri != null
+                && chiTietDieuTri.getChuanDoan() != null
+                && !chiTietDieuTri.getChuanDoan().isBlank();
+
+        if (hasIcd) {
+            chuanDoanField.setVisible(false);
+            dsChanDoanIcdField.setVisible(true);
+        } else if (hasChuanDoan) {
+            chuanDoanField.setVisible(true);
+            dsChanDoanIcdField.setVisible(false);
+        } else {
+            chuanDoanField.setVisible(true);
+            dsChanDoanIcdField.setVisible(false);
         }
     }
 

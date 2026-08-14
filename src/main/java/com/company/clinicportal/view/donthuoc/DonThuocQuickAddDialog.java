@@ -4,6 +4,7 @@ import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.DonThuoc;
 import com.company.clinicportal.entity.DonThuocChiTiet;
 import com.company.clinicportal.entity.DonThuocChanDoan;
+import com.company.clinicportal.entity.DonThuocDotDung;
 import com.company.clinicportal.entity.Icd10;
 import com.company.clinicportal.enumentity.LoaiDon;
 import com.company.clinicportal.enumentity.TrangThaiDonThuoc;
@@ -35,7 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -50,7 +53,7 @@ import java.util.UUID;
 @ViewController(id = "DonThuocQuickAddDialog")
 @ViewDescriptor(path = "don-thuoc-quick-add-dialog.xml")
 @EditedEntityContainer("donThuocDc")
-@DialogMode(width = "90%", height = "90%", resizable = true)
+@DialogMode(width = "60%", height = "90%", resizable = true)
 public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
     private static final Logger log = LoggerFactory.getLogger(DonThuocQuickAddDialog.class);
 
@@ -72,6 +75,8 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
 
     @ViewComponent
     private InstanceContainer<DonThuoc> donThuocDc;
+    @ViewComponent
+    private InstanceContainer<DonThuocDotDung> dotDungDc;
     @ViewComponent
     private CollectionContainer<DonThuocChiTiet> chiTietsDc;
     @ViewComponent
@@ -96,6 +101,14 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
     private TypedTextField<String> maDonThuocField;
     @ViewComponent
     private JmixSelect<com.company.clinicportal.enumentity.LoaiDon> loaiDonField;
+    @ViewComponent
+    private JmixSelect<com.company.clinicportal.enumentity.HinhThucDieuTri> hinhThucDieuTriField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField soDotField;
+    @ViewComponent
+    private com.vaadin.flow.component.datepicker.DatePicker tuNgayField;
+    @ViewComponent
+    private com.vaadin.flow.component.datepicker.DatePicker denNgayField;
 
     private ChiTietDieuTri chiTietDieuTri;
     private UUID donThuocIdParam;
@@ -119,6 +132,11 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         closeBtn.addClickListener(e -> close(StandardOutcome.CLOSE));
         configureThuocActionsColumn();
         configureChanDoanActionsColumn();
+        // Áp dụng trạng thái required ban đầu cho "Hình thức điều trị" theo loại đơn hiện tại
+        try{
+            applyHinhThucDieuTriRequired(
+                    getEditedEntity() != null ? getEditedEntity().getLoaiDon() : null);
+        } catch (Exception e){ }
     }
 
     /**
@@ -138,6 +156,8 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
             try {
                 maDonThuocField.setValue(newMa);
             } catch (Exception e) {}        }
+        // Cập nhật trạng thái required của "Hình thức điều trị" theo loại đơn
+        applyHinhThucDieuTriRequired(event.getValue());
     }
 
     @Subscribe("loaiDonField")
@@ -153,6 +173,24 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
             try {
                 maDonThuocField.setValue(newMa);
             } catch (Exception e) {}
+        }
+        applyHinhThucDieuTriRequired(event.getValue());
+    }
+
+    /**
+     * Bật/tắt dấu * bắt buộc của trường "Hình thức điều trị" tuỳ theo loại đơn.
+     * Chỉ đơn thuốc thông thường ({@link LoaiDon#THUONG}) mới bắt buộc nhập.
+     */
+    private void applyHinhThucDieuTriRequired(com.company.clinicportal.enumentity.LoaiDon loaiDon) {
+        if (hinhThucDieuTriField == null) {
+            return;
+        }
+        boolean required = loaiDon == com.company.clinicportal.enumentity.LoaiDon.THUONG;
+        try {
+            hinhThucDieuTriField.setRequiredIndicatorVisible(required);
+            hinhThucDieuTriField.setRequired(true);
+        } catch (Exception ignore) {
+            // API có thể không tồn tại trên một số phiên bản Jmix; bỏ qua nếu vậy.
         }
     }
 
@@ -183,31 +221,31 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         window.open();
     }
 
-    /**
-     * Jmix standard action: tạo chẩn đoán mới, mở modal edit.
-     */
-    @Subscribe("chanDoanDataGrid.create")
-    public void onChanDoanDataGridCreate(final ActionPerformedEvent event) {
-        DialogWindow<DonThuocChanDoanEditDialog> window =
-                dialogWindows.detail(this, DonThuocChanDoan.class)
-                        .withViewClass(DonThuocChanDoanEditDialog.class)
-                        .newEntity()
-                        .withParentDataContext(getViewData().getDataContext())
-                        .build();
-
-        window.addAfterCloseListener(closeEvent -> {
-            if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                DonThuocChanDoan saved = closeEvent.getView().getEditedEntity();
-                // Set parent reference và stt
-                saved.setDonThuoc(getEditedEntity());
-                saved.setStt(nextSttChanDoan());
-                // Thêm vào container để hiển thị trên grid
-                chanDoansDc.getMutableItems().add(saved);
-                updateChanDoanCountLabel();
-            }
-        });
-        window.open();
-    }
+//    /**
+//     * Jmix standard action: tạo chẩn đoán mới, mở modal edit.
+//     */
+//    @Subscribe("chanDoanDataGrid.create")
+//    public void onChanDoanDataGridCreate(final ActionPerformedEvent event) {
+//        DialogWindow<DonThuocChanDoanEditDialog> window =
+//                dialogWindows.detail(this, DonThuocChanDoan.class)
+//                        .withViewClass(DonThuocChanDoanEditDialog.class)
+//                        .newEntity()
+//                        .withParentDataContext(getViewData().getDataContext())
+//                        .build();
+//
+//        window.addAfterCloseListener(closeEvent -> {
+//            if (closeEvent.closedWith(StandardOutcome.SAVE)) {
+//                DonThuocChanDoan saved = closeEvent.getView().getEditedEntity();
+//                // Set parent reference và stt
+//                saved.setDonThuoc(getEditedEntity());
+//                saved.setStt(nextSttChanDoan());
+//                // Thêm vào container để hiển thị trên grid
+//                chanDoansDc.getMutableItems().add(saved);
+//                updateChanDoanCountLabel();
+//            }
+//        });
+//        window.open();
+//    }
 
     @Subscribe("chiTietDataGrid.remove")
     public void onChiTietDataGridRemove(final ActionPerformedEvent event) {
@@ -238,8 +276,8 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         DonThuocChanDoan selected = chanDoanDataGrid.getSingleSelectedItem();
         if (selected != null) {
             dialogs.createOptionDialog()
-                    .withHeader("Xoá chuẩn đoán")
-                    .withText("Bạn có chắc muốn xoá chuẩn đoán này?")
+                    .withHeader("Xoá chẩn đoán")
+                    .withText("Bạn có chắc muốn xoá chẩn đoán này?")
                     .withActions(
                             new io.jmix.flowui.action.DialogAction(
                                     io.jmix.flowui.action.DialogAction.Type.NO),
@@ -248,12 +286,38 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                                     .withHandler(e -> {
                                         chanDoansDc.getMutableItems().remove(selected);
                                         updateChanDoanCountLabel();
-                                        notifications.create("Đã xoá chuẩn đoán")
+                                        notifications.create("Đã xoá chẩn đoán")
                                                 .withType(Notifications.Type.SUCCESS).show();
                                     }))
                     .withWidth("320px")
                     .open();
         }
+    }
+
+    /**
+     * Bind dòng {@link DonThuocDotDung} đầu tiên của đơn thuốc hiện tại vào
+     * {@link #dotDungDc} để form 3 trường (Đợt / Từ ngày / Đến ngày) hiển thị
+     * giá trị. Service đã đảm bảo luôn có ít nhất 1 đợt dùng (THÊM MỚI tạo kèm
+     * sẵn soDot=1, SỬA load đầy đủ {@code dotDungs} fetch plan).
+     */
+    private void initDotDungInstance() {
+        DonThuoc dt = getEditedEntity();
+        if (dt == null || dotDungDc == null) {
+            return;
+        }
+        DonThuocDotDung dd = null;
+        if (dt.getDotDungs() != null && !dt.getDotDungs().isEmpty()) {
+            dd = dt.getDotDungs().get(0);
+        }
+        if (dd == null) {
+            // Fallback: tạo mới nếu vì lý do gì đó collection rỗng (vd. service
+            // chưa được gọi). Đảm bảo form luôn có 1 instance binding.
+            dd = dataManager.create(DonThuocDotDung.class);
+            dd.setDonThuoc(dt);
+            dd.setSoDot(1);
+            dt.getDotDungs().add(dd);
+        }
+        dotDungDc.setItem(dd);
     }
 
     /** Thêm cột "Thao tác" với nút Sửa cho mỗi dòng thuốc. */
@@ -320,11 +384,11 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         delBtn.addClickListener(e -> {
             chanDoansDc.getMutableItems().remove(cd);
             updateChanDoanCountLabel();
-            notifications.create("Đã xoá chuẩn đoán")
+            notifications.create("Đã xoá chẩn đoán")
                     .withType(Notifications.Type.SUCCESS).show();
         });
 
-        actions.add(editBtn, delBtn);
+        actions.add(editBtn);
         return actions;
     }
 
@@ -392,9 +456,12 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                     .fetchPlan(fp -> fp
                             .addFetchPlan("_base")
                             .add("chiTiets", b -> b.addFetchPlan("_base"))
-                            .add("chanDoans", b -> b.addFetchPlan("_base")))
+                            .add("chanDoans", b -> b.addFetchPlan("_base"))
+                            .add("dotDungs", b -> b.addFetchPlan("_base")))
                     .one();
             donThuocDc.setItem(existing);
+            applyHinhThucDieuTriRequired(existing.getLoaiDon());
+            initDotDungInstance();
             return;
         }
         // THÊM MỚI: phải có chiTietDieuTri thì mới tạo draft.
@@ -405,6 +472,165 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         DonThuoc draft = donThuocService.createDraftForChiTietDieuTri(
                 chiTietDieuTri, DEFAULT_TEN_BAC_SI);
         donThuocDc.setItem(draft);
+        applyHinhThucDieuTriRequired(draft.getLoaiDon());
+        // createDraftForChiTietDieuTri đã tạo sẵn 1 DonThuocDotDung (soDot=1) cho form 3 trường.
+        initDotDungInstance();
+
+        // === MAP TẠM danh sách ICD từ ChiTietDieuTri.dsChanDoanIcd ===
+        // Không lưu DB — chỉ hiển thị preview trên grid để bác sĩ thấy các
+        // ICD đã chẩn đoán ở phiếu điều trị. Khi user nhấn "Lưu nháp" hoặc
+        // "Lưu & phát hành" thì mới cascade save DonThuocChanDoan xuống DB.
+        mapTamIcdTuChiTietDieuTri(chiTietDieuTri);
+    }
+
+    /**
+     * Map tạm danh sách ICD từ {@code ChiTietDieuTri.dsChanDoanIcd} vào
+     * {@link #chanDoansDc} để hiển thị trên grid. Không lưu DB.
+     *
+     * <p>Quy tắc:</p>
+     * <ul>
+     *     <li>Load lại CTDT với fetchPlan đầy đủ cho {@code dsChanDoanIcd}
+     *         (tránh LazyInit nếu entity truyền sang không fetch collection).</li>
+     *     <li>Tạo {@link DonThuocChanDoan} mới cho mỗi ICD, gọi
+     *         {@link DonThuocChanDoan#snapshotFrom(Icd10)} để fill mã/tên snapshot.</li>
+     *     <li>Cờ {@code tamFromPhieu = true} đánh dấu dòng tạm (chưa persist).</li>
+     *     <li>KHÔNG set {@code donThuoc} trên dòng ICD — để cascade save không
+     *         insert vào DB khi user chưa Lưu. Nếu set parent thì save sẽ
+     *         insert dòng vào bảng {@code don_thuoc_chan_doan} cùng {@code don_thuoc}.</li>
+     *     <li>Nếu user bấm "Lưu nháp" / "Phát hành" mà vẫn còn dòng tạm chưa gắn
+     *         parent, hệ thống sẽ tự động gắn trước khi save (xem
+     *         {@link #attachChanDoansToEditedEntity()}).</li>
+     * </ul>
+     */
+    private void mapTamIcdTuChiTietDieuTri(ChiTietDieuTri ctx) {
+        if (ctx == null || ctx.getId() == null) {
+            return;
+        }
+        // Load lại CTDT với fetchPlan cho dsChanDoanIcd để tránh Lazy
+        ChiTietDieuTri ctdt;
+        try {
+            ctdt = dataManager.load(ChiTietDieuTri.class)
+                    .id(ctx.getId())
+                    .fetchPlan(fp -> fp
+                            .addFetchPlan("_base")
+                            .add("dsChanDoanIcd", icd -> icd.addFetchPlan("_base")))
+                    .one();
+        } catch (Exception ex) {
+            log.warn("[MapIcdTam] Không load được CTDT id={}, dùng entity truyền vào: {}",
+                    ctx.getId(), ex.getMessage());
+            ctdt = ctx;
+        }
+        Set<Icd10> dsIcd = ctdt.getDsChanDoanIcd();
+        if (dsIcd == null || dsIcd.isEmpty()) {
+            return;
+        }
+        int added = 0;
+        // Sắp xếp theo mã ICD để hiển thị ổn định
+        List<Icd10> sorted = dsIcd.stream()
+                .filter(java.util.Objects::nonNull)
+                .sorted((a, b) -> {
+                    String maA = a.getMaIcd() == null ? "" : a.getMaIcd();
+                    String maB = b.getMaIcd() == null ? "" : b.getMaIcd();
+                    return maA.compareTo(maB);
+                })
+                .toList();
+        // Bỏ qua các ICD đã có trong grid (tránh trùng khi user mở lại dialog)
+        Set<String> existingMaIcd = new HashSet<>();
+        for (DonThuocChanDoan cd : chanDoansDc.getItems()) {
+            if (cd.getMaIcdSnapshot() != null) {
+                existingMaIcd.add(cd.getMaIcdSnapshot());
+            }
+        }
+        for (Icd10 icd : sorted) {
+            if (icd.getMaIcd() != null && existingMaIcd.contains(icd.getMaIcd())) {
+                continue;
+            }
+            DonThuocChanDoan cd = dataManager.create(DonThuocChanDoan.class);
+            cd.snapshotFrom(icd);
+            cd.setStt(nextSttChanDoan());
+            cd.setTamFromPhieu(true); // đánh dấu dòng tạm (transient flag)
+            // Mặc định kết luận = tên bệnh (text tiếng Việt của ICD-10),
+            // bác sĩ có thể sửa lại trên grid sau khi map.
+            cd.setKetLuan(cd.getTenIcdSnapshot());
+            // CHƯA setDonThuoc → không cascade save khi user chưa bấm Lưu
+            chanDoansDc.getMutableItems().add(cd);
+            added++;
+        }
+        if (added > 0) {
+            updateChanDoanCountLabel();
+            log.info("[MapIcdTam] Đã map tạm {} ICD từ CTDT id={} vào grid chẩn đoán.",
+                    added, ctx.getId());
+        }
+    }
+
+    /**
+     * Trước khi save nháp / phát hành, gắn tất cả {@link DonThuocChanDoan} đang
+     * nằm trong {@link #chanDoansDc} (kể cả dòng tạm map từ phiếu ĐT) vào
+     * {@link DonThuoc} hiện tại để EclipseLink cascade persist.
+     *
+     * <p><b>Quan trọng:</b></p>
+     * <ul>
+     *     <li>Phải <b>vừa set parent (donThuoc) vừa add vào {@code dt.getChanDoans()}</b>.
+     *         EclipseLink chỉ cascade insert các entity mới nằm trong collection
+     *         của parent khi save. Nếu chỉ setDonThuoc mà không add vào collection,
+     *         sẽ gây lỗi "new object through relationship not marked PERSIST".</li>
+     *     <li>Vì {@link #chanDoansDc} là CollectionPropertyContainer của {@code donThuocDc},
+     *         nên {@code chanDoansDc.getMutableItems().add(cd)} đã đồng bộ với
+     *         {@code dt.getChanDoans()}. Tuy nhiên ta vẫn gọi {@code dt.getChanDoans().add(cd)}
+     *         để đảm bảo an toàn khi {@code chanDoansDc} không còn bind vào {@code dt}.</li>
+     * </ul>
+     *
+     * <p>Được gọi từ {@link #onSaveDraft} và {@link #onIssue}.</p>
+     */
+    private void attachChanDoansToEditedEntity() {
+        DonThuoc dt = getEditedEntity();
+        if (dt == null) {
+            return;
+        }
+        int attached = 0;
+        for (DonThuocChanDoan cd : chanDoansDc.getItems()) {
+            if (cd == null) {
+                continue;
+            }
+            // 1. Set parent để JPA biết FK (id_don_thuoc)
+            if (cd.getDonThuoc() == null) {
+                cd.setDonThuoc(dt);
+            }
+            // 2. Add vào collection của parent để EclipseLink cascade INSERT
+            //    khi save DonThuoc. Đây là bắt buộc cho @OneToMany(cascade=ALL).
+            if (!dt.getChanDoans().contains(cd)) {
+                dt.getChanDoans().add(cd);
+                attached++;
+            }
+        }
+        if (attached > 0) {
+            log.info("[MapIcdTam] Đã gắn {} dòng chẩn đoán (gồm cả tạm) vào DonThuoc.getChanDoans().",
+                    attached);
+        }
+    }
+
+    /**
+     * Gắn {@link DonThuocDotDung} đang chỉnh sửa trong {@link #dotDungDc} vào
+     * {@link DonThuoc} để EclipseLink cascade persist khi save.
+     * Với thiết kế form 3 trường (Đợt / Từ ngày / Đến ngày), mỗi đơn thuốc chỉ
+     * quản lý 1 đợt dùng thuốc, nên ta đảm bảo dòng đang sửa nằm trong
+     * {@code dt.getDotDungs()}.
+     */
+    private void attachDotDungToEditedEntity() {
+        DonThuoc dt = getEditedEntity();
+        if (dt == null) {
+            return;
+        }
+        DonThuocDotDung dd = dotDungDc.getItem();
+        if (dd == null) {
+            return;
+        }
+        if (dd.getDonThuoc() == null) {
+            dd.setDonThuoc(dt);
+        }
+        if (!dt.getDotDungs().contains(dd)) {
+            dt.getDotDungs().add(dd);
+        }
     }
 
     @Subscribe
@@ -437,7 +663,14 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                         .withType(Notifications.Type.WARNING).show();
                 return;
             }
-            // Reload để tránh OptimisticLockException
+            // Bước 1: Gắn các dòng chẩn đoán (kể cả dòng ICD tạm map từ phiếu
+            // điều trị) vào dt để EclipseLink cascade persist khi save.
+            attachChanDoansToEditedEntity();
+            // Đồng thời gắn đợt dùng thuốc đang chỉnh sửa trên form 3 trường vào dt.
+            attachDotDungToEditedEntity();
+
+            // Bước 2: Load lại entity managed từ DB để tránh OptimisticLockException.
+            // Lưu ý: phải fetch chanDoans, dotDungs để có thể merge dòng tạm vào managed.
             DonThuoc managed = dataManager.load(DonThuoc.class)
                     .id(dt.getId())
                     .fetchPlan(fp -> fp
@@ -446,13 +679,148 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                             .add("chanDoans", b -> b.addFetchPlan("_base"))
                             .add("dotDungs", b -> b.addFetchPlan("_base")))
                     .one();
+
+            // Bước 3: Merge các dòng chẩn đoán từ dt (in-memory) sang managed
+            // (vừa load từ DB). Mục đích:
+            //   - Bảo toàn các DonThuocChanDoan có id (user tự thêm / sửa trước đó)
+            //     bằng cách update giá trị thay vì insert lại.
+            //   - INSERT các DonThuocChanDoan MỚI (id == null, gồm cả dòng tạm
+            //     map từ phiếu ĐT) bằng cách thêm vào managed.getChanDoans().
+            //   - KHÔNG xóa các dòng managed đã có trong DB mà user chưa xóa.
+            mergeChanDoansFromDraft(managed, dt);
+            // Merge đợt dùng thuốc đang chỉnh sửa trên form 3 trường vào managed.
+            mergeDotDungFromDraft(managed, dt);
+
+            // Bước 4: Cập nhật container để UI hiển thị đúng các dòng đã merge
+            // (vì container bind vào một entity duy nhất, phải setItem(managed)
+            // để grid re-fetch).
             donThuocDc.setItem(managed);
+            // Re-bind dotDungDc sang dòng managed tương ứng (vẫn là 1 đợt duy nhất)
+            initDotDungInstance();
+
+            // Bước 5: Save đơn — EclipseLink cascade INSERT các dòng mới,
+            // UPDATE các dòng đã thay đổi.
             DonThuoc saved = donThuocService.saveDraft(managed);
             donThuocDc.setItem(saved);
             notifications.create("Đã lưu nháp đơn " + saved.getMaDonThuoc())
                     .withType(Notifications.Type.SUCCESS).show();
         } catch (Exception ex) {
-            throw new ValidationException("Lỗi khi lưu nháp: " + ex.getMessage());
+            String detail = ex.getMessage();
+            if (detail == null || detail.isBlank()) {
+                detail = ex.getClass().getSimpleName();
+                if (ex.getCause() != null) {
+                    detail += " <- " + ex.getCause().getClass().getSimpleName()
+                            + ": " + (ex.getCause().getMessage() != null
+                                    ? ex.getCause().getMessage()
+                                    : "(no message)");
+                }
+            }
+            log.error("onSaveDraft failed: {}", detail, ex);
+            throw new ValidationException("Lỗi khi lưu nháp: " + detail);
+        }
+    }
+
+    /**
+     * Merge các {@link DonThuocChanDoan} từ {@code draft} (entity in-memory) sang
+     * {@code managed} (entity vừa load từ DB).
+     *
+     * <p>Quy tắc merge:</p>
+     * <ul>
+     *     <li>Với mỗi {@code cdDraft} trong {@code draft.getChanDoans()}:
+     *         <ul>
+     *             <li>Nếu {@code cdDraft.id == null} (dòng mới, gồm cả dòng ICD tạm
+     *                 map từ phiếu ĐT) → add thẳng vào {@code managed.getChanDoans()}.
+     *                 JPA sẽ INSERT.</li>
+     *             <li>Nếu {@code cdDraft.id != null} (dòng đã tồn tại, user sửa) →
+     *                 tìm dòng tương ứng trong {@code managed.getChanDoans()} theo id,
+     *                 copy các trường có thể sửa (maIcdSnapshot, tenIcdSnapshot,
+     *                 icd10, ketLuan, stt). Không xóa dòng managed cũ.</li>
+     *         </ul>
+     *     </li>
+     *     <li>KHÔNG xóa các dòng có trong {@code managed.getChanDoans()} mà không
+     *         có trong draft — tránh orphanRemoval xóa nhầm dòng đã lưu trước đó.
+     *         (Nếu user muốn xóa, đã có action remove trên grid → cũng remove
+     *         khỏi container, và khi save cascade sẽ xóa theo.)</li>
+     * </ul>
+     *
+     * <p>Lý do KHÔNG thay thế {@code managed.getChanDoans()} bằng {@code draft.getChanDoans()}:
+     * các dòng trong draft có thể ở trạng thái detached (đã setDonThuoc) và merge
+     * cả collection dễ gây EntityExistsException hoặc OptimisticLockException.</p>
+     */
+    private void mergeChanDoansFromDraft(DonThuoc managed, DonThuoc draft) {
+        if (managed == null || draft == null) {
+            return;
+        }
+        // Map id → managed item để tra cứu nhanh
+        java.util.Map<java.util.UUID, DonThuocChanDoan> managedById = new java.util.HashMap<>();
+        for (DonThuocChanDoan cd : managed.getChanDoans()) {
+            if (cd != null && cd.getId() != null) {
+                managedById.put(cd.getId(), cd);
+            }
+        }
+        int inserted = 0;
+        int updated = 0;
+        for (DonThuocChanDoan cdDraft : draft.getChanDoans()) {
+            if (cdDraft == null) {
+                continue;
+            }
+            if (cdDraft.getId() == null) {
+                // Dòng mới (gồm cả dòng ICD tạm) → add để JPA INSERT.
+                // KHÔNG thay đổi identity của entity để Jmix DataContext vẫn track đúng.
+                cdDraft.setDonThuoc(managed);
+                managed.getChanDoans().add(cdDraft);
+                inserted++;
+            } else {
+                // Dòng đã tồn tại → update giá trị thay vì insert lại
+                DonThuocChanDoan cdManaged = managedById.get(cdDraft.getId());
+                if (cdManaged != null) {
+                    cdManaged.setStt(cdDraft.getStt());
+                    cdManaged.setIcd10(cdDraft.getIcd10());
+                    cdManaged.setMaIcdSnapshot(cdDraft.getMaIcdSnapshot());
+                    cdManaged.setTenIcdSnapshot(cdDraft.getTenIcdSnapshot());
+                    cdManaged.setKetLuan(cdDraft.getKetLuan());
+                    updated++;
+                }
+            }
+        }
+        if (inserted > 0 || updated > 0) {
+            log.info("[MapIcdTam] Merge chanDoans: {} inserted (gồm tạm), {} updated.",
+                    inserted, updated);
+        }
+    }
+
+    /**
+     * Merge {@link DonThuocDotDung} đang chỉnh sửa trên form (chỉ 1 dòng / đơn)
+     * từ {@code draft} sang {@code managed}. INSERT nếu dòng mới, UPDATE nếu đã tồn tại.
+     */
+    private void mergeDotDungFromDraft(DonThuoc managed, DonThuoc draft) {
+        if (managed == null || draft == null) {
+            return;
+        }
+        DonThuocDotDung ddDraft = dotDungDc.getItem();
+        if (ddDraft == null) {
+            return;
+        }
+        // Map id → managed item để tra cứu nhanh
+        java.util.Map<java.util.UUID, DonThuocDotDung> managedById = new java.util.HashMap<>();
+        for (DonThuocDotDung dd : managed.getDotDungs()) {
+            if (dd != null && dd.getId() != null) {
+                managedById.put(dd.getId(), dd);
+            }
+        }
+        if (ddDraft.getId() == null) {
+            ddDraft.setDonThuoc(managed);
+            managed.getDotDungs().add(ddDraft);
+            log.info("Merge dotDung: 1 inserted.");
+        } else {
+            DonThuocDotDung ddManaged = managedById.get(ddDraft.getId());
+            if (ddManaged != null) {
+                ddManaged.setSoDot(ddDraft.getSoDot());
+                ddManaged.setTuNgay(ddDraft.getTuNgay());
+                ddManaged.setDenNgay(ddDraft.getDenNgay());
+                ddManaged.setSoThangThuoc(ddDraft.getSoThangThuoc());
+                log.info("Merge dotDung: 1 updated.");
+            }
         }
     }
 
@@ -468,6 +836,10 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                             + String.join("\n- ", errors));
         }
         try {
+            // Gắn các dòng chẩn đoán (kể cả dòng ICD tạm) vào DonThuoc trước khi save.
+            attachChanDoansToEditedEntity();
+            // Đồng thời gắn đợt dùng thuốc đang chỉnh sửa trên form 3 trường.
+            attachDotDungToEditedEntity();
             DonThuoc saved = donThuocService.saveDraft(dt);
             notifications.create(
                             "Đã lưu đơn " + saved.getMaDonThuoc()

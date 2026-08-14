@@ -16,10 +16,10 @@ import org.springframework.lang.Nullable;
  */
 public enum LoaiDon implements EnumClass<String> {
 
-    THUONG("Thuong", "Đơn cơ bản", "c"),
-    HUONG_TAM_THAN("HuongTamThan", "Đơn hướng tâm thần/Tiền chất", "h"),
-    GAY_NGHIEN("GayNghien", "Đơn gây nghiện", "n"),
-    Y_HOC_CO_TRUYEN("YHocCoTruyen", "Đơn Y học cổ truyền", "y");
+    THUONG("Thuong", "Đơn thuốc thông thường", "c"),
+    HUONG_TAM_THAN("HuongTamThan", "Đơn thuốc hướng tâm thần/tiền chất", "h"),
+    GAY_NGHIEN("GayNghien", "Đơn thuốc gây nghiện", "n"),
+    Y_HOC_CO_TRUYEN("YHocCoTruyen", "Đơn thuốc y học cổ truyền", "y");
 
     private final String id;
     private final String tenHienThi;

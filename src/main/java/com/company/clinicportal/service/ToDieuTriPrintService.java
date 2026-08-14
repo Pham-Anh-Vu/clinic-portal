@@ -8,6 +8,8 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import io.jmix.core.DataManager;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -15,19 +17,33 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class ToDieuTriPrintService {
 
+    private static final Logger log = LoggerFactory.getLogger(ToDieuTriPrintService.class);
+
     private static final String TO_DIEU_TRI_TEMPLATE_HTML = "/reports/tờ điều trị BN BCB.html";
     private static final Set<String> RAW_HTML_PLACEHOLDERS = Set.of("${ROWS}");
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
+
+    /** Đường dẫn tuyệt đối ảnh chữ ký BS chỉ định. */
+    private static final String CHU_KY_IMAGE_PATH =
+            "E:\\0000.PROJECT\\clinic-portal\\src\\main\\resources\\reports\\anh-chu-ky.jpg";
+
+    /** Cache base64 (lazy + thread-safe). null khi file không tồn tại/không đọc được. */
+    private static final AtomicReference<String> CHU_KY_BASE64_CACHE = new AtomicReference<>();
+    /** Đánh dấu đã thử load để không log lỗi lặp lại. */
+    private static final AtomicReference<Boolean> CHU_KY_LOAD_ATTEMPTED = new AtomicReference<>(false);
 
     private final DataManager dataManager;
 
@@ -87,8 +103,69 @@ public class ToDieuTriPrintService {
                 .append("<td>").append(escapeHtml(tenDichVu)).append("</td>")
                 .append("<td style=\"text-align:center;\">").append(escapeHtml(thoiGian)).append("</td>")
                 .append("<td>").append(escapeHtml(nguoiThucHien)).append("</td>")
-                .append("<td>").append(escapeHtml(bacSi)).append("</td>")
+                .append("<td style=\"text-align:center;\">").append(buildBacSiCell(bacSi)).append("</td>")
                 .append("</tr>");
+    }
+
+    /**
+     * Build HTML cho ô "BS chỉ định": tên bác sĩ + ảnh chữ ký bên dưới.
+     * Ảnh được embed dạng base64 để openhtmltopdf render được (không phụ thuộc
+     * file path của runtime, không cần cấu hình {@code withFile}).
+     */
+    private String buildBacSiCell(String bacSiName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div style=\"text-align:center;\">");
+        if (!bacSiName.isEmpty()) {
+            sb.append("<div>").append(escapeHtml(bacSiName)).append("</div>");
+        }
+        String chuKyBase64 = getChuKyBase64();
+        if (chuKyBase64 != null) {
+            sb.append("<img src=\"data:image/jpeg;base64,")
+              .append(chuKyBase64)
+              .append("\" style=\"max-width:90px; max-height:35px; display:block; margin:2px auto 0 auto;\" alt=\"chữ ký\"/>");
+        }
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    /**
+     * Đọc file ảnh chữ ký thành base64. Cache kết quả lần đầu đọc thành công;
+     * nếu file lỗi thì log 1 lần và trả về null (không chèn ảnh).
+     */
+    private static String getChuKyBase64() {
+        String cached = CHU_KY_BASE64_CACHE.get();
+        if (cached != null) {
+            return cached;
+        }
+        if (Boolean.TRUE.equals(CHU_KY_LOAD_ATTEMPTED.get())) {
+            return null;
+        }
+        synchronized (CHU_KY_LOAD_ATTEMPTED) {
+            if (Boolean.TRUE.equals(CHU_KY_LOAD_ATTEMPTED.get())) {
+                return CHU_KY_BASE64_CACHE.get();
+            }
+            File f = new File(CHU_KY_IMAGE_PATH);
+            if (!f.isFile()) {
+                log.warn("Không tìm thấy ảnh chữ ký tại {}. Cột BS chỉ định sẽ chỉ hiển thị tên.",
+                        CHU_KY_IMAGE_PATH);
+                CHU_KY_LOAD_ATTEMPTED.set(true);
+                return null;
+            }
+            try {
+                byte[] bytes = Files.readAllBytes(f.toPath());
+                String b64 = Base64.getEncoder().encodeToString(bytes);
+                CHU_KY_BASE64_CACHE.set(b64);
+                CHU_KY_LOAD_ATTEMPTED.set(true);
+                log.info("Đã load ảnh chữ ký BS chỉ định ({} bytes, {} chars base64) từ {}.",
+                        bytes.length, b64.length(), CHU_KY_IMAGE_PATH);
+                return b64;
+            } catch (IOException ex) {
+                log.error("Không đọc được ảnh chữ ký tại {}. Cột BS chỉ định sẽ chỉ hiển thị tên.",
+                        CHU_KY_IMAGE_PATH, ex);
+                CHU_KY_LOAD_ATTEMPTED.set(true);
+                return null;
+            }
+        }
     }
 
     private String formatKyThuatList(List<ToDieuTriKyThuat> list, boolean tenDichVu) {

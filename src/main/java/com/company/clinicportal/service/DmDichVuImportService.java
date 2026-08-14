@@ -18,8 +18,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,81 +35,128 @@ public class DmDichVuImportService {
 
     /**
      * Parse Excel file và trả về danh sách preview (không save)
+     * Trong đó sẽ đánh dấu lỗi các dòng:
+     *  - Trùng tên dịch vụ với bản ghi đã tồn tại trong database
+     *  - Trùng tên dịch vụ với một dòng khác trong cùng file Excel
+     * So sánh không phân biệt hoa/thường, bỏ qua khoảng trắng đầu/cuối.
      */
     public List<DmDichVuPreviewItem> parsePreview(InputStream inputStream) {
         List<DmDichVuPreviewItem> previewItems = new ArrayList<>();
-        
+
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
-            
+
             // Skip header row (row 0 and 1 - title and headers)
             int startRow = 2;
-            
+
+            // Lấy tập tên dịch vụ đã tồn tại trong DB (normalize để so sánh)
+            Set<String> existingTenDichVu = loadExistingTenDichVuNormalized();
+
+            // Theo dõi tên dịch vụ đã xuất hiện trong chính file Excel (để phát hiện trùng trong file)
+            Set<String> seenTenDichVuInFile = new HashSet<>();
+
             for (int i = startRow; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) {
                     continue;
                 }
-                
+
                 // Check if row is empty
                 if (isRowEmpty(row)) {
                     continue;
                 }
-                
+
+                int rowNumber = i + 1;
                 try {
-                    DmDichVu entity = parseRow(row, i + 1);
+                    DmDichVu entity = parseRow(row, rowNumber);
                     if (entity != null) {
-                        previewItems.add(new DmDichVuPreviewItem(i + 1, entity));
+                        String normalizedTen = normalize(entity.getTenDichVu());
+
+                        if (normalizedTen.isEmpty()) {
+                            previewItems.add(new DmDichVuPreviewItem(rowNumber,
+                                    String.format("Dòng %d: Tên dịch vụ không được để trống", rowNumber)));
+                        } else if (existingTenDichVu.contains(normalizedTen)) {
+                            // Trùng với DB
+                            previewItems.add(new DmDichVuPreviewItem(rowNumber,
+                                    String.format("Dòng %d: Tên dịch vụ \"%s\" đã tồn tại", rowNumber, entity.getTenDichVu())));
+                        } else if (seenTenDichVuInFile.contains(normalizedTen)) {
+                            // Trùng với dòng trước trong cùng file
+                            previewItems.add(new DmDichVuPreviewItem(rowNumber,
+                                    String.format("Dòng %d: Tên dịch vụ \"%s\" bị trùng với dòng khác trong file", rowNumber, entity.getTenDichVu())));
+                        } else {
+                            seenTenDichVuInFile.add(normalizedTen);
+                            previewItems.add(new DmDichVuPreviewItem(rowNumber, entity));
+                        }
                     }
                 } catch (Exception e) {
-                    previewItems.add(new DmDichVuPreviewItem(i + 1, String.format("Dòng %d: %s", i + 1, e.getMessage())));
-                    log.error("Error parsing row {}: {}", i + 1, e.getMessage(), e);
+                    previewItems.add(new DmDichVuPreviewItem(rowNumber, String.format("Dòng %d: %s", rowNumber, e.getMessage())));
+                    log.error("Error parsing row {}: {}", rowNumber, e.getMessage(), e);
                 }
             }
-            
+
         } catch (Exception e) {
             log.error("Error parsing Excel file for preview", e);
             previewItems.add(new DmDichVuPreviewItem(0, "Lỗi khi đọc file: " + e.getMessage()));
         }
-        
+
         return previewItems;
     }
 
     @Transactional
     public ImportResult importFromExcel(InputStream inputStream) {
         ImportResult result = new ImportResult();
-        
+
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
-            
+
             // Skip header row (row 0 and 1 - title and headers)
             int startRow = 2;
-            
+
+            // Lấy tập tên dịch vụ đã tồn tại trong DB (normalize để so sánh)
+            Set<String> existingTenDichVu = loadExistingTenDichVuNormalized();
+
             List<DmDichVu> entitiesToSave = new ArrayList<>();
             List<String> errors = new ArrayList<>();
-            
+            Set<String> seenTenDichVuInFile = new HashSet<>();
+
             for (int i = startRow; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) {
                     continue;
                 }
-                
+
                 // Check if row is empty
                 if (isRowEmpty(row)) {
                     continue;
                 }
-                
+
+                int rowNumber = i + 1;
                 try {
-                    DmDichVu entity = parseRow(row, i + 1);
+                    DmDichVu entity = parseRow(row, rowNumber);
                     if (entity != null) {
-                        entitiesToSave.add(entity);
+                        String normalizedTen = normalize(entity.getTenDichVu());
+
+                        if (normalizedTen.isEmpty()) {
+                            errors.add(String.format("Dòng %d: Tên dịch vụ không được để trống", rowNumber));
+                        } else if (existingTenDichVu.contains(normalizedTen)) {
+                            // Trùng với DB - bỏ qua và báo lỗi
+                            errors.add(String.format("Dòng %d: Tên dịch vụ \"%s\" đã tồn tại", rowNumber, entity.getTenDichVu()));
+                            log.warn("Import - Row {}: Tên dịch vụ '{}' đã tồn tại trong DB, bỏ qua", rowNumber, entity.getTenDichVu());
+                        } else if (seenTenDichVuInFile.contains(normalizedTen)) {
+                            // Trùng với dòng trước trong cùng file - bỏ qua và báo lỗi
+                            errors.add(String.format("Dòng %d: Tên dịch vụ \"%s\" bị trùng với dòng khác trong file", rowNumber, entity.getTenDichVu()));
+                            log.warn("Import - Row {}: Tên dịch vụ '{}' bị trùng trong file, bỏ qua", rowNumber, entity.getTenDichVu());
+                        } else {
+                            seenTenDichVuInFile.add(normalizedTen);
+                            entitiesToSave.add(entity);
+                        }
                     }
                 } catch (Exception e) {
-                    errors.add(String.format("Dòng %d: %s", i + 1, e.getMessage()));
-                    log.error("Error parsing row {}: {}", i + 1, e.getMessage(), e);
+                    errors.add(String.format("Dòng %d: %s", rowNumber, e.getMessage()));
+                    log.error("Error parsing row {}: {}", rowNumber, e.getMessage(), e);
                 }
             }
-            
+
             // Save entities
             if (!entitiesToSave.isEmpty()) {
                 SaveContext saveContext = new SaveContext();
@@ -115,20 +164,46 @@ public class DmDichVuImportService {
                 dataManager.save(saveContext);
                 result.setSuccessCount(entitiesToSave.size());
             }
-            
+
             result.setErrors(errors);
-            
+
         } catch (Exception e) {
             log.error("Error importing Excel file", e);
             result.getErrors().add("Lỗi khi đọc file: " + e.getMessage());
         }
-        
+
         return result;
     }
-    
+
+    /**
+     * Load tất cả tên dịch vụ đã có trong DB và trả về tập các tên đã được
+     * chuẩn hoá (trim + lowercase) để so sánh không phân biệt hoa/thường.
+     */
+    private Set<String> loadExistingTenDichVuNormalized() {
+        List<DmDichVu> all = dataManager.load(DmDichVu.class)
+                .query("select d from DmDichVu d where d.tenDichVu is not null")
+                .list();
+        return all.stream()
+                .map(DmDichVu::getTenDichVu)
+                .map(this::normalize)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    /**
+     * Chuẩn hoá tên dịch vụ để so sánh: trim + lowercase.
+     * Trả về chuỗi rỗng nếu input null.
+     */
+    private String normalize(String tenDichVu) {
+        if (tenDichVu == null) {
+            return "";
+        }
+        return tenDichVu.trim().toLowerCase();
+    }
+
     private DmDichVu parseRow(Row row, int rowNumber) throws Exception {
         DmDichVu entity = dataManager.create(DmDichVu.class);
-        
+
         // Column A: Tên dịch vụ (*) - required
         Cell tenDichVuCell = row.getCell(0);
         if (tenDichVuCell == null || getCellValueAsString(tenDichVuCell).trim().isEmpty()) {
@@ -136,7 +211,7 @@ public class DmDichVuImportService {
         }
         String tenDichVu = getCellValueAsString(tenDichVuCell).trim();
         entity.setTenDichVu(tenDichVu);
-        
+
         // Column B: Nhóm dịch vụ (*) - required
         Cell nhomDichVuCell = row.getCell(1);
         if (nhomDichVuCell == null || getCellValueAsString(nhomDichVuCell).trim().isEmpty()) {
@@ -148,7 +223,7 @@ public class DmDichVuImportService {
             throw new Exception("Nhóm dịch vụ không hợp lệ: " + nhomDichVuStr + ". Các giá trị hợp lệ: Vật lý trị liệu, Vận động trị liệu, Kéo nắn trị liệu, Xoa bóp trị liệu, Khám, lượng giá");
         }
         entity.setNhomDichVu(nhomDichVu);
-        
+
         // Column C: Mô tả - optional
         Cell moTaCell = row.getCell(2);
         if (moTaCell != null) {
@@ -157,7 +232,7 @@ public class DmDichVuImportService {
                 entity.setMoTa(moTa);
             }
         }
-        
+
         // Column D: Giá - optional
         Cell giaCell = row.getCell(3);
         if (giaCell != null) {
@@ -188,58 +263,58 @@ public class DmDichVuImportService {
         if (giaKpiToi != null) {
             entity.setGiaKpiToi(giaKpiToi.getGia());
         }
-        
+
         // Set created date
         entity.setCreatedAt(new Date());
-        
+
         return entity;
     }
-    
+
     private NhomDichVu mapNhomDichVu(String value) {
         if (value == null) {
             return null;
         }
-        
+
         String normalized = value.trim().toLowerCase();
-        
+
         // Map Vietnamese names to enum
         // VAT_LY_TRI_LIEU = "Vật lý trị liệu"
-        if (normalized.contains("vật lý trị liệu") || normalized.contains("vat_ly_tri_lieu") || 
+        if (normalized.contains("vật lý trị liệu") || normalized.contains("vat_ly_tri_lieu") ||
             normalized.contains("vật lý") || normalized.equals("vat ly tri lieu")) {
             return NhomDichVu.VAT_LY_TRI_LIEU;
-        } 
+        }
         // VAN_DONG_TRI_LIEU = "Vận động trị liệu"
-        else if (normalized.contains("vận động trị liệu") || normalized.contains("van_dong_tri_lieu") || 
+        else if (normalized.contains("vận động trị liệu") || normalized.contains("van_dong_tri_lieu") ||
                  normalized.contains("vận động") || normalized.equals("van dong tri lieu")) {
             return NhomDichVu.VAN_DONG_TRI_LIEU;
-        } 
+        }
         // KEO_NAN_TRI_LIEU = "Kéo nắn trị liệu"
-        else if (normalized.contains("kéo nắn trị liệu") || normalized.contains("keo_nan_tri_lieu") || 
-                 normalized.contains("kéo nắn") || normalized.contains("keo nan") || 
+        else if (normalized.contains("kéo nắn trị liệu") || normalized.contains("keo_nan_tri_lieu") ||
+                 normalized.contains("kéo nắn") || normalized.contains("keo nan") ||
                  normalized.equals("keo nan tri lieu")) {
             return NhomDichVu.KEO_NAN_TRI_LIEU;
-        } 
+        }
         // XOA_BOP_TRI_LIEU = "Xoa bóp trị liệu"
-        else if (normalized.contains("xoa bóp trị liệu") || normalized.contains("xoa_bop_tri_lieu") || 
-                 normalized.contains("xoa bóp") || normalized.contains("xoa bop") || 
+        else if (normalized.contains("xoa bóp trị liệu") || normalized.contains("xoa_bop_tri_lieu") ||
+                 normalized.contains("xoa bóp") || normalized.contains("xoa bop") ||
                  normalized.equals("xoa bop tri lieu")) {
             return NhomDichVu.XOA_BOP_TRI_LIEU;
         }
         // KHAM_LUONG_GIA = "Khám, lượng giá"
-        else if (normalized.contains("khám, lượng giá") || normalized.contains("kham_luong_gia") || 
+        else if (normalized.contains("khám, lượng giá") || normalized.contains("kham_luong_gia") ||
                  normalized.contains("khám lượng giá") || normalized.contains("kham luong gia") ||
                  normalized.contains("khám lượng") || normalized.equals("kham luong gia")) {
             return NhomDichVu.KHAM_LUONG_GIA;
         }
-        
+
         return null;
     }
-    
+
     private String getCellValueAsString(Cell cell) {
         if (cell == null) {
             return "";
         }
-        
+
         switch (cell.getCellType()) {
             case STRING:
                 return cell.getStringCellValue();
@@ -263,12 +338,12 @@ public class DmDichVuImportService {
                 return "";
         }
     }
-    
+
     private Double getCellValueAsDouble(Cell cell) {
         if (cell == null) {
             return null;
         }
-        
+
         switch (cell.getCellType()) {
             case NUMERIC:
                 return cell.getNumericCellValue();
@@ -288,12 +363,12 @@ public class DmDichVuImportService {
                 return null;
         }
     }
-    
+
     private boolean isRowEmpty(Row row) {
         if (row == null) {
             return true;
         }
-        
+
         for (int i = 0; i < row.getLastCellNum(); i++) {
             Cell cell = row.getCell(i);
             if (cell != null && cell.getCellType() != CellType.BLANK) {
@@ -305,27 +380,27 @@ public class DmDichVuImportService {
         }
         return true;
     }
-    
+
     public static class ImportResult {
         private int successCount = 0;
         private List<String> errors = new ArrayList<>();
-        
+
         public int getSuccessCount() {
             return successCount;
         }
-        
+
         public void setSuccessCount(int successCount) {
             this.successCount = successCount;
         }
-        
+
         public List<String> getErrors() {
             return errors;
         }
-        
+
         public void setErrors(List<String> errors) {
             this.errors = errors;
         }
-        
+
         public boolean hasErrors() {
             return !errors.isEmpty();
         }

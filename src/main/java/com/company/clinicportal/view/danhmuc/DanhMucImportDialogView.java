@@ -93,14 +93,17 @@ public class DanhMucImportDialogView extends StandardView {
                         ? icd10ImportService.parsePreview(bais)
                         : dmThuocImportService.parsePreview(bais);
 
-                List<ImportPreviewRow> valid = items.stream()
-                        .filter(ImportPreviewRow::getOk)
-                        .toList();
-                previewDc.setItems(valid);
-                importButton.setEnabled(!valid.isEmpty());
-                if (valid.isEmpty()) {
-                    notifications.create("Không có dòng hợp lệ để import.")
+                previewDc.setItems(items);
+
+                long errorCount = items.stream().filter(r -> !Boolean.TRUE.equals(r.getOk())).count();
+                if (errorCount > 0) {
+                    importButton.setEnabled(false);
+                    notifications.create(String.format("Có %d dòng lỗi. Vui lòng sửa file và upload lại.", errorCount))
                             .withType(Notifications.Type.WARNING).show();
+                } else {
+                    importButton.setEnabled(true);
+                    notifications.create(String.format("Đã kiểm tra: %d dòng hợp lệ. Có thể import.", items.size()))
+                            .withType(Notifications.Type.SUCCESS).show();
                 }
             } catch (Exception ex) {
                 notifications.create("Lỗi khi đọc file: " + ex.getMessage())
@@ -139,14 +142,33 @@ public class DanhMucImportDialogView extends StandardView {
             return;
         }
         try {
-            InputStream is = new ByteArrayInputStream(fileBytes);
+            ByteArrayInputStream bais = new ByteArrayInputStream(fileBytes);
+            List<ImportPreviewRow> items = KIND_ICD.equals(kind)
+                    ? icd10ImportService.parsePreview(bais)
+                    : dmThuocImportService.parsePreview(bais);
+
+            long errorCount = items.stream().filter(r -> !Boolean.TRUE.equals(r.getOk())).count();
+            if (errorCount > 0) {
+                previewDc.setItems(items);
+                notifications.create(String.format("Vẫn còn %d dòng lỗi. Vui lòng sửa file và upload lại.", errorCount))
+                        .withType(Notifications.Type.ERROR).show();
+                return;
+            }
+
+            ByteArrayInputStream is = new ByteArrayInputStream(fileBytes);
             DmThuocImportService.ImportSummary summary = KIND_ICD.equals(kind)
                     ? icd10ImportService.importFromExcel(is, null)
                     : dmThuocImportService.importFromExcel(is, null);
 
-            notifications.create(String.format("Import xong: %d dòng thành công, %d lỗi.",
-                            summary.getInserted(), summary.getErrors().size()))
-                    .withType(Notifications.Type.SUCCESS).show();
+            if (!summary.getErrors().isEmpty()) {
+                previewDc.setItems(items);
+                notifications.create(String.format("Import xong: %d dòng thành công, %d lỗi.",
+                                summary.getInserted(), summary.getErrors().size()))
+                        .withType(Notifications.Type.WARNING).show();
+            } else {
+                notifications.create(String.format("Import thành công: %d dòng.", summary.getInserted()))
+                        .withType(Notifications.Type.SUCCESS).show();
+            }
             close(StandardOutcome.CLOSE);
         } catch (Exception ex) {
             notifications.create("Lỗi khi import: " + ex.getMessage())

@@ -52,7 +52,9 @@ import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.multiselectcombobox.JmixMultiSelectComboBox;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.kit.action.Action;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -78,7 +80,7 @@ import org.slf4j.LoggerFactory;
 @ViewController(id = "ChiTietDieuTriSBA.detail")
 @ViewDescriptor(path = "chi-tiet-dieu-tri-sba-detail-view.xml")
 @EditedEntityContainer("chiTietDieuTriDc")
-@DialogMode(height = "100%", width = "80%")
+@DialogMode(height = "90%", width = "70%")
 public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuTri> {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("d.M.yyyy");
     private static final Logger log = LoggerFactory.getLogger(ChiTietDieuTriSBADetailView.class);
@@ -171,6 +173,10 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private JmixButton addDonThuocButton;
     @ViewComponent
     private JmixButton dongBoDonThuocButton;
+    @ViewComponent
+    private JmixTextArea chuanDoanField;
+    @ViewComponent
+    private JmixMultiSelectComboBox<com.company.clinicportal.entity.Icd10> dsChanDoanIcdField;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -180,6 +186,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
         autoFillTongKetDieuTriFields();
+        toggleDiagnosisFields();
 
         khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
         khuyenMaiField.addValueChangeListener(event1 -> recalculatePaymentFields());
@@ -496,20 +503,20 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     }
 
     /**
-     * Nhấn nút "Đồng bộ" trên tab ĐƠN THUỐC → gọi API gửi đơn liên thông NGAY LẬP TỨC
-     * (không qua scheduler 30s).
+     * Nhấn nút "Đồng bộ" trên tab ĐƠN THUỐC → hiển thị popup xác nhận trước khi
+     * gọi API gửi đơn thuốc lên hệ thống quốc gia (Cổng liên thông BYT).
      *
      * <p>Flow:
      * <ol>
-     *     <li>Validate đơn thuốc.</li>
-     *     <li>Lấy cấu hình cơ sở KCB liên thông.</li>
-     *     <li>Gọi API trực tiếp qua {@link LienThongGuiDonThuocService}.</li>
-     *     <li>Cập nhật trạng thái đơn và hiển thị kết quả.</li>
+     *     <li>Validate trước (nếu không có đơn thì thoát ngay, không cần hỏi).</li>
+     *     <li>Hiển thị dialog YES/NO xác nhận gửi lên hệ thống quốc gia.</li>
+     *     <li>Nếu YES → gọi {@link #performDongBoDonThuoc()}.</li>
+     *     <li>Nếu NO → huỷ, không gọi API.</li>
      * </ol>
      */
     @Subscribe("dongBoDonThuocButton")
     public void onDongBoDonThuocButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
-        // Chỉ lấy đơn thuốc có trạng thái CHO_GUI hoặc GUI_LOI (không gửi NHAP)
+        // Validate trước - không có đơn để gửi thì không cần hiện popup hỏi.
         List<DonThuoc> tatCaDonThuoc = donThuocsDc.getItems().stream().collect(Collectors.toList());
         List<DonThuoc> danhSach = tatCaDonThuoc.stream()
                 .filter(dt -> {
@@ -532,6 +539,64 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                     .show();
             return;
         }
+
+        // Hiển thị popup xác nhận gửi lên hệ thống quốc gia.
+        // (Tránh gửi nhầm vì API BYT thật sẽ tạo mã đơn quốc gia, có thể ảnh hưởng đến bệnh nhân.)
+        dialogs.createOptionDialog()
+                .withHeader("Xác nhận gửi đơn thuốc lên hệ thống quốc gia")
+                .withText(buildDongBoConfirmMessage(danhSach))
+                .withActions(
+                        new DialogAction(DialogAction.Type.NO),
+                        new DialogAction(DialogAction.Type.YES)
+                                .withHandler(e -> performDongBoDonThuoc()))
+                .withWidth("480px")
+                .open();
+    }
+
+    /**
+     * Build message xác nhận gửi đơn - liệt kê các mã đơn sẽ được gửi để user review.
+     */
+    private String buildDongBoConfirmMessage(List<DonThuoc> danhSach) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Bạn có chắc muốn gửi ")
+          .append(danhSach.size())
+          .append(" đơn thuốc sau lên hệ thống quốc gia (Cổng liên thông BYT)?\n\n");
+        int max = Math.min(10, danhSach.size());
+        for (int i = 0; i < max; i++) {
+            DonThuoc dt = danhSach.get(i);
+            sb.append("• ").append(dt.getMaDonThuoc());
+            if (dt.getHoVaTenBenhNhan() != null) {
+                sb.append(" - ").append(dt.getHoVaTenBenhNhan());
+            }
+            sb.append("\n");
+        }
+        if (danhSach.size() > max) {
+            sb.append("... và ").append(danhSach.size() - max).append(" đơn khác.\n");
+        }
+        sb.append("\nLưu ý: Thao tác này sẽ tạo mã đơn thuốc quốc gia và không thể huỷ.");
+        return sb.toString();
+    }
+
+    /**
+     * Thực hiện gửi API đồng bộ đơn thuốc lên hệ thống quốc gia. Được gọi sau
+     * khi user xác nhận YES trên popup.
+     *
+     * <p>Flow:
+     * <ol>
+     *     <li>Lấy cấu hình cơ sở KCB liên thông.</li>
+     *     <li>Gọi API trực tiếp qua {@link LienThongGuiDonThuocService}.</li>
+     *     <li>Cập nhật trạng thái đơn và hiển thị kết quả.</li>
+     * </ol>
+     */
+    private void performDongBoDonThuoc() {
+        List<DonThuoc> tatCaDonThuoc = donThuocsDc.getItems().stream().collect(Collectors.toList());
+        List<DonThuoc> danhSach = tatCaDonThuoc.stream()
+                .filter(dt -> {
+                    TrangThaiDonThuoc trangThai = dt.getTrangThaiEnum();
+                    return trangThai == TrangThaiDonThuoc.CHO_GUI
+                        || trangThai == TrangThaiDonThuoc.GUI_LOI;
+                })
+                .collect(Collectors.toList());
 
         // Lấy cơ sở KCB liên thông đầu tiên (active)
         List<com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong> coSoList =
@@ -1061,6 +1126,38 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         if (chiTietDieuTri.getChuanDoanRaVien() == null || chiTietDieuTri.getChuanDoanRaVien().isBlank()) {
             String chuanDoan = chiTietDieuTri.getChuanDoan();
             chiTietDieuTri.setChuanDoanRaVien(chuanDoan != null ? chuanDoan : "");
+        }
+    }
+
+    /**
+     * Ẩn/hiện hai trường "Chẩn đoán ban đầu" và "Chẩn đoán ICD" theo quy tắc:
+     * <ul>
+     *     <li>Nếu {@code dsChanDoanIcd} có giá trị → hiện dsChanDoanIcdField, ẩn chuanDoanField.</li>
+     *     <li>Nếu {@code dsChanDoanIcd} rỗng và {@code chuanDoan} có giá trị → ẩn dsChanDoanIcdField, hiện chuanDoanField.</li>
+     *     <li>Nếu cả hai đều rỗng → hiện chuanDoanField, ẩn dsChanDoanIcdField.</li>
+     * </ul>
+     */
+    private void toggleDiagnosisFields() {
+        if (chuanDoanField == null || dsChanDoanIcdField == null) {
+            return;
+        }
+        ChiTietDieuTri chiTietDieuTri = getEditedEntity();
+        boolean hasIcd = chiTietDieuTri != null
+                && chiTietDieuTri.getDsChanDoanIcd() != null
+                && !chiTietDieuTri.getDsChanDoanIcd().isEmpty();
+        boolean hasChuanDoan = chiTietDieuTri != null
+                && chiTietDieuTri.getChuanDoan() != null
+                && !chiTietDieuTri.getChuanDoan().isBlank();
+
+        if (hasIcd) {
+            chuanDoanField.setVisible(false);
+            dsChanDoanIcdField.setVisible(true);
+        } else if (hasChuanDoan) {
+            chuanDoanField.setVisible(true);
+            dsChanDoanIcdField.setVisible(false);
+        } else {
+            chuanDoanField.setVisible(true);
+            dsChanDoanIcdField.setVisible(false);
         }
     }
 

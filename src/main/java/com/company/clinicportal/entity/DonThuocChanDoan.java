@@ -53,6 +53,18 @@ public class DonThuocChanDoan {
     @Column(name = "\"createdbyid\"")
     private Long createdById;
 
+    /**
+     * Cờ tạm (transient, KHÔNG map xuống DB): đánh dấu dòng chẩn đoán được
+     * auto-fill từ {@code ChiTietDieuTri.dsChanDoanIcd} khi mở dialog "Thêm mới đơn thuốc".
+     * Dòng tạm KHÔNG được cascade save cho tới khi user bấm "Lưu nháp" hoặc
+     * "Lưu & phát hành" — chừng đó controller mới set {@code donThuoc} để
+     * EclipseLink persist.
+     *
+     * <p>Không cần khai báo cột trong DB: dùng {@code @Transient} (Jmix sẽ bỏ qua khi save).</p>
+     */
+    @Transient
+    private boolean tamFromPhieu = false;
+
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
     public DonThuoc getDonThuoc() { return donThuoc; }
@@ -71,6 +83,9 @@ public class DonThuocChanDoan {
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
     public Long getCreatedById() { return createdById; }
     public void setCreatedById(Long createdById) { this.createdById = createdById; }
+
+    public boolean isTamFromPhieu() { return tamFromPhieu; }
+    public void setTamFromPhieu(boolean tamFromPhieu) { this.tamFromPhieu = tamFromPhieu; }
 
     public void snapshotFrom(Icd10 icd) {
         if (icd == null) return;

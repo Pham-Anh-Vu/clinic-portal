@@ -181,10 +181,26 @@ public class DmDichVuImportDialogView extends StandardView {
             InputStream inputStream = new ByteArrayInputStream(fileBytes);
             DmDichVuImportService.ImportResult result = importService.importFromExcel(inputStream);
 
-            notifications.create(String.format("Import thành công! Đã import %d bản ghi.", result.getSuccessCount()))
-                    .withThemeVariant(NotificationVariant.LUMO_SUCCESS)
-                    .withPosition(Notification.Position.TOP_END)
-                    .show();
+            // Thông báo kết quả import:
+            //  - Nếu có lỗi (trùng tên với DB, trùng trong file, validate...) thì liệt kê
+            //    số bản ghi thành công + số lỗi, kèm chi tiết lỗi đầu tiên.
+            //  - Nếu tất cả đều OK thì thông báo success bình thường.
+            if (result.hasErrors()) {
+                StringBuilder msg = new StringBuilder();
+                msg.append(String.format("Import hoàn tất: thành công %d, lỗi %d.", result.getSuccessCount(), result.getErrors().size()));
+                if (!result.getErrors().isEmpty()) {
+                    msg.append(System.lineSeparator()).append("Lỗi đầu tiên: ").append(result.getErrors().get(0));
+                }
+                notifications.create(msg.toString())
+                        .withType(Notifications.Type.WARNING)
+                        .withPosition(Notification.Position.TOP_END)
+                        .show();
+            } else {
+                notifications.create(String.format("Import thành công! Đã import %d bản ghi.", result.getSuccessCount()))
+                        .withThemeVariant(NotificationVariant.LUMO_SUCCESS)
+                        .withPosition(Notification.Position.TOP_END)
+                        .show();
+            }
 
             // Close dialog and refresh parent view
             close(StandardOutcome.CLOSE);

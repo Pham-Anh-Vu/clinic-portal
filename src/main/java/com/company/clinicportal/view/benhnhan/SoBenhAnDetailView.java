@@ -194,8 +194,8 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
                 .newEntity()
                 .build();
         dialogWindow.getView().setIdBenhNhan(idBenhNhan.getId());
-        dialogWindow.setWidth("80%");
-        dialogWindow.setHeight("100%");
+        dialogWindow.setWidth("60%");
+        dialogWindow.setHeight("90%");
 
         dialogWindow.addAfterCloseListener(event1 -> loadChiTietDieuTriList());
 
@@ -532,7 +532,7 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         values.put("${BenhNhan.tuoi}", safeText(benhNhan != null ? BenhNhan.calculateTuoi(benhNhan.getNgaySinh()) : null));
         values.put("${BenhNhan.gioiTinh}", formatGioiTinh(benhNhan != null ? benhNhan.getGioiTinh() : null));
         values.put("${BenhNhan.diaChi}", safeText(benhNhan != null ? benhNhan.getDiaChi() : null));
-        values.put("${ChiTietDieuTri.chuanDoan}", safeText(ctdt.getChuanDoan()));
+        values.put("${ChiTietDieuTri.chuanDoan}", resolveChuanDoanForReport(ctdt));
         values.put("${ROWS}", rows.toString());
 
         String htmlTemplate = loadHtmlTemplate(TO_DIEU_TRI_TEMPLATE_HTML);

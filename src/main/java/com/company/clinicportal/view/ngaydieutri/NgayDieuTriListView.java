@@ -49,7 +49,7 @@ public class NgayDieuTriListView extends StandardListView<NgayDieuTri> {
                     .optional()
                     .orElse(null);
             return p != null && p.getChiTietDieuTri() != null ? p.getChiTietDieuTri().getChuanDoan() : "";
-        }).setHeader("Chuẩn đoán");
+        }).setHeader("Chẩn đoán");
 
         ngayDieuTrisDataGrid.addColumn(lh -> {
                     var bn = lh.getIdBenhNhan();

@@ -85,8 +85,12 @@ public class LichHenListView extends StandardListView<LichHen> {
                                 .withViewClass(LichHenDetailView.class)
                                 .build();
                         window.addAfterCloseListener(e1 -> {
+                            lichHensDc.getMutableItems().clear();
                             lichHensDl.setParameter("currentDate", new Date());
                             lichHensDl.load();
+
+                            lichHensDc_1.getMutableItems().clear();
+                            lichHensDl_1.load();
                         });
                         window.open();
                     });
@@ -122,6 +126,11 @@ public class LichHenListView extends StandardListView<LichHen> {
                                 .withViewClass(LichHenDetailView.class)
                                 .build();
                         window.addAfterCloseListener(e1 -> {
+                            lichHensDc.getMutableItems().clear();
+                            lichHensDl.setParameter("currentDate", new Date());
+                            lichHensDl.load();
+
+                            lichHensDc_1.getMutableItems().clear();
                             lichHensDl_1.load();
                         });
                         window.open();
@@ -168,6 +177,36 @@ public class LichHenListView extends StandardListView<LichHen> {
 
     @Install(to = "lichHensDataGrid.editAction", subject = "afterSaveHandler")
     private void lichHensDataGridEditActionAfterSaveHandler(final LichHen lichHen) {
+        lichHensDc.getMutableItems().clear();
+        lichHensDl.setParameter("currentDate", new Date());
+        lichHensDl.load();
+
+        lichHensDc_1.getMutableItems().clear();
+        lichHensDl_1.load();
+    }
+
+    @Install(to = "lichHensDataGrid2.removeAction", subject = "afterActionPerformedHandler")
+    private void lichHensDataGrid2RemoveActionAfterActionPerformedHandler(final RemoveOperation.AfterActionPerformedEvent<LichHen> afterActionPerformedEvent) {
+        lichHensDc.getMutableItems().clear();
+        lichHensDl.setParameter("currentDate", new Date());
+        lichHensDl.load();
+
+        lichHensDc_1.getMutableItems().clear();
+        lichHensDl_1.load();
+    }
+
+    @Install(to = "lichHensDataGrid2.editAction", subject = "afterCloseHandler")
+    private void lichHensDataGrid2EditActionAfterCloseHandler(final DialogWindow.AfterCloseEvent<LichHenListView> afterCloseEvent) {
+        lichHensDc.getMutableItems().clear();
+        lichHensDl.setParameter("currentDate", new Date());
+        lichHensDl.load();
+
+        lichHensDc_1.getMutableItems().clear();
+        lichHensDl_1.load();
+    }
+
+    @Install(to = "lichHensDataGrid2.createAction", subject = "afterCloseHandler")
+    private void lichHensDataGrid2CreateActionAfterCloseHandler(final DialogWindow.AfterCloseEvent<LichHenListView> afterCloseEvent) {
         lichHensDc.getMutableItems().clear();
         lichHensDl.setParameter("currentDate", new Date());
         lichHensDl.load();

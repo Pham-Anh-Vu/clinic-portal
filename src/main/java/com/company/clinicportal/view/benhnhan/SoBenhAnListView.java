@@ -14,6 +14,7 @@ import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,6 +37,8 @@ public class SoBenhAnListView extends StandardListView<BenhNhan> {
     private DialogWindows dialogWindows;
     @Autowired
     private Messages messages;
+    @ViewComponent
+    private CollectionLoader<BenhNhan> benhNhansDl;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -73,6 +76,7 @@ public class SoBenhAnListView extends StandardListView<BenhNhan> {
                 if (benhNhan != null && benhNhan.getId() != null) {
                     DialogWindow<SoBenhAnDetailView> windows = dialogWindows.view(this, SoBenhAnDetailView.class).build();
                     windows.getView().setIdBenhNhan(benhNhan);
+                    windows.addAfterCloseListener(soBenhAnDetailViewAfterCloseEvent -> {benhNhansDl.load();});
                     windows.open();
                 }
             });
