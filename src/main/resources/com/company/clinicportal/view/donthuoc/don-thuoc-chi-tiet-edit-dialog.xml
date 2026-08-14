@@ -6,6 +6,14 @@
             <fetchPlan extends="_base"/>
             <loader id="chiTietDl"/>
         </instance>
+        <collection id="dmThuocsDc" class="com.company.clinicportal.entity.DmThuoc">
+            <fetchPlan extends="_base"/>
+            <loader id="dmThuocsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from DmThuoc e order by e.maThuoc]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -41,18 +49,9 @@
                         <responsiveStep minWidth="48em" columns="2"/>
                     </responsiveSteps>
 
-                    <entityPicker id="dmThuocField" property="dmThuoc" colspan="2" width="100%"
-                                  required="true">
-                        <actions>
-                            <action id="entityLookup" type="entity_lookup">
-                                <properties>
-                                    <property name="viewId" value="ltcs_DmThuoc.list"/>
-                                    <property name="openMode" value="DIALOG"/>
-                                </properties>
-                            </action>
-                            <action id="entityClear" type="entity_clear"/>
-                        </actions>
-                    </entityPicker>
+                    <entityComboBox id="dmThuocField" property="dmThuoc" colspan="2" width="100%"
+                            itemsContainer="dmThuocsDc" required="true"
+                    />
 
                     <textField id="maThuocSnapshotField" property="maThuocSnapshot" readOnly="true"
                                label="msg://donThuocChiTietEditDialog.codeLabel"/>

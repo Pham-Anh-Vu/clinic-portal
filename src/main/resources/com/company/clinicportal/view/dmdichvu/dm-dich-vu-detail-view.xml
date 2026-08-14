@@ -26,7 +26,7 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <textField id="tenDichVuField" property="tenDichVu"/>
+            <textField id="tenDichVuField" property="tenDichVu" required="true"/>
             <select id="nhomDichVuField" property="nhomDichVu" required="true"/>
             <textArea id="moTaField" height="9.5em" property="moTa" colspan="2"/>
             <textField id="giaField" property="gia"/>

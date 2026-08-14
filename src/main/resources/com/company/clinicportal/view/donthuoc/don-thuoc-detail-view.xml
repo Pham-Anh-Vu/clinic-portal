@@ -86,9 +86,9 @@
 
         <vbox id="chanDoanBox" width="100%" spacing="true" padding="true">
             <hbox spacing="true" alignItems="CENTER">
-                <h4 text="Chuẩn đoán (ICD-10)"/>
-                <button id="addChanDoanButton" text="Thêm chuẩn đoán" icon="vaadin:plus"/>
-                <button id="removeChanDoanButton" text="Xoá chuẩn đoán" icon="vaadin:minus"/>
+                <h4 text="Chẩn đoán (ICD-10)"/>
+                <button id="addChanDoanButton" text="Thêm chẩn đoán" icon="vaadin:plus"/>
+                <button id="removeChanDoanButton" text="Xoá chẩn đoán" icon="vaadin:minus"/>
             </hbox>
             <dataGrid id="chanDoanDataGrid" width="100%" minHeight="10em" dataContainer="chanDoansDc" editorEnabled="true">
                 <columns resizable="true">

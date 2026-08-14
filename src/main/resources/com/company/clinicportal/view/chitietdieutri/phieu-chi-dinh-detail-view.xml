@@ -51,12 +51,12 @@
             <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh" required="true"/>
             <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
 <!--            <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2" required="true"/>-->
-            <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2" required="true"/>
+            <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2"/>
             <multiSelectComboBox id="dsChanDoanIcdField" property="dsChanDoanIcd"
                                  itemsContainer="icd10sDc"
                                  colspan="2" width="100%"
-                                 label="Chuẩn đoán ICD"
-                                 clearButtonVisible="true"/>
+                                 label="Chẩn đoán ICD"
+                                 clearButtonVisible="true" required="true"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END" alignItems="END" alignSelf="END">
             <button id="saveAndCloseButton" action="saveAction"/>

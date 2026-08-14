@@ -96,6 +96,8 @@
                 <property name="loaiDon"/>
                 <property name="soLuongThuocTrongDon"/>
                 <property name="createdAt"/>
+                <property name="hoVaTenBenhNhan"/>
+                <property name="maDinhDanhYTe"/>
             </fetchPlan>
         </collection>
     </data>
@@ -213,12 +215,12 @@
                                 <textField id="idNhanSuField" property="idNhanSu" label="Bác sĩ chỉ định"/>
                                 <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
                                 <textArea id="ketQuaCanLamSangField" height="9.5em" property="ketQuaCanLamSang" colspan="2" label="Tóm tắt kết quả cận lâm sàng"/>
-                                <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" label="Chuẩn đoán ban đầu" colspan="2"/>
+                                <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" label="Chẩn đoán ban đầu" colspan="2"/>
                                 <multiSelectComboBox id="dsChanDoanIcdField" property="dsChanDoanIcd"
                                                      itemsContainer="icd10sDc"
                                                      colspan="2" width="100%"
-                                                     label="Chuẩn đoán ICD"
-                                                     readOnly="true"/>
+                                                     label="Chẩn đoán ban đầu"
+                                                     readOnly="true" />
                                 <textField id="daXuLyField" property="daXuLy" colspan="2" label="Đã xử lý (thuốc, chăm sóc)"/>
                                 <textArea id="kbBoPhanField" property="kbBoPhan" height="9.5em" colspan="2" label="Khám bệnh bộ phận"/>
                                 <textArea id="khamBenhToanThanField" property="khamBenhToanThan" height="9.5em" colspan="2" label="Khám bệnh toàn thân"/>

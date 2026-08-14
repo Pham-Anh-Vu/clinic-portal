@@ -127,13 +127,13 @@
                         <textField id="dienThoaiField" property="idBenhNhan.dienThoai" readOnly="true" label="SĐT liên lạc"/>
                         <textField id="diaChiField" property="idBenhNhan.diaChi" readOnly="true"/>
                         <textArea id="trieuChungField" height="9.5em" property="trieuChung"/>
-                        <textArea id="chuanDoanField" height="9.5em" property="chuanDoan"/>
-                        <textField id="idNhanSuField" property="idNhanSu.hoTen" colspan="2" readOnly="true" label="Bác sĩ chỉ định"/>
+                        <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" label="Chẩn đoán ban đầu"/>
                         <multiSelectComboBox id="dsChanDoanIcdField" property="dsChanDoanIcd"
                                              itemsContainer="icd10sDc"
                                              colspan="4" width="100%"
-                                             label="Chuẩn đoán ICD"
+                                             label="Chẩn đoán ban đầu"
                                              readOnly="true"/>
+                        <textField id="idNhanSuField" property="idNhanSu.hoTen" colspan="2" readOnly="true" label="Bác sĩ chỉ định"/>
                         <hbox id="trangThaiBox"
                               alignItems="CENTER"
                               spacing="true"/>

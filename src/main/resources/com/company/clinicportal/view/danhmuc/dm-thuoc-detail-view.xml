@@ -23,12 +23,12 @@
             </responsiveSteps>
             <textField property="maThuoc" required="true"/>
             <textField property="tenThuoc" required="true"/>
-            <select property="phanLoai" required="true"
+            <select property="phanLoai"
                     itemsEnum="com.company.clinicportal.enumentity.PhanLoaiThuoc"
                     label="msg://com.company.clinicportal.entity/DmThuoc.phanLoai"/>
             <textField property="donViTinh" required="true" />
             <textField property="bietDuoc" colspan="2" required="true"
-                       label="msg://com.company.clinicportal.entity/DmThuoc.bietDuoc"/>
+                       label="Hoạt chất"/>
             <textArea property="ghiChu" colspan="2"/>
         </formLayout>
         <hbox id="detailActions" justifyContent="END">
