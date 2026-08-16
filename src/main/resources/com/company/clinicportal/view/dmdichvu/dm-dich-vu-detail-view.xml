@@ -34,6 +34,7 @@
             <textField id="giaKpiSangField" property="giaKpiSang" required="true"/>
             <textField id="giaKpiToiField" property="giaKpiToi" required="true"/>
             <textField id="donViTinhField" property="donViTinh"/>
+            <select id="trangThaiField" property="trangThai"/>
 
 
         </formLayout>

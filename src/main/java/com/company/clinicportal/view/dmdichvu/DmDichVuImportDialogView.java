@@ -2,6 +2,7 @@ package com.company.clinicportal.view.dmdichvu;
 
 import com.company.clinicportal.entity.DmDichVu;
 import com.company.clinicportal.enumentity.NhomDichVu;
+import com.company.clinicportal.enumentity.TrangThaiDichVu;
 import com.company.clinicportal.service.DmDichVuImportService;
 import com.company.clinicportal.service.DmDichVuPreviewItem;
 import com.vaadin.flow.component.UI;
@@ -150,6 +151,34 @@ public class DmDichVuImportDialogView extends StandardView {
         .setHeader("Giá")
         .setAutoWidth(true)
         .setKey("giaColumn");
+
+        // Trang thai column (render badge mau)
+        previewDataGrid.addColumn(new ComponentRenderer<>(item -> {
+            Span span = uiComponents.create(Span.class);
+            if (item.getEntity() != null && item.getEntity().getTrangThai() != null) {
+                TrangThaiDichVu trangThai = item.getEntity().getTrangThai();
+                span.setText(messages.getMessage(trangThai));
+                span.getStyle()
+                        .set("display", "inline-block")
+                        .set("padding", "2px 10px")
+                        .set("border-radius", "10px")
+                        .set("font-size", "var(--lumo-font-size-s)")
+                        .set("font-weight", "600");
+                if (trangThai == TrangThaiDichVu.HOAT_DONG) {
+                    span.getStyle()
+                            .set("color", "var(--lumo-success-contrast-color)")
+                            .set("background-color", "var(--lumo-success-color)");
+                } else {
+                    span.getStyle()
+                            .set("color", "var(--lumo-contrast-80pct)")
+                            .set("background-color", "var(--lumo-contrast-10pct)");
+                }
+            }
+            return span;
+        }))
+        .setHeader("Trạng thái")
+        .setAutoWidth(true)
+        .setKey("trangThaiColumn");
         
         // Error column with color
         previewDataGrid.addColumn(new ComponentRenderer<>(item -> {

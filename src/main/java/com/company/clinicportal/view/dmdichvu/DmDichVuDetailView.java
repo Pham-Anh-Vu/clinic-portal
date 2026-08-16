@@ -3,6 +3,7 @@ package com.company.clinicportal.view.dmdichvu;
 import com.company.clinicportal.entity.DmDichVu;
 import com.company.clinicportal.entity.GiaKpi;
 import com.company.clinicportal.enumentity.LoaiGiaKPI;
+import com.company.clinicportal.enumentity.TrangThaiDichVu;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -47,6 +48,12 @@ public class DmDichVuDetailView extends StandardDetailView<DmDichVu> {
         }
         if (giaKpiToi != null) {
             getEditedEntity().setGiaKpiToi(giaKpiToi.getGia());
+        }
+
+        // Mặc định khi tạo mới dịch vụ: trạng thái = Đang hoạt động.
+        DmDichVu edited = getEditedEntity();
+        if (edited.getId() == null && edited.getTrangThai() == null) {
+            edited.setTrangThai(TrangThaiDichVu.HOAT_DONG);
         }
     }
 

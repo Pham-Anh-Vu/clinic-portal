@@ -4,6 +4,7 @@ import com.company.clinicportal.entity.DmDichVu;
 import com.company.clinicportal.entity.GiaKpi;
 import com.company.clinicportal.enumentity.LoaiGiaKPI;
 import com.company.clinicportal.enumentity.NhomDichVu;
+import com.company.clinicportal.enumentity.TrangThaiDichVu;
 import io.jmix.core.DataManager;
 import io.jmix.core.SaveContext;
 import org.apache.poi.ss.usermodel.*;
@@ -264,10 +265,48 @@ public class DmDichVuImportService {
             entity.setGiaKpiToi(giaKpiToi.getGia());
         }
 
+        // Column E: Trạng thái (Đang hoạt động / Dừng hoạt động) - optional.
+        // Mặc định nếu để trống là Đang hoạt động. Nếu không nhận dạng được thì báo lỗi.
+        Cell trangThaiCell = row.getCell(4);
+        String trangThaiStr = trangThaiCell == null ? "" : getCellValueAsString(trangThaiCell).trim();
+        TrangThaiDichVu trangThai = mapTrangThaiDichVu(trangThaiStr);
+        if (trangThai == null) {
+            throw new Exception("Trạng thái không hợp lệ: \"" + trangThaiStr + "\". Các giá trị hợp lệ: Đang hoạt động, Dừng hoạt động");
+        }
+        entity.setTrangThai(trangThai);
+
         // Set created date
         entity.setCreatedAt(new Date());
 
         return entity;
+    }
+
+    /**
+     * Map chuỗi trong Excel sang {@link TrangThaiDichVu}.
+     * - Để trống / null -> mặc định {@link TrangThaiDichVu#HOAT_DONG}
+     * - Hỗ trợ cả tiếng Việt có dấu lẫn không dấu, không phân biệt hoa/thường.
+     */
+    private TrangThaiDichVu mapTrangThaiDichVu(String value) {
+        if (value == null || value.isEmpty()) {
+            return TrangThaiDichVu.HOAT_DONG;
+        }
+        String normalized = value.trim().toLowerCase();
+        if (normalized.equals("hoat_dong")
+                || normalized.contains("hoạt động")
+                || normalized.contains("hoat dong")
+                || normalized.equals("active")) {
+            return TrangThaiDichVu.HOAT_DONG;
+        }
+        if (normalized.equals("dung_hoat_dong")
+                || normalized.contains("dừng hoạt động")
+                || normalized.contains("dung hoat dong")
+                || normalized.contains("ngừng hoạt động")
+                || normalized.contains("ngung hoat dong")
+                || normalized.equals("inactive")
+                || normalized.equals("ngung")) {
+            return TrangThaiDichVu.DUNG_HOAT_DONG;
+        }
+        return null;
     }
 
     private NhomDichVu mapNhomDichVu(String value) {

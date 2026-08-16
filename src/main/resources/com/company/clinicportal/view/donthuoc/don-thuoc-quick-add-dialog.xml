@@ -12,29 +12,54 @@
             <collection id="chiTietsDc" property="chiTiets"/>
             <collection id="chanDoansDc" property="chanDoans"/>
         </instance>
+        <instance id="dotDungDc" class="com.company.clinicportal.entity.DonThuocDotDung">
+            <fetchPlan extends="_base"/>
+        </instance>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
     </facets>
     <layout expand="actionsBox" spacing="false" padding="false">
-        <vbox id="formHeader" width="100%" spacing="true" padding="true">
-            <formLayout id="form" dataContainer="donThuocDc">
-                <responsiveSteps>
-                    <responsiveStep minWidth="0" columns="1"/>
-                    <responsiveStep minWidth="60em" columns="3"/>
-                </responsiveSteps>
-<!--                <textField property="maDonThuoc" readOnly="true"/>-->
-                <select id="loaiDonField" property="loaiDon" label="Loại đơn"
-                        optionsEnum="com.company.clinicportal.enumentity.LoaiDon" required="true"/>
-                <select property="hinhThucDieuTri" label="Hình thức điều trị"
-                        optionsEnum="com.company.clinicportal.enumentity.HinhThucDieuTri" required="true"/>
-                <dateTimePicker id="ngayKeField" property="ngayKe" label="Ngày kê" required="true"/>
-                <datePicker property="ngayTaiKham" required="true"/>
-                <textField property="tenBacSi" colspan="3" required="true"/>
-                <textArea property="chanDoanText" colspan="3" height="6em" required="true"/>
-                <textArea id="lyDoKhamField" property="lyDoKham" colspan="3" height="5em" label="Lưu ý" required="true"/>
-                <textArea property="loiDan" colspan="3" height="6em" required="true"/>
-            </formLayout>
+        <vbox width="100%" alignItems="START" padding="false"
+              spacing="false" classNames="tab-5-grid">
+            <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
+                  width="100%">
+                <hbox classNames="buttons-panel" width="100%">
+                    <div width="100%" classNames="all-control-auto-pay">
+                        <div classNames="title-grid">
+                            <span text="THÔNG TIN ĐƠN THUỐC"/>
+                            <span id="chanDoanCountLabel1" themeName="badge" visible="false"/>
+                        </div>
+                    </div>
+                </hbox>
+            </vbox>
+            <vbox padding="false" classNames="grid-data">
+                <formLayout id="form" dataContainer="donThuocDc" css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                        <responsiveStep minWidth="60em" columns="6"/>
+                    </responsiveSteps>
+                    <!--                <textField property="maDonThuoc" readOnly="true"/>-->
+                    <select id="loaiDonField" property="loaiDon" label="Loại đơn"
+                            optionsEnum="com.company.clinicportal.enumentity.LoaiDon" required="true" colspan="2"/>
+                    <textField property="tenBacSi" colspan="2" required="true" readOnly="true"/>
+                    <dateTimePicker id="ngayKeField" property="ngayKe" label="Ngày kê" required="true" colspan="2"/>
+                    <select id="hinhThucDieuTriField" property="hinhThucDieuTri" label="Hình thức điều trị"
+                            optionsEnum="com.company.clinicportal.enumentity.HinhThucDieuTri" required="false" colspan="2"/>
+                    <datePicker property="ngayTaiKham" colspan="2"/>
+<!--                    <textArea property="chanDoanText" height="6em" required="true" colspan="2" label="Chẩn đoán"/>-->
+
+                    <textField id="soDotField" property="soDot" label="Đợt" datatype="int" required="true"
+                               dataContainer="dotDungDc" colspan="2"/>
+                    <datePicker id="tuNgayField" property="tuNgay" label="Từ ngày" required="true"
+                                dataContainer="dotDungDc" colspan="2"/>
+                    <datePicker id="denNgayField" property="denNgay" label="Đến ngày" required="true"
+                                dataContainer="dotDungDc" colspan="2"/>
+
+                    <textArea id="lyDoKhamField" property="lyDoKham" colspan="3" height="5em" label="Lưu ý"/>
+                    <textArea property="loiDan" colspan="3" height="6em"/>
+                </formLayout>
+            </vbox>
         </vbox>
 
         <vbox width="100%" alignItems="START" padding="false"
@@ -44,12 +69,8 @@
                 <hbox classNames="buttons-panel" width="100%">
                     <div width="100%" classNames="all-control-auto-pay">
                         <div classNames="title-grid">
-                            <span text="CHUẨN ĐOÁN ICD-10"/>
+                            <span text="CHẨN ĐOÁN VÀ KẾT LUẬN   "/>
                             <span id="chanDoanCountLabel" themeName="badge" visible="false"/>
-                        </div>
-                        <div classNames="function-flex-end">
-                            <button id="addChanDoanButton" text="Thêm chUẩn đoán" icon="vaadin:plus" themeName="primary"
-                                    action="chanDoanDataGrid.create"/>
                         </div>
                     </div>
                 </hbox>
@@ -60,22 +81,19 @@
                     <responsiveSteps>
                         <responsiveStep minWidth="0" columns="1"/>
                     </responsiveSteps>
-                    <dataGrid id="chanDoanDataGrid" width="100%" minHeight="140px" dataContainer="chanDoansDc">
+                    <dataGrid id="chanDoanDataGrid" width="100%" minHeight="140px" dataContainer="chanDoansDc" colspan="6">
                         <actions>
-                            <action id="create" type="list_create" text="Thêm chuẩn đoán"/>
                             <action id="edit" type="list_edit" text="Chi tiết"/>
                             <action id="remove" type="list_remove" text="Xóa"/>
                         </actions>
                         <emptyStateComponent>
                             <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
                                 <icon icon="vaadin:file-o" size="36px" color="var(--lumo-tertiary-text-color)"/>
-                                <span text="Chưa có chuẩn đoán"/>
+                                <span text="Chưa có chẩn đoán"/>
                             </vbox>
                         </emptyStateComponent>
                         <columns resizable="true">
                             <column property="stt" width="3em" header="STT"/>
-                            <column property="icd10" header="ICD-10" editable="true" width="10em">
-                            </column>
                             <column property="maIcdSnapshot" header="Mã ICD" editable="false" width="7em"/>
                             <column property="tenIcdSnapshot" header="Tên bệnh" editable="false"/>
                             <column property="ketLuan" header="Kết luận" editable="true">
@@ -84,7 +102,7 @@
                     </dataGrid>
                 </formLayout>
             </vbox>
-        </vbox>
+        </vbox >
 
         <vbox width="100%" alignItems="START" padding="false"
               spacing="false" classNames="tab-5-grid">
@@ -137,7 +155,6 @@
                 </formLayout>
             </vbox>
         </vbox>
-
 
         <hbox id="actionsBox" justifyContent="END" spacing="true" width="100%">
             <button id="cancelDonBtn" text="Huỷ đơn" icon="vaadin:close"/>

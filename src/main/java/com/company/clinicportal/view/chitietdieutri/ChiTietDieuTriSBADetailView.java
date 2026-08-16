@@ -1,20 +1,15 @@
 package com.company.clinicportal.view.chitietdieutri;
 
-import com.company.clinicportal.entity.BenhNhan;
-import com.company.clinicportal.entity.BuoiDieuTri;
-import com.company.clinicportal.entity.ChiTietDichVu;
-import com.company.clinicportal.entity.ChiTietDieuTri;
-import com.company.clinicportal.entity.ChiTietDieuTriFileDinhKem;
-import com.company.clinicportal.entity.DonThuoc;
-import com.company.clinicportal.entity.LichSuThanhToan;
-import com.company.clinicportal.entity.PhieuDieuTri;
-import com.company.clinicportal.entity.ToDieuTri;
-import com.company.clinicportal.entity.ToDieuTriKyThuat;
+import com.company.clinicportal.entity.*;
 import com.company.clinicportal.enumentity.NhomDichVu;
 import com.company.clinicportal.enumentity.TinhTheoGia;
 import com.company.clinicportal.enumentity.TrangThaiBuoiDieuTri;
 import com.company.clinicportal.enumentity.TrangThaiDonThuoc;
+import com.company.clinicportal.lienthong.CoSoKhamChuaBenhLienThongService;
 import com.company.clinicportal.lienthong.LienThongGuiDonThuocService;
+import com.company.clinicportal.lienthong.LienThongPasswordPrompt;
+import com.company.clinicportal.lienthong.SecretCipher;
+import com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong;
 import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
 import com.company.clinicportal.service.DonThuocService;
 import com.company.clinicportal.service.TinhKpiChiTietService;
@@ -27,6 +22,7 @@ import com.company.clinicportal.view.donthuoc.DonThuocQuickAddDialog;
 import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.grid.Grid;
@@ -71,6 +67,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -138,13 +135,13 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     @Autowired
     private DonThuocService donThuocService;
     @Autowired
-    private com.company.clinicportal.lienthong.LienThongGuiDonThuocService lienThongService;
+    private LienThongGuiDonThuocService lienThongService;
     @Autowired
-    private com.company.clinicportal.lienthong.CoSoKhamChuaBenhLienThongService coSoService;
+    private CoSoKhamChuaBenhLienThongService coSoService;
     @Autowired
-    private com.company.clinicportal.lienthong.SecretCipher secretCipher;
+    private SecretCipher secretCipher;
     @Autowired
-    private com.company.clinicportal.lienthong.LienThongPasswordPrompt lienThongPasswordPrompt;
+    private LienThongPasswordPrompt lienThongPasswordPrompt;
 
     /** Tên bác sĩ mặc định khi tạo đơn thuốc nhanh từ chi tiết phiếu điều trị. */
     private static final String DEFAULT_TEN_BAC_SI = "BS. Đặng Thị Hà";
@@ -155,6 +152,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionLoader<DonThuoc> donThuocsDl;
     @ViewComponent
     private CollectionContainer<DonThuoc> donThuocsDc;
+    @ViewComponent
+    private JmixTextArea huongDieuTriField;
 
     /**
      * Renderer hiển thị tiếng Việt cho cột "Trạng thái" đơn thuốc: chuyển {@code trangThai}
@@ -176,7 +175,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     @ViewComponent
     private JmixTextArea chuanDoanField;
     @ViewComponent
-    private JmixMultiSelectComboBox<com.company.clinicportal.entity.Icd10> dsChanDoanIcdField;
+    private JmixMultiSelectComboBox<Icd10> dsChanDoanIcdField;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -187,6 +186,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     public void onBeforeShow(final BeforeShowEvent event) {
         autoFillTongKetDieuTriFields();
         toggleDiagnosisFields();
+
+        huongDieuTriField.setValue("Hướng dẫn PHCN tại nhà");
 
         khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
         khuyenMaiField.addValueChangeListener(event1 -> recalculatePaymentFields());
@@ -232,7 +233,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         );
 
         if (getEditedEntity() != null) {
-            configureToDieuTriGridColumns();
+//            configureToDieuTriGridColumns();
             toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
             toDieuTrisDl.load();
         }
@@ -268,24 +269,24 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         layout.setPadding(false);
 
         JmixButton openButton = uiComponents.create(JmixButton.class);
-        openButton.setIcon(com.vaadin.flow.component.icon.VaadinIcon.EYE.create());
-        openButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL,
-                com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY);
+        openButton.setIcon(VaadinIcon.EYE.create());
+        openButton.addThemeVariants(ButtonVariant.LUMO_SMALL,
+                ButtonVariant.LUMO_TERTIARY);
         openButton.setTitle("Mở xem");
         openButton.addClickListener(e -> openDonThuocDetail(donThuoc));
 
         JmixButton editButton = uiComponents.create(JmixButton.class);
-        editButton.setIcon(com.vaadin.flow.component.icon.VaadinIcon.EDIT.create());
-        editButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL,
-                com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY);
+        editButton.setIcon(VaadinIcon.EDIT.create());
+        editButton.addThemeVariants(ButtonVariant.LUMO_SMALL,
+                ButtonVariant.LUMO_TERTIARY);
         editButton.setTitle("Sửa");
         editButton.addClickListener(e -> openDonThuocDetail(donThuoc));
 
         JmixButton delButton = uiComponents.create(JmixButton.class);
-        delButton.setIcon(com.vaadin.flow.component.icon.VaadinIcon.TRASH.create());
-        delButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL,
-                com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR,
-                com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY);
+        delButton.setIcon(VaadinIcon.TRASH.create());
+        delButton.addThemeVariants(ButtonVariant.LUMO_SMALL,
+                ButtonVariant.LUMO_ERROR,
+                ButtonVariant.LUMO_TERTIARY);
         delButton.setTitle("Xoá");
         delButton.addClickListener(e -> confirmAndDeleteDonThuoc(donThuoc));
 
@@ -334,7 +335,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
     /** PostLoad handler để đảm bảo cột thao tác luôn được cấu hình sau khi data load. */
     @Subscribe(id = "donThuocsDl", target = Target.DATA_LOADER)
-    public void onDonThuocsDlPostLoad(final io.jmix.flowui.model.CollectionLoader.PostLoadEvent<DonThuoc> event) {
+    public void onDonThuocsDlPostLoad(final CollectionLoader.PostLoadEvent<DonThuoc> event) {
         configureDonThuocGridColumns();
     }
 
@@ -472,7 +473,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
      * Bác sĩ kê đơn = BS. Đặng Thị Hà), rồi mở màn chi tiết để nhập dòng thuốc.
      */
     @Subscribe("addDonThuocButton")
-    public void onAddDonThuocButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+    public void onAddDonThuocButtonClick(final ClickEvent<JmixButton> event) {
         ChiTietDieuTri chiTietDieuTri = getEditedEntity();
         if (chiTietDieuTri == null) {
             return;
@@ -489,8 +490,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             // — không cần mở DonThuocDetailView nữa.
             DialogWindow<?> window = dialogWindows.view(this, "DonThuocQuickAddDialog")
                     .build();
-            com.company.clinicportal.view.donthuoc.DonThuocQuickAddDialog view =
-                    (com.company.clinicportal.view.donthuoc.DonThuocQuickAddDialog) window.getView();
+            DonThuocQuickAddDialog view =
+                    (DonThuocQuickAddDialog) window.getView();
             view.setChiTietDieuTri(chiTietDieuTri);
             window.addAfterCloseListener(closeEvent -> donThuocsDl.load());
             window.open();
@@ -515,7 +516,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
      * </ol>
      */
     @Subscribe("dongBoDonThuocButton")
-    public void onDongBoDonThuocButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+    public void onDongBoDonThuocButtonClick(final ClickEvent<JmixButton> event) {
         // Validate trước - không có đơn để gửi thì không cần hiện popup hỏi.
         List<DonThuoc> tatCaDonThuoc = donThuocsDc.getItems().stream().collect(Collectors.toList());
         List<DonThuoc> danhSach = tatCaDonThuoc.stream()
@@ -599,8 +600,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                 .collect(Collectors.toList());
 
         // Lấy cơ sở KCB liên thông đầu tiên (active)
-        List<com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong> coSoList =
-                dataManager.load(com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong.class)
+        List<CoSoKhamChuaBenhLienThong> coSoList =
+                dataManager.load(CoSoKhamChuaBenhLienThong.class)
                         .query("select e from ltcs_CoSoKhamChuaBenhLienThong e where e.active = true")
                         .list();
         if (coSoList.isEmpty()) {
@@ -609,7 +610,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                     .show();
             return;
         }
-        com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong coSo = coSoList.get(0);
+        CoSoKhamChuaBenhLienThong coSo = coSoList.get(0);
         String password = coSoService.decryptPasswordOrNull(coSo);
         if (password == null || password.isBlank()) {
             notifications.create("Cơ sở KCB chưa có password. Vui lòng cấu hình.")
@@ -620,7 +621,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
         // Lấy thông tin đăng nhập bác sĩ từ application.properties.
         // Theo FSD §VI: API gửi đơn cần token từ /api/auth/dang-nhap-bac-si.
-        com.company.clinicportal.lienthong.LienThongPasswordPrompt.BacSiCredentials creds =
+        LienThongPasswordPrompt.BacSiCredentials creds =
                 lienThongPasswordPrompt.resolveBacSiCredentials(notifications);
         if (creds == null) {
             // user huỷ dialog hoặc thiếu config
@@ -635,9 +636,9 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
         int success = 0, fail = 0;
         // Chỉ theo dõi các đơn THÀNH CÔNG để liệt kê trong message thông báo.
-        java.util.List<String> successCodes = new java.util.ArrayList<>();
+        List<String> successCodes = new ArrayList<>();
         // Lỗi chỉ đếm + log; không đẩy raw JSON/Unicode vào notification (gây rối UI).
-        java.util.List<String> failMuteMessages = new java.util.ArrayList<>();
+        List<String> failMuteMessages = new ArrayList<>();
 
         for (DonThuoc dt : danhSach) {
             // Load lại entity từ DB với fetch plan đầy đủ, tránh lazy fetch trên detached object
@@ -667,10 +668,10 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
             try {
                 String idempotencyKey = managedDt.getIdempotencyKey() != null ? managedDt.getIdempotencyKey()
-                        : java.util.UUID.randomUUID().toString();
+                        : UUID.randomUUID().toString();
                 // maLienThongBacSi + password lấy từ application.properties
                 // maLienThongCoSo + passwordCoSo lấy từ DB CoSoKhamChuaBenhLienThong
-                com.company.clinicportal.lienthong.LienThongGuiDonThuocService.GuiDonThuocResult result =
+                LienThongGuiDonThuocService.GuiDonThuocResult result =
                         lienThongService.send(managedDt, idempotencyKey,
                                 coSo.getMaLienThong(), password,
                                 creds.maLienThongBacSi, creds.password);
@@ -720,7 +721,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     }
 
     @Subscribe("printToDieuTriButton")
-    public void onPrintToDieuTriButtonClick(final com.vaadin.flow.component.ClickEvent<JmixButton> event) {
+    public void onPrintToDieuTriButtonClick(final ClickEvent<JmixButton> event) {
         if (getEditedEntity().getId() == null) {
             notifications.create("Vui lòng lưu phiếu điều trị trước khi in.")
                     .withType(Notifications.Type.WARNING)
@@ -815,7 +816,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         toDieuTriColumnsConfigured = true;
     }
 
-    private void setColumnRenderer(String key, java.util.function.Function<ToDieuTri, Span> supplier) {
+    private void setColumnRenderer(String key, Function<ToDieuTri, Span> supplier) {
         Grid.Column<ToDieuTri> column = toDieuTrisDataGrid.getColumnByKey(key);
         if (column != null) {
             column.setRenderer(new ComponentRenderer<>(supplier::apply));

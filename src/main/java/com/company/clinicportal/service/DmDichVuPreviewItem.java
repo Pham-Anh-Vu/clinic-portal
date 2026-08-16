@@ -75,6 +75,10 @@ public class DmDichVuPreviewItem {
     public Long getGia() {
         return entity != null ? entity.getGia() : null;
     }
+
+    public String getTrangThai() {
+        return entity != null && entity.getTrangThai() != null ? entity.getTrangThai().getId() : "";
+    }
 }
 
 

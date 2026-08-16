@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -658,7 +659,7 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
     private void onSaveDraft(com.vaadin.flow.component.ClickEvent<Button> e) {
         try {
             DonThuoc dt = getEditedEntity();
-            if (dt == null || dt.getId() == null) {
+            if (dt == null) {
                 notifications.create("Đơn thuốc chưa được tạo")
                         .withType(Notifications.Type.WARNING).show();
                 return;
@@ -671,39 +672,48 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
 
             // Bước 2: Load lại entity managed từ DB để tránh OptimisticLockException.
             // Lưu ý: phải fetch chanDoans, dotDungs để có thể merge dòng tạm vào managed.
-            DonThuoc managed = dataManager.load(DonThuoc.class)
+            // Dùng optional() thay vì one() vì entity mới tạo (chưa save) có id từ Jmix
+            // nhưng chưa tồn tại trong DB → NoResultException nếu dùng one().
+            java.util.Optional<DonThuoc> optManaged = dataManager.load(DonThuoc.class)
                     .id(dt.getId())
                     .fetchPlan(fp -> fp
                             .addFetchPlan("_base")
                             .add("chiTiets", b -> b.addFetchPlan("_base"))
                             .add("chanDoans", b -> b.addFetchPlan("_base"))
                             .add("dotDungs", b -> b.addFetchPlan("_base")))
-                    .one();
+                    .optional();
 
-            // Bước 3: Merge các dòng chẩn đoán từ dt (in-memory) sang managed
-            // (vừa load từ DB). Mục đích:
-            //   - Bảo toàn các DonThuocChanDoan có id (user tự thêm / sửa trước đó)
-            //     bằng cách update giá trị thay vì insert lại.
-            //   - INSERT các DonThuocChanDoan MỚI (id == null, gồm cả dòng tạm
-            //     map từ phiếu ĐT) bằng cách thêm vào managed.getChanDoans().
-            //   - KHÔNG xóa các dòng managed đã có trong DB mà user chưa xóa.
-            mergeChanDoansFromDraft(managed, dt);
-            // Merge đợt dùng thuốc đang chỉnh sửa trên form 3 trường vào managed.
-            mergeDotDungFromDraft(managed, dt);
+            DonThuoc managed;
+            if (optManaged.isPresent()) {
+                // Đơn đã tồn tại trong DB (chế độ SỬA) → merge dữ liệu từ dt vào managed
+                managed = optManaged.get();
+                mergeChanDoansFromDraft(managed, dt);
+                mergeDotDungFromDraft(managed, dt);
+                mergeChiTietsFromDraft(managed, dt);
+            } else {
+                // Đơn mới tạo, chưa lưu lần nào (chế độ THÊM MỚI)
+                // Jmix đã gán id cho dt nhưng chưa persist → dùng luôn dt làm managed
+                managed = dt;
+                // Attach các dòng mới (đã được attach ở bước 1, nhưng đảm bảo đủ)
+                attachChanDoansToEditedEntity();
+                attachDotDungToEditedEntity();
+                log.info("onSaveDraft: đơn mới (chưa persist), dùng dt làm managed.");
+            }
 
-            // Bước 4: Cập nhật container để UI hiển thị đúng các dòng đã merge
+            // Bước 3: Cập nhật container để UI hiển thị đúng các dòng đã merge
             // (vì container bind vào một entity duy nhất, phải setItem(managed)
             // để grid re-fetch).
             donThuocDc.setItem(managed);
             // Re-bind dotDungDc sang dòng managed tương ứng (vẫn là 1 đợt duy nhất)
             initDotDungInstance();
 
-            // Bước 5: Save đơn — EclipseLink cascade INSERT các dòng mới,
+            // Bước 4: Save đơn — EclipseLink cascade INSERT các dòng mới,
             // UPDATE các dòng đã thay đổi.
             DonThuoc saved = donThuocService.saveDraft(managed);
             donThuocDc.setItem(saved);
             notifications.create("Đã lưu nháp đơn " + saved.getMaDonThuoc())
                     .withType(Notifications.Type.SUCCESS).show();
+            close(StandardOutcome.DISCARD);
         } catch (Exception ex) {
             String detail = ex.getMessage();
             if (detail == null || detail.isBlank()) {
@@ -821,6 +831,79 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                 ddManaged.setSoThangThuoc(ddDraft.getSoThangThuoc());
                 log.info("Merge dotDung: 1 updated.");
             }
+        }
+    }
+
+    /**
+     * Merge các {@link DonThuocChiTiet} từ {@code draft} (entity in-memory) sang
+     * {@code managed} (entity vừa load từ DB).
+     *
+     * <p>Quy tắc merge:</p>
+     * <ul>
+     *     <li>Với mỗi {@code ctDraft} trong {@code chiTietsDc.getItems()}:
+     *         <ul>
+     *             <li>Nếu {@code ctDraft.id == null} (dòng mới, user thêm thuốc) →
+     *                 add thẳng vào {@code managed.getChiTiets()}.
+     *                 JPA sẽ INSERT.</li>
+     *             <li>Nếu {@code ctDraft.id != null} (dòng đã tồn tại) →
+     *                 tìm dòng tương ứng trong {@code managed.getChiTiets()} theo id,
+     *                 copy các trường có thể sửa. Không xóa dòng managed cũ.</li>
+     *         </ul>
+     *     </li>
+     *     <li>KHÔNG xóa các dòng có trong {@code managed.getChiTiets()} mà không
+     *         có trong container — tránh orphanRemoval xóa nhầm dòng đã lưu trước đó.
+     *         (Nếu user muốn xóa, đã có action remove trên grid → cũng remove
+     *         khỏi container.)</li>
+     * </ul>
+     */
+    private void mergeChiTietsFromDraft(DonThuoc managed, DonThuoc draft) {
+        if (managed == null) {
+            return;
+        }
+        // Map id → managed item để tra cứu nhanh
+        java.util.Map<java.util.UUID, DonThuocChiTiet> managedById = new java.util.HashMap<>();
+        for (DonThuocChiTiet ct : managed.getChiTiets()) {
+            if (ct != null && ct.getId() != null) {
+                managedById.put(ct.getId(), ct);
+            }
+        }
+        int inserted = 0;
+        int updated = 0;
+        for (DonThuocChiTiet ctDraft : chiTietsDc.getItems()) {
+            if (ctDraft == null) {
+                continue;
+            }
+            if (ctDraft.getId() == null) {
+                // Dòng mới → add để JPA INSERT.
+                ctDraft.setDonThuoc(managed);
+                managed.getChiTiets().add(ctDraft);
+                inserted++;
+            } else {
+                // Dòng đã tồn tại → update giá trị thay vì insert lại
+                DonThuocChiTiet ctManaged = managedById.get(ctDraft.getId());
+                if (ctManaged != null) {
+                    ctManaged.setStt(ctDraft.getStt());
+                    ctManaged.setDmThuoc(ctDraft.getDmThuoc());
+                    ctManaged.setMaThuocSnapshot(ctDraft.getMaThuocSnapshot());
+                    ctManaged.setTenThuocSnapshot(ctDraft.getTenThuocSnapshot());
+                    ctManaged.setBietDuocSnapshot(ctDraft.getBietDuocSnapshot());
+                    ctManaged.setDonViTinhSnapshot(ctDraft.getDonViTinhSnapshot());
+                    ctManaged.setHamLuongSnapshot(ctDraft.getHamLuongSnapshot());
+                    ctManaged.setDangBaoCheSnapshot(ctDraft.getDangBaoCheSnapshot());
+                    ctManaged.setSoDangKySnapshot(ctDraft.getSoDangKySnapshot());
+                    ctManaged.setSoLuong(ctDraft.getSoLuong());
+                    ctManaged.setLieuDung(ctDraft.getLieuDung());
+                    ctManaged.setTanSuat(ctDraft.getTanSuat());
+                    ctManaged.setThoiGianDung(ctDraft.getThoiGianDung());
+                    ctManaged.setCachDung(ctDraft.getCachDung());
+                    ctManaged.setDuongDung(ctDraft.getDuongDung());
+                    ctManaged.setGhiChu(ctDraft.getGhiChu());
+                    updated++;
+                }
+            }
+        }
+        if (inserted > 0 || updated > 0) {
+            log.info("[MergeChiTiets] {} inserted, {} updated.", inserted, updated);
         }
     }
 

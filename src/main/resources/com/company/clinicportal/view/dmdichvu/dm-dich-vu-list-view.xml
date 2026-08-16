@@ -86,6 +86,7 @@
                         <column property="giaKpiSang"/>
                         <column property="giaKpiToi"/>
                         <column property="donViTinh"/>
+                        <column property="trangThai"/>
                     </columns>
                 </dataGrid>
                 <simplePagination id="pagination" dataLoader="dmDichVusDl" alignSelf="END" css="margin-top: 8px;"/>

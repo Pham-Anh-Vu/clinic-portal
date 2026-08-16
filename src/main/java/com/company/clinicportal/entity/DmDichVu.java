@@ -1,6 +1,7 @@
 package com.company.clinicportal.entity;
 
 import com.company.clinicportal.enumentity.NhomDichVu;
+import com.company.clinicportal.enumentity.TrangThaiDichVu;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -61,6 +62,9 @@ public class DmDichVu {
     @Column(name = "ten_dich_vu")
     private String tenDichVu;
 
+    @Column(name = "trang_thai", length = 32)
+    private String trangThai;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "\"updatedAt\"")
     private Date updatedAt;
@@ -98,6 +102,14 @@ public class DmDichVu {
 
     public void setTenDichVu(String tenDichVu) {
         this.tenDichVu = tenDichVu;
+    }
+
+    public TrangThaiDichVu getTrangThai() {
+        return trangThai == null ? null : TrangThaiDichVu.fromId(trangThai);
+    }
+
+    public void setTrangThai(TrangThaiDichVu trangThai) {
+        this.trangThai = trangThai == null ? null : trangThai.getId();
     }
 
     public NhomDichVu getNhomDichVu() {
