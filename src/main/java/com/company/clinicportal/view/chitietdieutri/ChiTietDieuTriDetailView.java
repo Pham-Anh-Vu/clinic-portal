@@ -62,10 +62,10 @@ import java.util.*;
 @EditedEntityContainer("chiTietDieuTriDc")
 @DialogMode(width = "60%", height = "90%")
 public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri> {
-    @ViewComponent
-    private DataGrid<ChiTietDichVu> chiTietDichVusDataGrid;
-    @ViewComponent("chiTietDichVusDataGrid.remove")
-    private Action chiTietDichVusRemoveAction;
+//    @ViewComponent
+//    private DataGrid<ChiTietDichVu> chiTietDichVusDataGrid;
+//    @ViewComponent("chiTietDichVusDataGrid.remove")
+//    private Action chiTietDichVusRemoveAction;
     @Autowired
     private UiComponents uiComponents;
     @Autowired
@@ -122,11 +122,11 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
     public void onInit(InitEvent event) {
         khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
         khuyenMaiField.addValueChangeListener(event1 -> recalculatePaymentFields());
-
-        chiTietDichVusDataGrid.addComponentColumn(this::buildChiTietDichVuActionsCell)
-                .setHeader("Thao tác")
-                .setAutoWidth(true)
-                .setFlexGrow(0);
+//
+//        chiTietDichVusDataGrid.addComponentColumn(this::buildChiTietDichVuActionsCell)
+//                .setHeader("Thao tác")
+//                .setAutoWidth(true)
+//                .setFlexGrow(0);
 
         // TẠM ẨN: khối BUỔI ĐIỀU TRỊ
         // buoiDieuTrisDataGrid.addComponentColumn(buoiDieuTri -> {
@@ -185,18 +185,18 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
         });
 
         // Nút Xóa
-        JmixButton deleteBtn = uiComponents.create(JmixButton.class);
-        deleteBtn.setText("Xóa");
-        deleteBtn.addClickListener(e -> {
-            if (chiTietDichVu == null || chiTietDichVu.getId() == null) {
-                return;
-            }
-            // Chọn dòng hiện tại rồi ủy quyền cho action list_remove (đã khai báo trong XML)
-            chiTietDichVusDataGrid.select(chiTietDichVu);
-            chiTietDichVusRemoveAction.actionPerform(chiTietDichVusDataGrid);
-        });
+//        JmixButton deleteBtn = uiComponents.create(JmixButton.class);
+//        deleteBtn.setText("Xóa");
+//        deleteBtn.addClickListener(e -> {
+//            if (chiTietDichVu == null || chiTietDichVu.getId() == null) {
+//                return;
+//            }
+//            // Chọn dòng hiện tại rồi ủy quyền cho action list_remove (đã khai báo trong XML)
+//            chiTietDichVusDataGrid.select(chiTietDichVu);
+//            chiTietDichVusRemoveAction.actionPerform(chiTietDichVusDataGrid);
+//        });
 
-        actions.add(editBtn, deleteBtn);
+//        actions.add(editBtn, deleteBtn);
         return actions;
     }
 
@@ -674,84 +674,84 @@ public class ChiTietDieuTriDetailView extends StandardDetailView<ChiTietDieuTri>
 
     
 
-    @Subscribe("chiTietDichVusDataGrid.create")
-    public void onChiTietDichVusDataGridCreate(final ActionPerformedEvent event) {
-        DialogWindow<ChiTietDichVuDetailView> window =
-                dialogWindows.detail(this, ChiTietDichVu.class)
-                        .withViewClass(ChiTietDichVuDetailView.class)
-                        .newEntity()
-                        .build();
-
-        window.addAfterCloseListener(event1 -> {
-            if (event1.closedWith(StandardOutcome.SAVE)) {
-                ChiTietDichVu saved = event1.getView().getEditedEntity();
-                Long soLuong = saved.getSoLuong();
-                Long khoangCachBuoiDieuTri = saved.getKhoangCachBuoiDieuTri();
-                Date ngayBatDau = saved.getNgayBatDau();
-
-                // Validate theo quy tắc nghiệp vụ:
-                //   soLuong > 1  && khoangCachBuoiDieuTri == 0  -> báo lỗi, không lưu gì cả.
-                if (soLuong != null && soLuong > 1
-                        && (khoangCachBuoiDieuTri == null || khoangCachBuoiDieuTri == 0)) {
-                    notifications.create("Khoảng cách buổi điều trị phải lớn hơn 0")
-                            .withType(Notifications.Type.ERROR)
-                            .show();
-                    return;
-                }
-
-                saved.setIdChiTietPhieuDieuTri(getEditedEntity());
-                saved.setCreatedAt(LocalDateTime.now());
-                ChiTietDichVu persisted = dataManager.save(saved);
-
-                // Sinh buổi điều trị:
-                //   - soLuong >= 1, có ngày bắt đầu và bệnh nhân.
-                //   - khoangCachBuoiDieuTri có thể = 0 (áp dụng cho soLuong = 1, mọi buổi đều = ngayBatDau)
-                //     hoặc > 0 (các buổi cách nhau khoangCach ngày).
-                if (soLuong != null && soLuong > 0 &&
-                        ngayBatDau != null &&
-                        persisted.getIdChiTietPhieuDieuTri() != null &&
-                        persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan() != null) {
-
-                    SaveContext saveContext = new SaveContext();
-
-                    long stepDays = (khoangCachBuoiDieuTri != null && khoangCachBuoiDieuTri > 0)
-                            ? khoangCachBuoiDieuTri
-                            : 0L;
-
-                    for (int i = 0; i < soLuong; i++) {
-                        BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
-                        buoiDieuTri.setIdChiTietDichVu(persisted);
-                        buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
-                        buoiDieuTri.setIdBenhNhan(persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan());
-
-                        Calendar ngayThucHienCal = Calendar.getInstance();
-                        ngayThucHienCal.setTime(ngayBatDau);
-                        ngayThucHienCal.add(Calendar.DAY_OF_MONTH, (int) (stepDays * i));
-                        Date ngayThucHien = ngayThucHienCal.getTime();
-                        buoiDieuTri.setNgayThucHien(ngayThucHien);
-                        buoiDieuTri.setTrangThai(TrangThaiBuoiDieuTri.CHUA_THUC_HIEN);
-
-                        saveContext.saving(buoiDieuTri);
-                    }
-
-                    if (!saveContext.getEntitiesToSave().isEmpty()) {
-                        dataManager.save(saveContext);
-                        if (getEditedEntity().getId() != null) {
-                            tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
-                        }
-                    }
-                }
-
-                chiTietDieuTriDl.load();
-                recalculatePaymentFields();
-            }
-        });
-        window.open();
-    }
-
-    @Subscribe("chiTietDichVusDataGrid.edit")
-    public void onChiTietDichVusDataGridEdit(final ActionPerformedEvent event) {
-        // mặc định action list_edit đã xử lý, giữ hook cho mở rộng sau
-    }
+//    @Subscribe("chiTietDichVusDataGrid.create")
+//    public void onChiTietDichVusDataGridCreate(final ActionPerformedEvent event) {
+//        DialogWindow<ChiTietDichVuDetailView> window =
+//                dialogWindows.detail(this, ChiTietDichVu.class)
+//                        .withViewClass(ChiTietDichVuDetailView.class)
+//                        .newEntity()
+//                        .build();
+//
+//        window.addAfterCloseListener(event1 -> {
+//            if (event1.closedWith(StandardOutcome.SAVE)) {
+//                ChiTietDichVu saved = event1.getView().getEditedEntity();
+//                Long soLuong = saved.getSoLuong();
+//                Long khoangCachBuoiDieuTri = saved.getKhoangCachBuoiDieuTri();
+//                Date ngayBatDau = saved.getNgayBatDau();
+//
+//                // Validate theo quy tắc nghiệp vụ:
+//                //   soLuong > 1  && khoangCachBuoiDieuTri == 0  -> báo lỗi, không lưu gì cả.
+//                if (soLuong != null && soLuong > 1
+//                        && (khoangCachBuoiDieuTri == null || khoangCachBuoiDieuTri == 0)) {
+//                    notifications.create("Khoảng cách buổi điều trị phải lớn hơn 0")
+//                            .withType(Notifications.Type.ERROR)
+//                            .show();
+//                    return;
+//                }
+//
+//                saved.setIdChiTietPhieuDieuTri(getEditedEntity());
+//                saved.setCreatedAt(LocalDateTime.now());
+//                ChiTietDichVu persisted = dataManager.save(saved);
+//
+//                // Sinh buổi điều trị:
+//                //   - soLuong >= 1, có ngày bắt đầu và bệnh nhân.
+//                //   - khoangCachBuoiDieuTri có thể = 0 (áp dụng cho soLuong = 1, mọi buổi đều = ngayBatDau)
+//                //     hoặc > 0 (các buổi cách nhau khoangCach ngày).
+//                if (soLuong != null && soLuong > 0 &&
+//                        ngayBatDau != null &&
+//                        persisted.getIdChiTietPhieuDieuTri() != null &&
+//                        persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan() != null) {
+//
+//                    SaveContext saveContext = new SaveContext();
+//
+//                    long stepDays = (khoangCachBuoiDieuTri != null && khoangCachBuoiDieuTri > 0)
+//                            ? khoangCachBuoiDieuTri
+//                            : 0L;
+//
+//                    for (int i = 0; i < soLuong; i++) {
+//                        BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
+//                        buoiDieuTri.setIdChiTietDichVu(persisted);
+//                        buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
+//                        buoiDieuTri.setIdBenhNhan(persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan());
+//
+//                        Calendar ngayThucHienCal = Calendar.getInstance();
+//                        ngayThucHienCal.setTime(ngayBatDau);
+//                        ngayThucHienCal.add(Calendar.DAY_OF_MONTH, (int) (stepDays * i));
+//                        Date ngayThucHien = ngayThucHienCal.getTime();
+//                        buoiDieuTri.setNgayThucHien(ngayThucHien);
+//                        buoiDieuTri.setTrangThai(TrangThaiBuoiDieuTri.CHUA_THUC_HIEN);
+//
+//                        saveContext.saving(buoiDieuTri);
+//                    }
+//
+//                    if (!saveContext.getEntitiesToSave().isEmpty()) {
+//                        dataManager.save(saveContext);
+//                        if (getEditedEntity().getId() != null) {
+//                            tinhKpiChiTietService.regenerateForChiTietDieuTri(getEditedEntity().getId());
+//                        }
+//                    }
+//                }
+//
+//                chiTietDieuTriDl.load();
+//                recalculatePaymentFields();
+//            }
+//        });
+//        window.open();
+//    }
+//
+//    @Subscribe("chiTietDichVusDataGrid.edit")
+//    public void onChiTietDichVusDataGridEdit(final ActionPerformedEvent event) {
+//        // mặc định action list_edit đã xử lý, giữ hook cho mở rộng sau
+//    }
 
 }

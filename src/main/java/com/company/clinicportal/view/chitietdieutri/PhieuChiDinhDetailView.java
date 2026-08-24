@@ -35,7 +35,10 @@ public class PhieuChiDinhDetailView extends StandardDetailView<ChiTietDieuTri> {
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
-        ngayChiDinhField.setValue(LocalDateTime.now());
+        // Chỉ set ngày chỉ định mặc định cho phiếu mới, không ghi đè khi sửa.
+        if (entityStates.isNew(getEditedEntity())) {
+            ngayChiDinhField.setValue(LocalDateTime.now());
+        }
 
         if (idBenhNhan != null) {
             BenhNhan benhNhan = dataManager.load(BenhNhan.class).id(idBenhNhan).optional().orElse(null);

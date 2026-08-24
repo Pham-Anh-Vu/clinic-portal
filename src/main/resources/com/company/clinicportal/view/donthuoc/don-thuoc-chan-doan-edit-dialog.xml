@@ -9,6 +9,15 @@
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
+        <!-- KHÔNG bật dataLoadCoordinator auto="true" vì dialog mở qua
+             .editEntity(cd) + .withContainer(chanDoansDc) +
+             .withParentDataContext(...) — parent DataContext đã quản lý entity.
+             Nếu bật auto, loader sẽ tự load entity từ DB theo id, ghi đè
+             lên entity đã truyền vào → form bind sai instance, giá trị nhập
+             vào sẽ KHÔNG được ghi vào entity trên grid cha (và còn có nguy cơ
+             gây lỗi INSERT với id_don_thuoc=null do entity bị detach khỏi
+             parent). Loader vẫn được khai báo để StandardDetailView có thể
+             tìm thấy khi .editEntity(cd) được gọi. -->
     </facets>
     <actions>
         <action id="saveAction" type="detail_saveClose"/>
@@ -16,11 +25,9 @@
     </actions>
     <layout expand="actionsBox" spacing="false" padding="false">
         <vbox width="100%" height="100%" spacing="true" padding="false">
-            <!-- Card -->
             <vbox spacing="false" width="100%"
                   css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; padding: 16px; background: var(--lumo-base-color);">
 
-                <!-- HEADER -->
                 <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
                       css="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--lumo-primary-color);">
                     <hbox spacing="true" alignItems="CENTER">
@@ -31,7 +38,6 @@
                     </hbox>
                 </hbox>
 
-                <!-- FORM -->
                 <formLayout id="form" dataContainer="chanDoanDc" width="100%">
                     <responsiveSteps>
                         <responsiveStep minWidth="0" columns="1"/>
@@ -59,7 +65,6 @@
                               label="msg://donThuocChanDoanEditDialog.ketLuanLabel" required="true"/>
                 </formLayout>
 
-                <!-- FOOTER -->
                 <hbox id="actionsBox" justifyContent="END" spacing="true" width="100%"
                       css="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--lumo-contrast-10pct);">
                     <button id="cancelBtn" action="closeAction" text="Hủy bỏ" icon="vaadin:close" themeName="tertiary"/>

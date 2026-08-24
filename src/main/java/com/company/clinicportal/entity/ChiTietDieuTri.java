@@ -4,6 +4,7 @@ import io.jmix.core.FileRef;
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.OnDelete;
 import io.jmix.core.metamodel.annotation.Composition;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.data.DdlGeneration;
 import jakarta.persistence.*;
@@ -128,6 +129,35 @@ public class ChiTietDieuTri {
 
     @Column(name = "kham_benh_toan_than")
     private String khamBenhToanThan;
+
+    @Column(name = "mach")
+    private Double mach;
+
+    @Column(name = "nhiet_do")
+    private Double nhietDo;
+
+    @Column(name = "huyet_ap", length = 16)
+    private String huyetAp;
+
+    @Column(name = "nhip_tho")
+    private Double nhipTho;
+
+    @Column(name = "can_nang")
+    private Double canNang;
+
+    @Column(name = "chieu_cao")
+    private Double chieuCao;
+
+    @Transient
+    @DependsOnProperties({"canNang", "chieuCao"})
+    public Double getBmi() {
+        if (canNang == null || chieuCao == null || chieuCao <= 0) {
+            return null;
+        }
+        double chieuCaoMet = chieuCao / 100.0;
+        double bmi = canNang / (chieuCaoMet * chieuCaoMet);
+        return Math.round(bmi * 100.0) / 100.0;
+    }
 
     @Column(name = "khuyen_mai")
     private Double khuyenMai;
@@ -602,6 +632,54 @@ public class ChiTietDieuTri {
 
     public void setLinkGgDrive(String linkGgDrive) {
         this.linkGgDrive = linkGgDrive;
+    }
+
+    public Double getMach() {
+        return mach;
+    }
+
+    public void setMach(Double mach) {
+        this.mach = mach;
+    }
+
+    public Double getNhietDo() {
+        return nhietDo;
+    }
+
+    public void setNhietDo(Double nhietDo) {
+        this.nhietDo = nhietDo;
+    }
+
+    public String getHuyetAp() {
+        return huyetAp;
+    }
+
+    public void setHuyetAp(String huyetAp) {
+        this.huyetAp = huyetAp;
+    }
+
+    public Double getNhipTho() {
+        return nhipTho;
+    }
+
+    public void setNhipTho(Double nhipTho) {
+        this.nhipTho = nhipTho;
+    }
+
+    public Double getCanNang() {
+        return canNang;
+    }
+
+    public void setCanNang(Double canNang) {
+        this.canNang = canNang;
+    }
+
+    public Double getChieuCao() {
+        return chieuCao;
+    }
+
+    public void setChieuCao(Double chieuCao) {
+        this.chieuCao = chieuCao;
     }
 
     public Long getDaThanhToan() {

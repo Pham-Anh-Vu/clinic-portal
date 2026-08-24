@@ -5,6 +5,8 @@ import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.ChiTietDichVu;
 import com.company.clinicportal.entity.ChiTietDieuTri;
 import com.company.clinicportal.entity.NhanSu;
+import com.company.clinicportal.entity.ToDieuTri;
+import com.company.clinicportal.entity.ToDieuTriKyThuat;
 import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
 import com.company.clinicportal.service.LibreOfficeDocumentConversionService;
 import com.company.clinicportal.service.WordTemplateFillService;
@@ -18,7 +20,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
@@ -66,10 +70,10 @@ import javax.xml.transform.stream.StreamResult;
 @ViewController(id = "SoBenhAn.detail")
 @ViewDescriptor(path = "so-benh-an-detail-view.xml")
 @EditedEntityContainer("benhNhanDc")
-@DialogMode(height = "100%", width = "80%")
+//@DialogMode(height = "100%", width = "80%")
 public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     private static final Logger log = LoggerFactory.getLogger(SoBenhAnDetailView.class);
-    private static final String SO_BENH_AN_REPORT_TEMPLATE_DOC = "/reports/29.-Benh-an-ngoai-tru-PHCN-in (1).docx";
+    private static final String SO_BENH_AN_REPORT_TEMPLATE_DOC = "/reports/29.-Benh-an-ngoai-tru-PHCN-in (3).docx";
     private static final String TO_DIEU_TRI_TEMPLATE_HTML = "/reports/tờ điều trị BN BCB.html";
     private static final java.util.Set<String> RAW_HTML_PLACEHOLDERS = java.util.Set.of(
             "${chiTietDichVuRows}",
@@ -86,6 +90,8 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     private WordTemplateFillService wordTemplateFillService;
     @Autowired
     private LibreOfficeDocumentConversionService libreOfficeDocumentConversionService;
+    @Autowired
+    private com.company.clinicportal.service.ImageResourceLoader imageResourceLoader;
     @Autowired
     private UiComponents uiComponents;
     @Autowired
@@ -127,10 +133,21 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     @Subscribe
     public void onInit(final InitEvent event) {
         chiTietDieuTrisDataGrid.addComponentColumn(chiTietDieuTri -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText("Chi tiết");
-            button.addClickListener(e -> openChiTietDieuTriDetail(chiTietDieuTri));
-            return button;
+            HorizontalLayout actions = uiComponents.create(HorizontalLayout.class);
+            actions.setSpacing(true);
+            actions.setPadding(false);
+
+            JmixButton chiTietBtn = uiComponents.create(JmixButton.class);
+            chiTietBtn.setText("Chi tiết");
+            chiTietBtn.addClickListener(e -> openChiTietDieuTriDetail(chiTietDieuTri));
+            actions.add(chiTietBtn);
+
+            JmixButton editBtn = uiComponents.create(JmixButton.class);
+            editBtn.setText("Sửa");
+            editBtn.addClickListener(e -> openChiTietDieuTriEdit(chiTietDieuTri));
+            actions.add(editBtn);
+
+            return actions;
         }).setHeader("Thao tác").setAutoWidth(true);
 
 //        buoiDieuTrisDataGrid.addComponentColumn(buoiDieuTri -> {
@@ -154,6 +171,34 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
         loadChiTietDieuTriList();
         refreshPatientInfoSection();
+    }
+
+    @Override
+    protected void processBeforeEnterInternal(BeforeEnterEvent event) {
+        super.processBeforeEnterInternal(event);
+        loadBenhNhanFromRoute(event.getRouteParameters());
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        loadBenhNhanFromRoute(event.getRouteParameters());
+        super.beforeEnter(event);
+    }
+
+    private void loadBenhNhanFromRoute(RouteParameters params) {
+        Optional<String> idOpt = params.get("id");
+        if (idOpt.isEmpty()) {
+            return;
+        }
+        try {
+            Long id = Long.valueOf(idOpt.get());
+            if (idBenhNhan == null || !id.equals(idBenhNhan.getId())) {
+                BenhNhan benhNhan = dataManager.load(BenhNhan.class).id(id).one();
+                setIdBenhNhan(benhNhan);
+            }
+        } catch (NumberFormatException e) {
+            // ignore — URL :id không hợp lệ, view sẽ mở với idBenhNhan null
+        }
     }
 
     private void loadChiTietDieuTriList() {
@@ -199,6 +244,30 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
 
         dialogWindow.addAfterCloseListener(event1 -> loadChiTietDieuTriList());
 
+        dialogWindow.open();
+    }
+
+    private void openChiTietDieuTriEdit(ChiTietDieuTri chiTietDieuTri) {
+        Long phieuId = chiTietDieuTri == null ? null : chiTietDieuTri.getId();
+        if (phieuId == null) {
+            notifications.create("Không thể sửa phiếu chưa được lưu.")
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+        DialogWindow<PhieuChiDinhDetailView> dialogWindow = dialogWindows.detail(this, ChiTietDieuTri.class)
+                .withViewClass(PhieuChiDinhDetailView.class)
+                .editEntity(chiTietDieuTri)
+                .build();
+        dialogWindow.setWidth("60%");
+        dialogWindow.setHeight("90%");
+        dialogWindow.addAfterCloseListener(closeEvent -> {
+            if (!closeEvent.closedWith(StandardOutcome.SAVE)) {
+                return;
+            }
+            paymentSummaryService.refreshPaymentSummary(phieuId);
+            loadChiTietDieuTriList();
+        });
         dialogWindow.open();
     }
 
@@ -334,11 +403,32 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
     }
 
     private byte[] generateSoBenhAnDoc(ChiTietDieuTri chiTietDieuTri) throws Exception {
-        Map<String, String> values = buildSoBenhAnPlaceholderValues(chiTietDieuTri);
-        return wordTemplateFillService.fillTemplate(SO_BENH_AN_REPORT_TEMPLATE_DOC, values);
+        // Build values + danh sách base64 ảnh chữ ký theo từng row (cùng thứ tự rows).
+        java.util.List<String> chuKyByRow = new java.util.ArrayList<>();
+        Map<String, String> values = buildSoBenhAnPlaceholderValues(chiTietDieuTri, chuKyByRow);
+
+        String resourcePath = SO_BENH_AN_REPORT_TEMPLATE_DOC;
+        try (java.io.InputStream in = getClass().getResourceAsStream(resourcePath)) {
+            if (in == null) {
+                throw new IOException("Không tìm thấy mẫu Word: " + resourcePath);
+            }
+            // Gọi overload có truyền list base64 để WordTemplateFillService
+            // chèn ảnh chữ ký vào cell "BS chỉ định" của từng row.
+            return wordTemplateFillService.fillDocxTemplate(in, values, chuKyByRow);
+        }
     }
 
     private Map<String, String> buildSoBenhAnPlaceholderValues(ChiTietDieuTri chiTietDieuTri) {
+        return buildSoBenhAnPlaceholderValues(chiTietDieuTri, new java.util.ArrayList<>());
+    }
+
+    /**
+     * Build map placeholder cho template DOCX sổ bệnh án.
+     * Đồng thời build danh sách base64 ảnh chữ ký tương ứng với từng row
+     * (cùng thứ tự với rows được nạp vào {@code ${chiTietDichVuRows}}).
+     */
+    private Map<String, String> buildSoBenhAnPlaceholderValues(ChiTietDieuTri chiTietDieuTri,
+                                                               java.util.List<String> chuKyByRowOut) {
         ChiTietDieuTri ctdt = chiTietDieuTri;
         if (chiTietDieuTri.getId() != null) {
             ctdt = dataManager.load(ChiTietDieuTri.class)
@@ -359,19 +449,30 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
                     .orElse(null);
         }
 
-        List<ChiTietDichVu> chiTietDichVus = dataManager.load(ChiTietDichVu.class)
-                .query("select e from ChiTietDichVu e where e.idChiTietPhieuDieuTri = :ctdt order by e.id")
+        List<ToDieuTri> toDieuTris = dataManager.load(ToDieuTri.class)
+                .query("select e from ToDieuTri e where e.chiTietDieuTri = :ctdt order by e.tuNgay asc, e.id asc")
                 .parameter("ctdt", ctdt)
+                .fetchPlan(fp -> fp
+                        .addFetchPlan("_base")
+                        .add("idNguoiThucHien", nguoiThucHienFp -> nguoiThucHienFp.addFetchPlan("_base"))
+                        .add("idBacSiChiDinh", bacSiFp -> bacSiFp.addFetchPlan("_base"))
+                        .add("kyThuatList", kyThuatListFp -> kyThuatListFp
+                                .addFetchPlan("_base")
+                                .add("idDichVu", dichVuFp -> dichVuFp.addFetchPlan("_base"))))
                 .list();
 
         Set<String> tenDichVus = new LinkedHashSet<>();
         Set<String> bacSis = new LinkedHashSet<>();
-        for (ChiTietDichVu chiTietDichVu : chiTietDichVus) {
-            if (chiTietDichVu.getIdDichVu() != null && chiTietDichVu.getIdDichVu().getTenDichVu() != null) {
-                tenDichVus.add(chiTietDichVu.getIdDichVu().getTenDichVu());
+        for (ToDieuTri toDieuTri : toDieuTris) {
+            if (toDieuTri.getIdBacSiChiDinh() != null && toDieuTri.getIdBacSiChiDinh().getHoTen() != null) {
+                bacSis.add(toDieuTri.getIdBacSiChiDinh().getHoTen());
             }
-            if (chiTietDichVu.getIdBacSi() != null && chiTietDichVu.getIdBacSi().getHoTen() != null) {
-                bacSis.add(chiTietDichVu.getIdBacSi().getHoTen());
+            if (toDieuTri.getKyThuatList() != null) {
+                for (ToDieuTriKyThuat kyThuat : toDieuTri.getKyThuatList()) {
+                    if (kyThuat.getIdDichVu() != null && kyThuat.getIdDichVu().getTenDichVu() != null) {
+                        tenDichVus.add(kyThuat.getIdDichVu().getTenDichVu());
+                    }
+                }
             }
         }
 
@@ -380,39 +481,69 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
                 ? String.join("; ", bacSis)
                 : safeText(ctdt.getIdNhanSu() != null ? ctdt.getIdNhanSu().getHoTen() : null);
 
-        List<Long> chiTietIds = chiTietDichVus.stream()
-                .map(ChiTietDichVu::getId)
-                .toList();
-
-        List<BuoiDieuTri> allBuoiDieuTris = Collections.emptyList();
-        if (!chiTietIds.isEmpty()) {
-            allBuoiDieuTris = dataManager.load(BuoiDieuTri.class)
-                    .query("select e from BuoiDieuTri e where e.idChiTietDichVu.id in :ids order by e.ngayThucHien, e.gioBatDau, e.id")
-                    .parameter("ids", chiTietIds)
-                    .list();
-        }
-
         StringBuilder rows = new StringBuilder();
-        for (BuoiDieuTri buoi : allBuoiDieuTris) {
-            ChiTietDichVu dv = buoi.getIdChiTietDichVu();
-            String tenDichVu = dv != null && dv.getIdDichVu() != null
-                    ? safeText(dv.getIdDichVu().getTenDichVu())
-                    : "";
-            String bsChiDinh = dv != null && dv.getIdBacSi() != null
-                    ? safeText(dv.getIdBacSi().getHoTen())
-                    : safeText(ctdt.getIdNhanSu() != null ? ctdt.getIdNhanSu().getHoTen() : null);
-            String nguoiThucHien = safeText(buoi.getHoTenNhanSuThucHien());
+        for (ToDieuTri toDieuTri : toDieuTris) {
+            StringBuilder ngayGioBuilder = new StringBuilder();
+            if (toDieuTri.getTuNgay() != null) {
+                ngayGioBuilder.append(formatDate(toDieuTri.getTuNgay()));
+            }
+            if (toDieuTri.getDenNgay() != null) {
+                if (ngayGioBuilder.length() > 0) {
+                    ngayGioBuilder.append(" - ");
+                }
+                ngayGioBuilder.append(formatDate(toDieuTri.getDenNgay()));
+            }
+            String ngayGio = ngayGioBuilder.toString();
 
-            rows.append(formatNgayGioBuoiDieuTri(buoi)).append("||")
-                    .append(safeText(ctdt.getDienBienBenh())).append("||")
+            String dienBien = safeText(toDieuTri.getMoTaDienBienBenh());
+
+            String tenDichVu;
+            int tongPhut = 0;
+            Set<String> tenDichVuSet = new LinkedHashSet<>();
+            if (toDieuTri.getKyThuatList() != null && !toDieuTri.getKyThuatList().isEmpty()) {
+                for (ToDieuTriKyThuat kyThuat : toDieuTri.getKyThuatList()) {
+                    if (kyThuat.getIdDichVu() != null && kyThuat.getIdDichVu().getTenDichVu() != null) {
+                        tenDichVuSet.add(kyThuat.getIdDichVu().getTenDichVu());
+                    }
+                    if (kyThuat.getThoiGianPhut() != null) {
+                        tongPhut += kyThuat.getThoiGianPhut();
+                    }
+                }
+            }
+            tenDichVu = String.join("; ", tenDichVuSet);
+            String soPhutText = tongPhut > 0 ? String.valueOf(tongPhut) : "";
+
+            String nguoiThucHien = safeText(toDieuTri.getIdNguoiThucHien() != null
+                    ? toDieuTri.getIdNguoiThucHien().getHoTen()
+                    : null);
+
+            String bsChiDinh = safeText(toDieuTri.getIdBacSiChiDinh() != null
+                    ? toDieuTri.getIdBacSiChiDinh().getHoTen()
+                    : null);
+            if (bsChiDinh.isBlank()) {
+                bsChiDinh = safeText(ctdt.getIdNhanSu() != null ? ctdt.getIdNhanSu().getHoTen() : null);
+            }
+
+            // === MỚI: build base64 ảnh chữ ký cho row này ===
+            // Chỉ chèn khi có tên bác sĩ (không chèn ảnh vào row trống).
+            // Hiện dùng ảnh tĩnh /reports/anh-chu-ky.jpg cho mọi BS chỉ định
+            // (giống cách ToDieuTriPrintService đã làm).
+            if (!bsChiDinh.isBlank()) {
+                chuKyByRowOut.add(imageResourceLoader.getDefaultChuKyBase64());
+            } else {
+                chuKyByRowOut.add(null);
+            }
+
+            rows.append(ngayGio).append("||")
+                    .append(dienBien).append("||")
                     .append(tenDichVu).append("||")
-                    .append(safeText(calcMinutes(buoi.getGioBatDau(), buoi.getGioKetThuc()))).append("||")
+                    .append(soPhutText).append("||")
                     .append(nguoiThucHien).append("||")
                     .append(bsChiDinh)
                     .append("\n");
         }
         if (rows.length() == 0) {
-            rows.append("(Chưa có buổi điều trị)||||||\n");
+            rows.append("(Chưa có tờ điều trị)|||||\n");
         }
 
         Map<String, String> values = new HashMap<>();
@@ -427,9 +558,16 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         values.put("${ChiTietDieuTri.khamBenhQuaTrinhBenh}", safeText(ctdt.getKhamBenhQuaTrinhBenh()));
         values.put("${ChiTietDieuTri.khamBenhTienSuBenh}", safeText(ctdt.getKhamBenhTienSuBenh()));
         values.put("${ChiTietDieuTri.khamBenhToanThan}", safeText(ctdt.getKhamBenhToanThan()));
+        values.put("${ChiTietDieuTri.mach}", safeText(ctdt.getMach()));
+        values.put("${ChiTietDieuTri.nhietDo}", safeText(ctdt.getNhietDo()));
+        values.put("${ChiTietDieuTri.huyetAp}", safeText(ctdt.getHuyetAp()));
+        values.put("${ChiTietDieuTri.nhipTho}", safeText(ctdt.getNhipTho()));
+        values.put("${ChiTietDieuTri.canNang}", safeText(ctdt.getCanNang()));
+        values.put("${ChiTietDieuTri.chieuCao}", safeText(ctdt.getChieuCao()));
+        values.put("${ChiTietDieuTri.bmi}", safeText(calculateBmi(ctdt.getCanNang(), ctdt.getChieuCao())));
         values.put("${ChiTietDieuTri.lyDoVaoVien}", safeText(ctdt.getLyDoVaoVien()));
-        values.put("${ChiTietDieuTri.ngayBatDau}", formatDate(ctdt.getNgayBatDau()));
-        values.put("${ChiTietDieuTri.ngayKetThuc}", formatDate(ctdt.getNgayKetThuc()));
+        values.put("${ChiTietDieuTri.ngayBatDau}", formatDate(resolveSoBenhAnDateStart(ctdt)));
+        values.put("${ChiTietDieuTri.ngayKetThuc}", formatDate(resolveSoBenhAnDateEnd(ctdt)));
         Date ngayKhamBenh = resolveNgayKhamBenh(ctdt, benhNhan);
         values.put("${ChiTietDieuTri.idPhieuDieuTri.ngayKham}", formatDate(ngayKhamBenh));
         putChuKyDateValues(values, ngayKhamBenh);
@@ -645,6 +783,21 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         return date != null ? DATE_FORMAT.format(date) : "";
     }
 
+    /**
+     * Tính BMI từ cân nặng (kg) và chiều cao (cm) - dùng khi in sổ bệnh án để không
+     * phụ thuộc vào transient getter {@code getBmi()} trên entity (tránh lỗi
+     * "Unknown property 'bmi'" ở một số tình huống binding của Jmix).
+     * Trả về null nếu thiếu dữ liệu hoặc chiều cao không hợp lệ.
+     */
+    private Double calculateBmi(Double canNang, Double chieuCao) {
+        if (canNang == null || chieuCao == null || chieuCao <= 0) {
+            return null;
+        }
+        double chieuCaoMet = chieuCao / 100.0;
+        double bmi = canNang / (chieuCaoMet * chieuCaoMet);
+        return Math.round(bmi * 100.0) / 100.0;
+    }
+
     private void putChuKyDateValues(Map<String, String> values, Date ngayKhamBenh) {
         Date effectiveDate = ngayKhamBenh != null ? ngayKhamBenh : new Date();
         Calendar calendar = Calendar.getInstance();
@@ -695,6 +848,84 @@ public class SoBenhAnDetailView extends StandardDetailView<BenhNhan> {
         long diffMs = end.getTime() - start.getTime();
         if (diffMs <= 0) return null;
         return (int) Math.round(diffMs / 60000.0);
+    }
+
+    /**
+     * Tính ngày bắt đầu cho sổ bệnh án theo đúng logic ở tab tổng kết điều trị
+     * (xem {@code ChiTietDieuTriSBADetailView.handleTongKetTabSelected} +
+     * {@code resolveDateRangeFromToDieuTri}).
+     * <p>
+     * Quy tắc:
+     * <ul>
+     *     <li>Nếu {@code ctdt.ngayBatDau} đã có → giữ nguyên.</li>
+     *     <li>Nếu trống → lấy {@code min(tuNgay)} của các {@code ToDieuTri}
+     *         thuộc phiếu (ưu tiên dòng có ngày sớm nhất).</li>
+     *     <li>Nếu không có {@code ToDieuTri} nào hoặc không có ngày hợp lệ
+     *         → trả về {@code null} (giữ chỗ trống).</li>
+     * </ul>
+     */
+    private Date resolveSoBenhAnDateStart(ChiTietDieuTri ctdt) {
+        if (ctdt == null) {
+            return null;
+        }
+        if (ctdt.getNgayBatDau() != null) {
+            return ctdt.getNgayBatDau();
+        }
+        Date fromToDieuTri = resolveMinTuNgayFromToDieuTri(ctdt);
+        return fromToDieuTri;
+    }
+
+    /**
+     * Tính ngày kết thúc cho sổ bệnh án theo đúng logic ở tab tổng kết điều trị.
+     * <ul>
+     *     <li>Nếu {@code ctdt.ngayKetThuc} đã có → giữ nguyên.</li>
+     *     <li>Nếu trống → lấy {@code max(denNgay)} của các {@code ToDieuTri}.</li>
+     *     <li>Nếu không có dữ liệu → trả về {@code null}.</li>
+     * </ul>
+     */
+    private Date resolveSoBenhAnDateEnd(ChiTietDieuTri ctdt) {
+        if (ctdt == null) {
+            return null;
+        }
+        if (ctdt.getNgayKetThuc() != null) {
+            return ctdt.getNgayKetThuc();
+        }
+        Date fromToDieuTri = resolveMaxDenNgayFromToDieuTri(ctdt);
+        return fromToDieuTri;
+    }
+
+    private Date resolveMinTuNgayFromToDieuTri(ChiTietDieuTri chiTietDieuTri) {
+        if (chiTietDieuTri == null || chiTietDieuTri.getId() == null) {
+            return null;
+        }
+        List<ToDieuTri> lines = dataManager.load(ToDieuTri.class)
+                .query("select e from ToDieuTri e where e.chiTietDieuTri = :ctdt order by e.tuNgay asc, e.id asc")
+                .parameter("ctdt", chiTietDieuTri)
+                .list();
+        Date start = null;
+        for (ToDieuTri line : lines) {
+            if (line.getTuNgay() != null && (start == null || line.getTuNgay().before(start))) {
+                start = line.getTuNgay();
+            }
+        }
+        return start;
+    }
+
+    private Date resolveMaxDenNgayFromToDieuTri(ChiTietDieuTri chiTietDieuTri) {
+        if (chiTietDieuTri == null || chiTietDieuTri.getId() == null) {
+            return null;
+        }
+        List<ToDieuTri> lines = dataManager.load(ToDieuTri.class)
+                .query("select e from ToDieuTri e where e.chiTietDieuTri = :ctdt order by e.tuNgay asc, e.id asc")
+                .parameter("ctdt", chiTietDieuTri)
+                .list();
+        Date end = null;
+        for (ToDieuTri line : lines) {
+            if (line.getDenNgay() != null && (end == null || line.getDenNgay().after(end))) {
+                end = line.getDenNgay();
+            }
+        }
+        return end;
     }
 
     private String formatGioiTinh(Object gioiTinh) {

@@ -10,7 +10,8 @@
             </fetchPlan>
             <loader id="donThuocDl"/>
             <collection id="chiTietsDc" property="chiTiets"/>
-            <collection id="chanDoansDc" property="chanDoans"/>
+            <collection id="chanDoansDc" property="chanDoans">
+            </collection>
         </instance>
         <instance id="dotDungDc" class="com.company.clinicportal.entity.DonThuocDotDung">
             <fetchPlan extends="_base"/>
@@ -39,21 +40,19 @@
                         <responsiveStep minWidth="0" columns="1"/>
                         <responsiveStep minWidth="60em" columns="6"/>
                     </responsiveSteps>
-                    <!--                <textField property="maDonThuoc" readOnly="true"/>-->
                     <select id="loaiDonField" property="loaiDon" label="Loại đơn"
                             optionsEnum="com.company.clinicportal.enumentity.LoaiDon" required="true" colspan="2"/>
                     <textField property="tenBacSi" colspan="2" required="true" readOnly="true"/>
                     <dateTimePicker id="ngayKeField" property="ngayKe" label="Ngày kê" required="true" colspan="2"/>
                     <select id="hinhThucDieuTriField" property="hinhThucDieuTri" label="Hình thức điều trị"
-                            optionsEnum="com.company.clinicportal.enumentity.HinhThucDieuTri" required="false" colspan="2"/>
+                            optionsEnum="com.company.clinicportal.enumentity.HinhThucDieuTri" colspan="2"/>
                     <datePicker property="ngayTaiKham" colspan="2"/>
-<!--                    <textArea property="chanDoanText" height="6em" required="true" colspan="2" label="Chẩn đoán"/>-->
 
-                    <textField id="soDotField" property="soDot" label="Đợt" datatype="int" required="true"
+                    <textField id="soDotField" property="soDot" label="Đợt" datatype="int"
                                dataContainer="dotDungDc" colspan="2"/>
-                    <datePicker id="tuNgayField" property="tuNgay" label="Từ ngày" required="true"
+                    <datePicker id="tuNgayField" property="tuNgay" label="Từ ngày"
                                 dataContainer="dotDungDc" colspan="2"/>
-                    <datePicker id="denNgayField" property="denNgay" label="Đến ngày" required="true"
+                    <datePicker id="denNgayField" property="denNgay" label="Đến ngày"
                                 dataContainer="dotDungDc" colspan="2"/>
 
                     <textArea id="lyDoKhamField" property="lyDoKham" colspan="3" height="5em" label="Lưu ý"/>
@@ -85,6 +84,7 @@
                         <actions>
                             <action id="edit" type="list_edit" text="Chi tiết"/>
                             <action id="remove" type="list_remove" text="Xóa"/>
+                            <action id="refresh" type="list_refresh" text="refresh"/>
                         </actions>
                         <emptyStateComponent>
                             <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">

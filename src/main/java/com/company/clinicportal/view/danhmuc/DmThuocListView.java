@@ -73,12 +73,12 @@ public class DmThuocListView extends StandardListView<DmThuoc> {
                 if(donThuocChiTiet != null){
                     notifications.create(messageBundle.getMessage("DonThuocChiTiet.deleted"))
                             .withThemeVariant(NotificationVariant.LUMO_WARNING)
-                            .withPosition(Notification.Position.TOP_START)
+                            .withPosition(Notification.Position.MIDDLE)
                             .show();
+                }else{
+                    dmThuocsDataGrid.select(dmThuoc);
+                    dmThuocsDataGridRemoveAction.execute();
                 }
-
-                dmThuocsDataGrid.select(dmThuoc);
-                dmThuocsDataGridRemoveAction.execute();
             });
 
             actionsLayout.add(editButton);

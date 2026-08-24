@@ -23,6 +23,7 @@ import com.company.clinicportal.view.lichsuthanhtoan.LichSuThanhToanDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.grid.Grid;
@@ -49,6 +50,7 @@ import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.multiselectcombobox.JmixMultiSelectComboBox;
+import io.jmix.flowui.component.tabsheet.JmixTabSheet;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.kit.action.Action;
@@ -77,17 +79,17 @@ import org.slf4j.LoggerFactory;
 @ViewController(id = "ChiTietDieuTriSBA.detail")
 @ViewDescriptor(path = "chi-tiet-dieu-tri-sba-detail-view.xml")
 @EditedEntityContainer("chiTietDieuTriDc")
-@DialogMode(height = "90%", width = "70%")
+@DialogMode(height = "90%", width = "90%")
 public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuTri> {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("d.M.yyyy");
     private static final Logger log = LoggerFactory.getLogger(ChiTietDieuTriSBADetailView.class);
     private boolean toDieuTriColumnsConfigured = false;
 
     private BenhNhan idBenhNhan = null;
-    @ViewComponent
-    private DataGrid<ChiTietDichVu> chiTietDichVusDataGrid;
-    @ViewComponent("chiTietDichVusDataGrid.remove")
-    private Action chiTietDichVusRemoveAction;
+//    @ViewComponent
+//    private DataGrid<ChiTietDichVu> chiTietDichVusDataGrid;
+//    @ViewComponent("chiTietDichVusDataGrid.remove")
+//    private Action chiTietDichVusRemoveAction;
     @Autowired
     private UiComponents uiComponents;
     @Autowired
@@ -98,22 +100,18 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private Notifications notifications;
     @Autowired
     private ToDieuTriPrintService toDieuTriPrintService;
+    @Autowired
+    private com.company.clinicportal.service.TheoDoiBNPrintService theoDoiBNPrintService;
     @ViewComponent
     private DataGrid<LichSuThanhToan> lichSuThanhToansDataGrid;
     @ViewComponent
     private CollectionLoader<LichSuThanhToan> lichSuThanhToansDl;
     @ViewComponent
-    private TypedTextField<Long> tongTienField;
+    private TypedTextField<?> ngayBatDauField;
     @ViewComponent
-    private TypedTextField<String> khuyenMaiField;
+    private TypedTextField<?> ngayKetThucField;
     @ViewComponent
-    private TypedTextField<Long> daThanhToanField;
-    @ViewComponent
-    private TypedTextField<Long> tongTienSauKhuyenMaiField;
-    @ViewComponent
-    private TypedTextField<Integer> phaiDongField;
-    @ViewComponent
-    private TypedDatePicker<Date> ngayThanhToanField;
+    private JmixTextArea dienBienBenhField;
     @Autowired
     private Metadata metadata;
     @Autowired
@@ -128,6 +126,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionContainer<ToDieuTri> toDieuTrisDc;
     @ViewComponent
     private CollectionContainer<LichSuThanhToan> lichSuThanhToansDc;
+    @ViewComponent
+    private JmixTabSheet tabSheet;
 //    @Autowired
 //    private TinhKpiChiTietService tinhKpiChiTietService;
     @Autowired
@@ -168,6 +168,27 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             return e == null ? dt.getTrangThai() : e.getTenHienThi();
         });
     }
+
+    /**
+     * Renderer cho cột "Chẩn đoán" của đơn thuốc: ưu tiên danh sách ICD-10 trên
+     * {@code donThuoc.chiTietDieuTri.dsChanDoanIcd} (helper {@code getDsChanDoanIcdText()}
+     * trả về chuỗi "Mã - Tên" đã ghép), nếu rỗng mới fallback sang
+     * {@code chiTietDieuTri.chuanDoan} (text chuẩn đoán thường).
+     */
+    @Supply(to = "donThuocsDataGrid.chanDoanColumn", subject = "renderer")
+    private Renderer<DonThuoc> donThuocsDataGridChanDoanColumnRenderer() {
+        return new TextRenderer<>(dt -> {
+            ChiTietDieuTri ctdt = dt.getChiTietDieuTri();
+            if (ctdt == null) {
+                return "";
+            }
+            String icdText = ctdt.getDsChanDoanIcdText();
+            if (icdText != null && !icdText.isBlank()) {
+                return icdText;
+            }
+            return ctdt.getChuanDoan() != null ? ctdt.getChuanDoan() : "";
+        });
+    }
     @ViewComponent
     private JmixButton addDonThuocButton;
     @ViewComponent
@@ -176,6 +197,20 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private JmixTextArea chuanDoanField;
     @ViewComponent
     private JmixMultiSelectComboBox<Icd10> dsChanDoanIcdField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField machField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField nhietDoField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField huyetApField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField nhipThoField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField canNangField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField chieuCaoField;
+    @ViewComponent
+    private com.vaadin.flow.component.textfield.TextField bmiField;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -186,11 +221,10 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     public void onBeforeShow(final BeforeShowEvent event) {
         autoFillTongKetDieuTriFields();
         toggleDiagnosisFields();
+        handleTongKetTabSelected();
+        updateBmiField();
 
         huongDieuTriField.setValue("Hướng dẫn PHCN tại nhà");
-
-        khuyenMaiField.setValueChangeMode(ValueChangeMode.EAGER);
-        khuyenMaiField.addValueChangeListener(event1 -> recalculatePaymentFields());
 
         if (getEditedEntity().getId() != null) {
             lichSuThanhToansDl.setParameter("idChiTietDieuTri", getEditedEntity());
@@ -200,42 +234,42 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
         // ✅ Column Giá
-        Grid.Column<ChiTietDichVu> giaColumn = chiTietDichVusDataGrid.addColumn(chiTiet -> {
-
-                    if (chiTiet.getIdDichVu() == null) return "";
-
-                    Long gia = TinhTheoGia.LE.equals(chiTiet.getTinhTheoGia())
-                            ? chiTiet.getIdDichVu().getGiaBuoiLe()
-                            : chiTiet.getIdDichVu().getGia();
-
-                    return gia != null ? formatter.format(gia) : "0";
-
-                }).setHeader("Giá")
-                .setKey("giaColumn")
-                .setAutoWidth(true)
-                .setSortable(true);
-
-        // ✅ Column Thao tác
-        Grid.Column<ChiTietDichVu> actionColumn = chiTietDichVusDataGrid.addComponentColumn(this::buildChiTietDichVuActionsCell)
-                .setHeader("Thao tác")
-                .setKey("actionColumn")
-                .setAutoWidth(true);
-
-        // ✅ Set đúng thứ tự column
-        chiTietDichVusDataGrid.setColumnOrder(
-                chiTietDichVusDataGrid.getColumnByKey("tenDichVu"),
-                chiTietDichVusDataGrid.getColumnByKey("nhomDichVu"),
-                chiTietDichVusDataGrid.getColumnByKey("ghiChu"),
-                giaColumn,
-                chiTietDichVusDataGrid.getColumnByKey("soLuong"),
-                chiTietDichVusDataGrid.getColumnByKey("ngayBatDau"),
-                actionColumn
-        );
+//        Grid.Column<ChiTietDichVu> giaColumn = chiTietDichVusDataGrid.addColumn(chiTiet -> {
+//
+//                    if (chiTiet.getIdDichVu() == null) return "";
+//
+//                    Long gia = TinhTheoGia.LE.equals(chiTiet.getTinhTheoGia())
+//                            ? chiTiet.getIdDichVu().getGiaBuoiLe()
+//                            : chiTiet.getIdDichVu().getGia();
+//
+//                    return gia != null ? formatter.format(gia) : "0";
+//
+//                }).setHeader("Giá")
+//                .setKey("giaColumn")
+//                .setAutoWidth(true)
+//                .setSortable(true);
+//
+//        // ✅ Column Thao tác
+//        Grid.Column<ChiTietDichVu> actionColumn = chiTietDichVusDataGrid.addComponentColumn(this::buildChiTietDichVuActionsCell)
+//                .setHeader("Thao tác")
+//                .setKey("actionColumn")
+//                .setAutoWidth(true);
+//
+//        // ✅ Set đúng thứ tự column
+//        chiTietDichVusDataGrid.setColumnOrder(
+//                chiTietDichVusDataGrid.getColumnByKey("tenDichVu"),
+//                chiTietDichVusDataGrid.getColumnByKey("nhomDichVu"),
+//                chiTietDichVusDataGrid.getColumnByKey("ghiChu"),
+//                giaColumn,
+//                chiTietDichVusDataGrid.getColumnByKey("soLuong"),
+//                chiTietDichVusDataGrid.getColumnByKey("ngayBatDau"),
+//                actionColumn
+//        );
 
         if (getEditedEntity() != null) {
 //            configureToDieuTriGridColumns();
-            toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
-            toDieuTrisDl.load();
+//            toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
+//            toDieuTrisDl.load();
         }
 
         // Load danh sách đơn thuốc của chi tiết phiếu điều trị hiện tại và cấu hình cột thao tác.
@@ -245,7 +279,112 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         }
         configureDonThuocGridColumns();
 
-        recalculatePaymentFields();
+//        recalculatePaymentFields();
+
+        // Nếu tab mặc định đang hiển thị là "T� điều trị" (chẳng hạn user mở dialog từ
+        // chỗ nào đó đã chọn sẵn tab3) thì load + cấu hình renderer luôn trong onBeforeShow.
+        // Nếu không, việc này sẽ được làm lười (lazy) trong onTabSheetSelectedChange khi
+        // user thực sự chuyển sang tab này.
+        if (tabSheet != null) {
+            com.vaadin.flow.component.tabs.Tab selected = tabSheet.getSelectedTab();
+            if (selected != null
+                    && selected.getId().isPresent()
+                    && "tab3".equals(selected.getId().get())) {
+                if (getEditedEntity() != null
+                        && toDieuTrisDl != null
+                        && toDieuTrisDc.getItems().isEmpty()) {
+                    toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
+                    toDieuTrisDl.load();
+                }
+                configureToDieuTriGridColumns();
+            }
+        }
+    }
+
+    @Subscribe("canNangField")
+    public void onCanNangFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<TypedTextField<Double>, Double> event) {
+        updateBmiField();
+    }
+
+    @Subscribe("chieuCaoField")
+    public void onChieuCaoFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<TypedTextField<Double>, Double> event) {
+        updateBmiField();
+    }
+
+        /**
+     * Lazy load + cấu hình renderer cho "Tờ điều trị" chỉ khi user thực sự mở tab "tab3".
+     * Trước đó việc này chạy ngay trong {@link #onBeforeShow} khiến 8 cột ComponentRenderer
+     * (đặc biệt các cột Span + indexOf O(n)) được set sẵn cho cả view, gây lag giật khi
+     * kéo lên/xuống ở các tab khác vì Vaadin Grid vẫn lazy-render row của "Tờ điều trị" nếu
+     * user đã từng mở tab này. Bây giờ chỉ chạy khi thực sự cần.
+     */
+    @Subscribe("tabSheet")
+    public void onTabSheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
+        com.vaadin.flow.component.tabs.Tab selected = event.getSelectedTab();
+        if (selected == null || selected.getId().isEmpty()) {
+            return;
+        }
+        String tabId = selected.getId().get();
+        if ("tab3".equals(tabId)) {
+            handleToDieuTriTabSelected();
+        }
+    }
+
+    private void handleToDieuTriTabSelected() {
+        if (getEditedEntity() == null) {
+            return;
+        }
+        if (toDieuTrisDl != null && toDieuTrisDc.getItems().isEmpty()) {
+            toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
+            toDieuTrisDl.load();
+        }
+        configureToDieuTriGridColumns();
+    }
+
+    private void handleTongKetTabSelected() {
+        if (getEditedEntity() == null) {
+            return;
+        }
+        if (ngayBatDauField == null || ngayKetThucField == null) {
+            return;
+        }
+        ChiTietDieuTri entity = getEditedEntity();
+        boolean batDauTrong = entity.getNgayBatDau() == null;
+        boolean ketThucTrong = entity.getNgayKetThuc() == null;
+        if (!batDauTrong && !ketThucTrong) {
+            // Cả ngày bắt đầu/kết thúc đều đã có → bỏ qua luôn phần ngày.
+        }
+        DateRange range = null;
+        if (batDauTrong || ketThucTrong) {
+            range = resolveDateRangeFromToDieuTri(entity);
+        }
+        if (batDauTrong && range != null && range.tuNgay() != null) {
+            // ngayBatDauField đã bind với property ngayBatDau của entity,
+            // chỉ cần set entity là UI tự cập nhật; gọi setValue(String) thủ công sẽ gây
+            // IllegalArgumentException khi model type là Date.
+            entity.setNgayBatDau(range.tuNgay());
+        }
+        if (ketThucTrong && range != null && range.denNgay() != null) {
+            entity.setNgayKetThuc(range.denNgay());
+        }
+
+        // Auto-fill "Mô tả diễn biến bệnh" từ "Khám bệnh bộ phận" ở tab CHI TIẾT ĐIỀU TRỊ.
+        // CHỈ fill khi trống để cho phép người dùng tự sửa ở những lần mở tab sau mà không bị ghi đè.
+        if (dienBienBenhField != null
+                && (entity.getDienBienBenh() == null || entity.getDienBienBenh().isBlank())) {
+            String kbBoPhan = entity.getKbBoPhan();
+            if (kbBoPhan != null && !kbBoPhan.isBlank()) {
+                entity.setDienBienBenh(kbBoPhan);
+                dienBienBenhField.setValue(kbBoPhan);
+            }
+        }
+    }
+
+    private boolean isToDieuTriTabSelected(JmixTabSheet.SelectedChangeEvent event) {
+        com.vaadin.flow.component.tabs.Tab selected = event.getSelectedTab();
+        return selected != null
+                && selected.getId().isPresent()
+                && "tab3".equals(selected.getId().get());
     }
 
     private void configureDonThuocGridColumns() {
@@ -299,39 +438,39 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
      * - "Chi tiết" — mở danh sách buổi điều trị của dịch vụ.
      * - "Xóa" — xóa dịch vụ khỏi chỉ định (tận dụng action list_remove của grid).
      */
-    private HorizontalLayout buildChiTietDichVuActionsCell(ChiTietDichVu chiTietDichVu) {
-        HorizontalLayout actions = uiComponents.create(HorizontalLayout.class);
-        actions.setSpacing(true);
-        actions.setPadding(false);
-
-        // Nút Chi tiết
-        JmixButton editButton = uiComponents.create(JmixButton.class);
-        editButton.setText("Chi tiết");
-        editButton.addClickListener(e -> {
-            if (chiTietDichVu != null && chiTietDichVu.getId() != null) {
-                DialogWindow<View<?>> window =
-                        dialogWindows.view(this, "BuoiDieuTri.list")
-                                .build();
-                BuoiDieuTriListView view = (BuoiDieuTriListView) window.getView();
-                view.setIdChiTietDichVu(chiTietDichVu.getId());
-                window.open();
-            }
-        });
-
-        // Nút Xóa
-        JmixButton deleteButton = uiComponents.create(JmixButton.class);
-        deleteButton.setText("Xóa");
-        deleteButton.addClickListener(e -> {
-            if (chiTietDichVu == null || chiTietDichVu.getId() == null) {
-                return;
-            }
-            chiTietDichVusDataGrid.select(chiTietDichVu);
-            chiTietDichVusRemoveAction.actionPerform(chiTietDichVusDataGrid);
-        });
-
-        actions.add(editButton, deleteButton);
-        return actions;
-    }
+//    private HorizontalLayout buildChiTietDichVuActionsCell(ChiTietDichVu chiTietDichVu) {
+//        HorizontalLayout actions = uiComponents.create(HorizontalLayout.class);
+//        actions.setSpacing(true);
+//        actions.setPadding(false);
+//
+//        // Nút Chi tiết
+//        JmixButton editButton = uiComponents.create(JmixButton.class);
+//        editButton.setText("Chi tiết");
+//        editButton.addClickListener(e -> {
+//            if (chiTietDichVu != null && chiTietDichVu.getId() != null) {
+//                DialogWindow<View<?>> window =
+//                        dialogWindows.view(this, "BuoiDieuTri.list")
+//                                .build();
+//                BuoiDieuTriListView view = (BuoiDieuTriListView) window.getView();
+//                view.setIdChiTietDichVu(chiTietDichVu.getId());
+//                window.open();
+//            }
+//        });
+//
+//        // Nút Xóa
+//        JmixButton deleteButton = uiComponents.create(JmixButton.class);
+//        deleteButton.setText("Xóa");
+//        deleteButton.addClickListener(e -> {
+//            if (chiTietDichVu == null || chiTietDichVu.getId() == null) {
+//                return;
+//            }
+//            chiTietDichVusDataGrid.select(chiTietDichVu);
+//            chiTietDichVusRemoveAction.actionPerform(chiTietDichVusDataGrid);
+//        });
+//
+//        actions.add(editButton, deleteButton);
+//        return actions;
+//    }
 
     /** PostLoad handler để đảm bảo cột thao tác luôn được cấu hình sau khi data load. */
     @Subscribe(id = "donThuocsDl", target = Target.DATA_LOADER)
@@ -377,81 +516,76 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         window.open();
     }
 
-    @Subscribe(id = "lichSuThanhToansDl", target = Target.DATA_LOADER)
-    public void onLichSuThanhToansDlPostLoad(final CollectionLoader.PostLoadEvent<LichSuThanhToan> event) {
-        recalculatePaymentFields();
-    }
-
-    @Subscribe("chiTietDichVusDataGrid.create")
-    public void onChiTietDichVusDataGridCreate(final ActionPerformedEvent event) {
-        DialogWindow<ChiTietDichVuDetailView> window =
-                dialogWindows.detail(this, ChiTietDichVu.class)
-                        .withViewClass(ChiTietDichVuDetailView.class)
-                        .newEntity()
-                        .build();
-
-        window.addAfterCloseListener(event1 -> {
-            if (event1.closedWith(StandardOutcome.SAVE)) {
-                ChiTietDichVu saved = event1.getView().getEditedEntity();
-                Long soLuong = saved.getSoLuong();
-                Long khoangCachBuoiDieuTri = saved.getKhoangCachBuoiDieuTri();
-                Date ngayBatDau = saved.getNgayBatDau();
-
-                // Validate theo quy tắc nghiệp vụ:
-                //   soLuong > 1  && khoangCachBuoiDieuTri == 0  -> báo lỗi, không lưu gì cả.
-                if (soLuong != null && soLuong > 1
-                        && (khoangCachBuoiDieuTri == null || khoangCachBuoiDieuTri == 0)) {
-                    notifications.create("Khoảng cách buổi điều trị phải lớn hơn 0")
-                            .withType(Notifications.Type.ERROR)
-                            .show();
-                    return;
-                }
-
-                saved.setIdChiTietPhieuDieuTri(getEditedEntity());
-                saved.setCreatedAt(LocalDateTime.now());
-                ChiTietDichVu persisted = dataManager.save(saved);
-
-                // Sinh buổi điều trị:
-                //   - soLuong >= 1, có ngày bắt đầu và bệnh nhân.
-                //   - khoangCachBuoiDieuTri có thể = 0 (áp dụng cho soLuong = 1, mọi buổi đều = ngayBatDau)
-                //     hoặc > 0 (các buổi cách nhau khoangCach ngày).
-                if (soLuong != null && soLuong > 0
-                        && ngayBatDau != null
-                        && persisted.getIdChiTietPhieuDieuTri() != null
-                        && persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan() != null) {
-
-                    SaveContext saveContext = new SaveContext();
-
-                    long stepDays = (khoangCachBuoiDieuTri != null && khoangCachBuoiDieuTri > 0)
-                            ? khoangCachBuoiDieuTri
-                            : 0L;
-
-                    for (int i = 0; i < soLuong; i++) {
-                        BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
-                        buoiDieuTri.setIdChiTietDichVu(persisted);
-                        buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
-                        buoiDieuTri.setIdBenhNhan(persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan());
-
-                        Calendar ngayThucHienCal = Calendar.getInstance();
-                        ngayThucHienCal.setTime(ngayBatDau);
-                        ngayThucHienCal.add(Calendar.DAY_OF_MONTH, (int) (stepDays * i));
-                        buoiDieuTri.setNgayThucHien(ngayThucHienCal.getTime());
-                        buoiDieuTri.setTrangThai(TrangThaiBuoiDieuTri.CHUA_THUC_HIEN);
-
-                        saveContext.saving(buoiDieuTri);
-                    }
-
-                    if (!saveContext.getEntitiesToSave().isEmpty()) {
-                        dataManager.save(saveContext);
-                    }
-                }
-
-                chiTietDichVuDc.getMutableItems().add(loadChiTietDichVuForGrid(persisted.getId()));
-                recalculatePaymentFields();
-            }
-        });
-        window.open();
-    }
+//    @Subscribe("chiTietDichVusDataGrid.create")
+//    public void onChiTietDichVusDataGridCreate(final ActionPerformedEvent event) {
+//        DialogWindow<ChiTietDichVuDetailView> window =
+//                dialogWindows.detail(this, ChiTietDichVu.class)
+//                        .withViewClass(ChiTietDichVuDetailView.class)
+//                        .newEntity()
+//                        .build();
+//
+//        window.addAfterCloseListener(event1 -> {
+//            if (event1.closedWith(StandardOutcome.SAVE)) {
+//                ChiTietDichVu saved = event1.getView().getEditedEntity();
+//                Long soLuong = saved.getSoLuong();
+//                Long khoangCachBuoiDieuTri = saved.getKhoangCachBuoiDieuTri();
+//                Date ngayBatDau = saved.getNgayBatDau();
+//
+//                // Validate theo quy tắc nghiệp vụ:
+//                //   soLuong > 1  && khoangCachBuoiDieuTri == 0  -> báo lỗi, không lưu gì cả.
+//                if (soLuong != null && soLuong > 1
+//                        && (khoangCachBuoiDieuTri == null || khoangCachBuoiDieuTri == 0)) {
+//                    notifications.create("Khoảng cách buổi điều trị phải lớn hơn 0")
+//                            .withType(Notifications.Type.ERROR)
+//                            .show();
+//                    return;
+//                }
+//
+//                saved.setIdChiTietPhieuDieuTri(getEditedEntity());
+//                saved.setCreatedAt(LocalDateTime.now());
+//                ChiTietDichVu persisted = dataManager.save(saved);
+//
+//                // Sinh buổi điều trị:
+//                //   - soLuong >= 1, có ngày bắt đầu và bệnh nhân.
+//                //   - khoangCachBuoiDieuTri có thể = 0 (áp dụng cho soLuong = 1, mọi buổi đều = ngayBatDau)
+//                //     hoặc > 0 (các buổi cách nhau khoangCach ngày).
+//                if (soLuong != null && soLuong > 0
+//                        && ngayBatDau != null
+//                        && persisted.getIdChiTietPhieuDieuTri() != null
+//                        && persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan() != null) {
+//
+//                    SaveContext saveContext = new SaveContext();
+//
+//                    long stepDays = (khoangCachBuoiDieuTri != null && khoangCachBuoiDieuTri > 0)
+//                            ? khoangCachBuoiDieuTri
+//                            : 0L;
+//
+//                    for (int i = 0; i < soLuong; i++) {
+//                        BuoiDieuTri buoiDieuTri = dataManager.create(BuoiDieuTri.class);
+//                        buoiDieuTri.setIdChiTietDichVu(persisted);
+//                        buoiDieuTri.setIdChiTietDieuTri(getEditedEntity());
+//                        buoiDieuTri.setIdBenhNhan(persisted.getIdChiTietPhieuDieuTri().getIdBenhNhan());
+//
+//                        Calendar ngayThucHienCal = Calendar.getInstance();
+//                        ngayThucHienCal.setTime(ngayBatDau);
+//                        ngayThucHienCal.add(Calendar.DAY_OF_MONTH, (int) (stepDays * i));
+//                        buoiDieuTri.setNgayThucHien(ngayThucHienCal.getTime());
+//                        buoiDieuTri.setTrangThai(TrangThaiBuoiDieuTri.CHUA_THUC_HIEN);
+//
+//                        saveContext.saving(buoiDieuTri);
+//                    }
+//
+//                    if (!saveContext.getEntitiesToSave().isEmpty()) {
+//                        dataManager.save(saveContext);
+//                    }
+//                }
+//
+//                chiTietDichVuDc.getMutableItems().add(loadChiTietDichVuForGrid(persisted.getId()));
+////                recalculatePaymentFields();
+//            }
+//        });
+//        window.open();
+//    }
 
     private ChiTietDichVu loadChiTietDichVuForGrid(Long chiTietDichVuId) {
         return dataManager.load(ChiTietDichVu.class)
@@ -742,11 +876,45 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                     .build();
             window.getView().setPreviewData(pdfBytes, pdfBytes, fileName);
             window.getView().setPreviewTitle("Xem trước tờ điều trị");
+            window.getView().setPreviewFileName(fileName);
             window.setWidth("90%");
             window.setHeight("90%");
             window.open();
         } catch (Exception ex) {
             notifications.create("Không thể tạo bản xem trước tờ điều trị. Vui lòng thử lại.")
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+        }
+    }
+
+    @Subscribe("printTheoDoiBNButton")
+    public void onPrintTheoDoiBNButtonClick(final ClickEvent<JmixButton> event) {
+        if (getEditedEntity().getId() == null) {
+            notifications.create("Vui lòng lưu phiếu điều trị trước khi in.")
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+        try {
+            notifications.create("Đang tạo bảng theo dõi bệnh nhân...")
+                    .withPosition(Notification.Position.TOP_END)
+                    .withDuration(3000)
+                    .show();
+
+            byte[] pdfBytes = theoDoiBNPrintService.generatePdf(getEditedEntity());
+            String fileName = "theo-doi-bn-" + getEditedEntity().getId() + ".pdf";
+
+            DialogWindow<SoBenhAnPreviewDialogView> window = dialogWindows
+                    .view(this, SoBenhAnPreviewDialogView.class)
+                    .build();
+            window.getView().setPreviewData(pdfBytes, pdfBytes, fileName);
+            window.getView().setPreviewTitle("Xem trước bảng theo dõi bệnh nhân");
+            window.getView().setPreviewFileName(fileName);
+            window.setWidth("90%");
+            window.setHeight("90%");
+            window.open();
+        } catch (Exception ex) {
+            notifications.create("Không thể tạo bảng theo dõi bệnh nhân. Vui lòng thử lại.")
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
@@ -956,16 +1124,6 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         return value != null ? String.valueOf(value) : "";
     }
 
-    @Subscribe("khuyenMaiField")
-    public void onKhuyenMaiFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<TypedTextField<String>, String> event) {
-        recalculatePaymentFields();
-    }
-
-    @Subscribe("khuyenMaiField")
-    public void onKhuyenMaiFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<String>, String> event) {
-        recalculatePaymentFields();
-    }
-
 //    @Subscribe
 //    public void onValidation(final ValidationEvent event) {
 //        String validationError = buildTrongSoValidationError();
@@ -974,52 +1132,52 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 //        }
 //    }
 
-    private void recalculatePaymentFields() {
-        long tongTien = 0L;
-        for (ChiTietDichVu item : chiTietDichVuDc.getItems()) {
-            long gia = item.getIdDichVu() != null && item.getIdDichVu().getGia() != null
-                    ? item.getIdDichVu().getGia()
-                    : 0L;
-            long soBuoi = item.getSoLuong() != null ? item.getSoLuong() : 0L;
-            tongTien += gia * soBuoi;
-        }
-
-        BigDecimal tongTienBd = BigDecimal.valueOf(tongTien);
-        BigDecimal khuyenMaiPercent = parseFlexibleDecimal(khuyenMaiField.getTypedValue())
-                .orElse(BigDecimal.ZERO);
-        long daThanhToanTong = 0L;
-        Date ngayThanhToanCuoi = null;
-        for (LichSuThanhToan lichSuThanhToan : lichSuThanhToansDc.getItems()) {
-            daThanhToanTong += lichSuThanhToan.getDaThanhToan() != null ? lichSuThanhToan.getDaThanhToan() : 0L;
-            if (lichSuThanhToan.getThanhToanLuc() != null
-                    && (ngayThanhToanCuoi == null || lichSuThanhToan.getThanhToanLuc().after(ngayThanhToanCuoi))) {
-                ngayThanhToanCuoi = lichSuThanhToan.getThanhToanLuc();
-            }
-        }
-        BigDecimal daThanhToan = BigDecimal.valueOf(daThanhToanTong);
-
-        BigDecimal tongSauKhuyenMaiBd = tongTienBd.subtract(
-                tongTienBd.multiply(khuyenMaiPercent)
-                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-        );
-        long tongSauKhuyenMai = tongSauKhuyenMaiBd.setScale(0, RoundingMode.HALF_UP).longValue();
-        int phaiDong = BigDecimal.valueOf(tongSauKhuyenMai)
-                .subtract(daThanhToan)
-                .setScale(0, RoundingMode.HALF_UP)
-                .intValue();
-
-        getEditedEntity().setTongTien(tongTien);
-        getEditedEntity().setTongTienSauKhuyenMai(tongSauKhuyenMai);
-        getEditedEntity().setDaThanhToan(daThanhToanTong);
-        getEditedEntity().setPhaiDong(phaiDong);
-        getEditedEntity().setNgayThanhToan(ngayThanhToanCuoi);
-
-        tongTienField.setTypedValue(tongTien);
-        tongTienSauKhuyenMaiField.setTypedValue(tongSauKhuyenMai);
-        daThanhToanField.setTypedValue(daThanhToanTong);
-        phaiDongField.setTypedValue(phaiDong);
-        ngayThanhToanField.setTypedValue(ngayThanhToanCuoi);
-    }
+//    private void recalculatePaymentFields() {
+//        long tongTien = 0L;
+//        for (ChiTietDichVu item : chiTietDichVuDc.getItems()) {
+//            long gia = item.getIdDichVu() != null && item.getIdDichVu().getGia() != null
+//                    ? item.getIdDichVu().getGia()
+//                    : 0L;
+//            long soBuoi = item.getSoLuong() != null ? item.getSoLuong() : 0L;
+//            tongTien += gia * soBuoi;
+//        }
+//
+//        BigDecimal tongTienBd = BigDecimal.valueOf(tongTien);
+////        BigDecimal khuyenMaiPercent = parseFlexibleDecimal(khuyenMaiField.getTypedValue())
+////                .orElse(BigDecimal.ZERO);
+//        long daThanhToanTong = 0L;
+//        Date ngayThanhToanCuoi = null;
+//        for (LichSuThanhToan lichSuThanhToan : lichSuThanhToansDc.getItems()) {
+//            daThanhToanTong += lichSuThanhToan.getDaThanhToan() != null ? lichSuThanhToan.getDaThanhToan() : 0L;
+//            if (lichSuThanhToan.getThanhToanLuc() != null
+//                    && (ngayThanhToanCuoi == null || lichSuThanhToan.getThanhToanLuc().after(ngayThanhToanCuoi))) {
+//                ngayThanhToanCuoi = lichSuThanhToan.getThanhToanLuc();
+//            }
+//        }
+//        BigDecimal daThanhToan = BigDecimal.valueOf(daThanhToanTong);
+//
+//        BigDecimal tongSauKhuyenMaiBd = tongTienBd.subtract(
+//                tongTienBd.multiply(khuyenMaiPercent)
+//                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+//        );
+//        long tongSauKhuyenMai = tongSauKhuyenMaiBd.setScale(0, RoundingMode.HALF_UP).longValue();
+//        int phaiDong = BigDecimal.valueOf(tongSauKhuyenMai)
+//                .subtract(daThanhToan)
+//                .setScale(0, RoundingMode.HALF_UP)
+//                .intValue();
+//
+//        getEditedEntity().setTongTien(tongTien);
+//        getEditedEntity().setTongTienSauKhuyenMai(tongSauKhuyenMai);
+//        getEditedEntity().setDaThanhToan(daThanhToanTong);
+//        getEditedEntity().setPhaiDong(phaiDong);
+//        getEditedEntity().setNgayThanhToan(ngayThanhToanCuoi);
+//
+////        tongTienField.setTypedValue(tongTien);
+////        tongTienSauKhuyenMaiField.setTypedValue(tongSauKhuyenMai);
+////        daThanhToanField.setTypedValue(daThanhToanTong);
+////        phaiDongField.setTypedValue(phaiDong);
+////        ngayThanhToanField.setTypedValue(ngayThanhToanCuoi);
+//    }
 
     private String buildTrongSoValidationError() {
         Map<NhomDichVu, BigDecimal> trongSoTheoNhom = getTrongSoTheoNhom();
@@ -1108,12 +1266,6 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         };
     }
 
-    @Install(to = "lichSuThanhToansDataGrid.create", subject = "newEntitySupplier")
-    private LichSuThanhToan lichSuThanhToansDataGridCreateNewEntitySupplier() {
-        LichSuThanhToan lichSuThanhToan = metadata.create(LichSuThanhToan.class);
-        lichSuThanhToan.setIdChiTietDieuTri(getEditedEntity());
-        return lichSuThanhToan;
-    }
 
     private void autoFillTongKetDieuTriFields() {
         ChiTietDieuTri chiTietDieuTri = getEditedEntity();
@@ -1121,9 +1273,9 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             return;
         }
 
-        if (chiTietDieuTri.getDienBienBenh() == null || chiTietDieuTri.getDienBienBenh().isBlank()) {
-            chiTietDieuTri.setDienBienBenh(resolveDienBienBenhFromToDieuTri(chiTietDieuTri));
-        }
+        // dienBienBenh giờ được auto-fill từ kbBoPhan trong handleTongKetTabSelected()
+        // (chỉ khi user mở tab Tổng kết điều trị và field trống) — không fill ở đây nữa.
+
         if (chiTietDieuTri.getChuanDoanRaVien() == null || chiTietDieuTri.getChuanDoanRaVien().isBlank()) {
             String chuanDoan = chiTietDieuTri.getChuanDoan();
             chiTietDieuTri.setChuanDoanRaVien(chuanDoan != null ? chuanDoan : "");
@@ -1162,28 +1314,35 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         }
     }
 
-    private String resolveDienBienBenhFromToDieuTri(ChiTietDieuTri chiTietDieuTri) {
+    private DateRange resolveDateRangeFromToDieuTri(ChiTietDieuTri chiTietDieuTri) {
         if (chiTietDieuTri.getId() == null) {
-            return "";
+            return null;
         }
         List<ToDieuTri> lines = dataManager.load(ToDieuTri.class)
                 .query("select e from ToDieuTri e where e.chiTietDieuTri = :ctdt order by e.tuNgay asc, e.id asc")
                 .parameter("ctdt", chiTietDieuTri)
                 .list();
-
-        StringBuilder sb = new StringBuilder();
-        for (ToDieuTri line : lines) {
-            String moTa = line.getMoTaDienBienBenh();
-            if (moTa == null || moTa.isBlank()) {
-                continue;
-            }
-            if (!sb.isEmpty()) {
-                sb.append("\n\n");
-            }
-            sb.append(moTa.trim());
+        if (lines.isEmpty()) {
+            return null;
         }
-        return sb.toString();
+        Date start = null;
+        Date end = null;
+        for (ToDieuTri line : lines) {
+            if (line.getTuNgay() != null && (start == null || line.getTuNgay().before(start))) {
+                start = line.getTuNgay();
+            }
+            if (line.getDenNgay() != null && (end == null || line.getDenNgay().after(end))) {
+                end = line.getDenNgay();
+            }
+        }
+        if (start == null && end == null) {
+            return null;
+        }
+        return new DateRange(start, end);
     }
+
+    /** Khoảng ngày bắt đầu / kết thúc trả về từ {@link #resolveDateRangeFromToDieuTri}. */
+    private record DateRange(Date tuNgay, Date denNgay) { }
 
     @Install(to = "fileDinhKemDataGrid.create", subject = "newEntitySupplier")
     private ChiTietDieuTriFileDinhKem fileDinhKemDataGridCreateNewEntitySupplier() {
@@ -1192,9 +1351,46 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         return fileDinhKem;
     }
 
+    @Subscribe("canNangField")
+    public void onCanNangFieldValueChange(final HasValue.ValueChangeEvent<?> event) {
+        updateBmiField();
+    }
+
+    @Subscribe("chieuCaoField")
+    public void onChieuCaoFieldValueChange(final HasValue.ValueChangeEvent<?> event) {
+        updateBmiField();
+    }
+
+    private void updateBmiField() {
+        if (canNangField == null || chieuCaoField == null || bmiField == null) {
+            return;
+        }
+        Double canNang = parseDouble(canNangField.getValue());
+        Double chieuCao = parseDouble(chieuCaoField.getValue());
+        if (canNang == null || chieuCao == null || chieuCao <= 0) {
+            bmiField.setValue("");
+            return;
+        }
+        double chieuCaoMet = chieuCao / 100.0;
+        double bmi = canNang / (chieuCaoMet * chieuCaoMet);
+        double rounded = Math.round(bmi * 100.0) / 100.0;
+        bmiField.setValue(String.valueOf(rounded));
+    }
+
+    private static Double parseDouble(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Double.parseDouble(value.trim().replace(',', '.'));
+        } catch (NumberFormatException ignore) {
+            return null;
+        }
+    }
+
     @Subscribe
     public void onBeforeSave(final BeforeSaveEvent event) {
-        recalculatePaymentFields();
+//        recalculatePaymentFields();
         paymentSummaryService.applyTotals(getEditedEntity());
     }
 

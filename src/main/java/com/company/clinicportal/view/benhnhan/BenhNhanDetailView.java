@@ -11,11 +11,14 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import io.jmix.chartsflowui.component.Chart;
 import com.company.clinicportal.view.benhnhan.dto.StatusCount;
+import io.jmix.flowui.component.textarea.JmixTextArea;
+import io.jmix.flowui.exception.ValidationException;
 import io.jmix.flowui.model.CollectionContainer;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
@@ -25,16 +28,17 @@ import io.jmix.core.MetadataTools;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
+import com.company.clinicportal.service.BenhNhanValidator;
+import com.company.clinicportal.service.ValidationError;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.exception.ValidationException;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.awt.*;
+import com.vaadin.flow.component.Component;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -91,6 +95,24 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
     private MetadataTools metadataTools;
     @Autowired
     private com.company.clinicportal.service.BenhNhanValidator benhNhanValidator;
+
+    // Field-level validation targets (formCreate). Khai báo tường minh để map
+    // ValidationError.fieldKey() với component thật → Jmix hiển thị lỗi inline
+    // dưới field tương ứng thay vì ném ValidationException (dialog lỗi hệ thống).
+    @ViewComponent
+    private TypedTextField<String> hoVaTenField;
+    @ViewComponent
+    private TypedDatePicker<Date> ngaySinhField;
+    @ViewComponent
+    private TypedTextField<String> dienThoaiField;
+    @ViewComponent
+    private JmixTextArea diaChiField;
+    @ViewComponent
+    private TypedTextField<String> hoTenNguoiThanField;
+    @ViewComponent
+    private TypedTextField<String> sdtNguoiThanField;
+    @ViewComponent
+    private TypedTextField<String> quanHeVoiBenhNhanField;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -290,16 +312,43 @@ public class BenhNhanDetailView extends StandardDetailView<BenhNhan> {
         renderStatusChart();
     }
 
+    /**
+     * Validate form tại thời điểm save. Mỗi lỗi được gắn với component tương ứng
+     * để Jmix hiển thị inline dưới field — không phải dialog lỗi hệ thống.
+     * Lỗi không gắn với field cụ thể (CCCD/BHYT/cân nặng nằm ngoài form) sẽ hiện
+     * dưới dạng toast.
+     */
     @Subscribe
-    public void onBeforeSave(BeforeSaveEvent event) {
-        java.util.List<String> errors = new java.util.ArrayList<>();
-        benhNhanValidator.validate(getEditedEntity(), errors, null);
-        if (!errors.isEmpty()) {
-            String msg = errors.stream()
-                    .map(this::resolveMessage)
-                    .reduce((a, b) -> a + "\n" + b)
-                    .orElse("");
-            throw new ValidationException(msg);
+    public void onValidation(ValidationEvent event) {
+        java.util.List<ValidationError> errors = benhNhanValidator.validate(getEditedEntity(), null);
+        if (errors.isEmpty()) {
+            return;
+        }
+        for (ValidationError err : errors) {
+            Component target = resolveField(err.fieldKey());
+            String text = resolveMessage(err.messageKey());
+            if (target != null) {
+                event.getErrors().add(target, text);
+            } else {
+                notifications.create(text)
+                        .withPosition(Notification.Position.MIDDLE)
+                        .withType(Notifications.Type.WARNING)
+                        .show();
+            }
+        }
+    }
+
+    private Component resolveField(String fieldKey) {
+        if (fieldKey == null) return null;
+        switch (fieldKey) {
+            case "hoVaTenField":         return hoVaTenField;
+            case "ngaySinhField":        return ngaySinhField;
+            case "dienThoaiField":       return dienThoaiField;
+            case "diaChiField":          return diaChiField;
+            case "hoTenNguoiThanField":  return hoTenNguoiThanField;
+            case "sdtNguoiThanField":    return sdtNguoiThanField;
+            case "quanHeVoiBenhNhanField": return quanHeVoiBenhNhanField;
+            default:                     return null;
         }
     }
 

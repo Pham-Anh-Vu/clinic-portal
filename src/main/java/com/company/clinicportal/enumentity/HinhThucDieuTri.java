@@ -15,8 +15,8 @@ import org.springframework.lang.Nullable;
  */
 public enum HinhThucDieuTri implements EnumClass<String> {
 
-    NGOAI_TRU("1", "Ngoại trú"),
-    NOI_TRU("2", "Nội trú"),
+    NGOAI_TRU("2", "Ngoại trú"),
+    NOI_TRU("1", "Nội trú"),
     NGOAI_TRU_BAN_NGAY("3", "Ngoại trú ban ngày"),
     KHAC("4", "Khác");
 

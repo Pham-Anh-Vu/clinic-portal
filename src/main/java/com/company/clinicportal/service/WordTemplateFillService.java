@@ -10,12 +10,15 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,8 @@ import java.util.regex.Pattern;
  */
 @Service
 public class WordTemplateFillService {
+
+    private static final Logger log = LoggerFactory.getLogger(WordTemplateFillService.class);
 
     private static final String CHU_KY_NGAY_KEY = "${chuKy.ngay}";
     private static final String CHU_KY_THANG_KEY = "${chuKy.thang}";
@@ -51,11 +56,28 @@ public class WordTemplateFillService {
     }
 
     public byte[] fillDocxTemplate(InputStream templateStream, Map<String, String> values) throws IOException {
+        return fillDocxTemplate(templateStream, values, java.util.Collections.emptyList());
+    }
+
+    /**
+     * Phiên bản mở rộng của {@link #fillDocxTemplate(InputStream, Map)}:
+     * cho phép truyền danh sách base64 ảnh chữ ký (mỗi phần tử là base64
+     * của ảnh ứng với 1 row trong bảng) để chèn ảnh vào cell "BS chỉ định"
+     * CÙNG DÒNG với text tên bác sĩ (không tạo paragraph/dòng mới).
+     *
+     * @param chuKyBase64ByRow list base64 (không có prefix "data:") theo
+     *                          thứ tự row. Có thể null/empty nếu không
+     *                          muốn chèn ảnh. Phần tử null/rỗng nghĩa là
+     *                          row đó không có chữ ký.
+     */
+    public byte[] fillDocxTemplate(InputStream templateStream,
+                                   Map<String, String> values,
+                                   List<String> chuKyBase64ByRow) throws IOException {
         try (XWPFDocument document = new XWPFDocument(templateStream);
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             // ${chiTietDichVuRows} needs special handling: it represents repeated table rows.
             // If we replace it as plain text first, we can no longer locate the template row.
-            replaceTableRowsForSoBenhAn(document, values);
+            replaceTableRowsForSoBenhAn(document, values, chuKyBase64ByRow);
 
             Map<String, String> textValues = new HashMap<>(values);
             textValues.remove("${chiTietDichVuRows}");
@@ -128,6 +150,12 @@ public class WordTemplateFillService {
     }
 
     private void replaceTableRowsForSoBenhAn(XWPFDocument document, Map<String, String> values) {
+        replaceTableRowsForSoBenhAn(document, values, java.util.Collections.emptyList());
+    }
+
+    private void replaceTableRowsForSoBenhAn(XWPFDocument document,
+                                             Map<String, String> values,
+                                             List<String> chuKyBase64ByRow) {
         String rowBlock = values.get("${chiTietDichVuRows}");
         if (rowBlock == null) {
             return;
@@ -152,9 +180,18 @@ public class WordTemplateFillService {
                 }
 
                 int insertIndex = rowIndex;
-                for (String singleRow : rowData) {
+                for (int dataIdx = 0; dataIdx < rowData.size(); dataIdx++) {
+                    String singleRow = rowData.get(dataIdx);
                     XWPFTableRow newRow = insertRowWithCells(table, insertIndex++, templateCellCount);
-                    clearAndFillRowCells(newRow, splitCells(singleRow));
+                    List<String> cells = splitCells(singleRow);
+                    clearAndFillRowCells(newRow, cells);
+
+                    // Chèn ảnh chữ ký CÙNG DÒNG với text "Tên BS" ở cell cuối.
+                    // Phần tử null/rỗng trong chuKyBase64ByRow → bỏ qua row đó.
+                    if (chuKyBase64ByRow != null && dataIdx < chuKyBase64ByRow.size()) {
+                        String b64 = chuKyBase64ByRow.get(dataIdx);
+                        insertChuKyPictureSameLine(newRow, b64);
+                    }
                 }
                 return;
             }
@@ -253,6 +290,70 @@ public class WordTemplateFillService {
             }
             XWPFParagraph paragraph = cell.addParagraph();
             paragraph.createRun().setText(value, 0);
+        }
+    }
+
+    /**
+     * Chèn ảnh chữ ký (decode từ base64) vào cùng dòng với text "Tên BS"
+     * trong cell cuối cùng của row. KHÔNG tạo paragraph/dòng mới.
+     *
+     * Cách làm:
+     *  - Lấy paragraph hiện có (đã chứa "Tên BS" do clearAndFillRowCells set).
+     *  - addPicture() trên run có sẵn → Word/LibreOffice hiển thị text và ảnh
+     *    trên cùng 1 dòng, ảnh nằm ngay sau tên bác sĩ.
+     *
+     * Ghi chú:
+     *  - Một run trong DOCX có thể chứa cả <w:t> và <w:drawing>.
+     *  - Nếu text quá dài và không vừa 1 dòng với ảnh, Word có thể tự
+     *    ngắt dòng trước ảnh (đây là hành vi chuẩn của Word, không
+     *    phải do code tạo dòng mới).
+     */
+    private void insertChuKyPictureSameLine(XWPFTableRow row, String base64Image) {
+        if (base64Image == null || base64Image.isBlank()) {
+            return;
+        }
+        int cellCount = row.getTableCells().size();
+        if (cellCount == 0) {
+            return;
+        }
+        XWPFTableCell lastCell = row.getCell(cellCount - 1);
+        if (lastCell == null) {
+            return;
+        }
+
+        byte[] imageBytes;
+        try {
+            imageBytes = Base64.getDecoder().decode(base64Image);
+        } catch (IllegalArgumentException ex) {
+            log.warn("Base64 ảnh chữ ký không hợp lệ, bỏ qua chèn ảnh.", ex);
+            return;
+        }
+
+        // Lấy paragraph cuối cùng (đã có "Tên BS") - KHÔNG tạo paragraph mới.
+        List<XWPFParagraph> paragraphs = lastCell.getParagraphs();
+        XWPFParagraph targetParagraph = !paragraphs.isEmpty()
+                ? paragraphs.get(paragraphs.size() - 1)
+                : lastCell.addParagraph();
+
+        // Dùng run hiện có để addPicture (cùng run với "Tên BS").
+        // Nếu paragraph không có run thì tạo mới.
+        XWPFRun pictureRun = !targetParagraph.getRuns().isEmpty()
+                ? targetParagraph.getRuns().get(0)
+                : targetParagraph.createRun();
+
+        try {
+            // Kích thước ảnh ~90pt x 35pt (EMU = pt * 12700).
+            int widthEmu = 90 * 12700;
+            int heightEmu = 35 * 12700;
+            pictureRun.addPicture(
+                new java.io.ByteArrayInputStream(imageBytes),
+                XWPFDocument.PICTURE_TYPE_JPEG,
+                "chu-ky.jpg",
+                widthEmu,
+                heightEmu
+            );
+        } catch (Exception ex) {
+            log.error("Không chèn được ảnh chữ ký vào DOCX.", ex);
         }
     }
 

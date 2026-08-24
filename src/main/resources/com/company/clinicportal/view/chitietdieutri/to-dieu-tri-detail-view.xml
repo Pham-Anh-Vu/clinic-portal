@@ -18,7 +18,7 @@
         <collection id="nhanSusDc" class="com.company.clinicportal.entity.NhanSu">
             <loader id="nhanSusDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from NhanSu e order by e.hoTen]]>
+                    <![CDATA[select e from NhanSu e where e.chucVu = 'Kỹ thuật viên' order by e.hoTen]]>
                 </query>
             </loader>
             <fetchPlan extends="_base"/>

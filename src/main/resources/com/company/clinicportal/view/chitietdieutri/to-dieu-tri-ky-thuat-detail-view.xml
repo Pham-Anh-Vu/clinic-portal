@@ -13,7 +13,7 @@
         <collection id="dmDichVusDc" class="com.company.clinicportal.entity.DmDichVu">
             <loader id="dmDichVusDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from DmDichVu e order by e.tenDichVu]]>
+                    <![CDATA[select e from DmDichVu e where e.trangThai = 'hoat_dong' order by e.tenDichVu]]>
                 </query>
             </loader>
             <fetchPlan extends="_base"/>

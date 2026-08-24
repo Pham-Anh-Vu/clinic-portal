@@ -50,7 +50,6 @@
             <entityComboBox id="idNhanSuField" property="idNhanSu"  itemsContainer="nhanSusDc" required="true" label="Bác sĩ chỉ định"/>
             <dateTimePicker id="ngayChiDinhField" property="ngayChiDinh" required="true"/>
             <timePicker id="gioHenMacDinhField" property="gioHenMacDinh"/>
-<!--            <textArea id="trieuChungField" height="9.5em" property="trieuChung" colspan="2" required="true"/>-->
             <textArea id="chuanDoanField" height="9.5em" property="chuanDoan" colspan="2"/>
             <multiSelectComboBox id="dsChanDoanIcdField" property="dsChanDoanIcd"
                                  itemsContainer="icd10sDc"

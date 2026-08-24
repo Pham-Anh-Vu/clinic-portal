@@ -25,6 +25,12 @@
                 </property>
                 <property name="fileDinhKem" fetchPlan="_base"/>
                 <property name="dsChanDoanIcd" fetchPlan="_base"/>
+                <property name="mach"/>
+                <property name="nhietDo"/>
+                <property name="huyetAp"/>
+                <property name="nhipTho"/>
+                <property name="canNang"/>
+                <property name="chieuCao"/>
             </fetchPlan>
             <collection id="chiTietDichVuDc" property="chiTietDichVu"/>
             <collection id="fileDinhKemDc" property="fileDinhKem"/>
@@ -98,6 +104,10 @@
                 <property name="createdAt"/>
                 <property name="hoVaTenBenhNhan"/>
                 <property name="maDinhDanhYTe"/>
+                <property name="chiTietDieuTri" fetchPlan="_base">
+                    <property name="chuanDoan"/>
+                    <property name="dsChanDoanIcd" fetchPlan="_base"/>
+                </property>
             </fetchPlan>
         </collection>
     </data>
@@ -224,6 +234,21 @@
                                 <textField id="daXuLyField" property="daXuLy" colspan="2" label="Đã xử lý (thuốc, chăm sóc)"/>
                                 <textArea id="kbBoPhanField" property="kbBoPhan" height="9.5em" colspan="2" label="Khám bệnh bộ phận"/>
                                 <textArea id="khamBenhToanThanField" property="khamBenhToanThan" height="9.5em" colspan="2" label="Khám bệnh toàn thân"/>
+                                <textField id="machField" property="mach"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.mach"/>
+                                <textField id="nhietDoField" property="nhietDo"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.nhietDo"/>
+                                <textField id="huyetApField" property="huyetAp"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.huyetAp"
+                                           placeholder="VD: 120/80"/>
+                                <textField id="nhipThoField" property="nhipTho"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.nhipTho"/>
+                                <textField id="canNangField" property="canNang"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.canNang"/>
+                                <textField id="chieuCaoField" property="chieuCao"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.chieuCao"/>
+                                <textField id="bmiField" readOnly="true"
+                                           label="msg://com.company.clinicportal.entity/ChiTietDieuTri.bmi"/>
                                 <textField id="linkGgDriveField" property="linkGgDrive" colspan="2"
                                            label="msg://com.company.clinicportal.entity/ChiTietDieuTri.linkGgDrive"/>
                             </formLayout>
@@ -286,59 +311,56 @@
                         </vbox>
                     </vbox>
 
-                    <vbox width="100%" alignItems="START" padding="false"
-                          spacing="false" classNames="tab-5-grid">
-                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
-                              width="100%">
-                            <hbox classNames="buttons-panel" width="100%">
-                                <div width="100%" classNames="all-control-auto-pay">
-                                    <div classNames="title-grid">
-                                        <span text="CHỈ ĐỊNH DỊCH VỤ"/>
-                                    </div>
-                                    <div classNames="function-flex-end">
-                                        <button action="chiTietDichVusDataGrid.create" text="Thêm dịch vụ"
-                                                classNames="action-button create"/>
-                                        <button action="chiTietDichVusDataGrid.refresh" classNames="action-button refresh"/>
-                                    </div>
-                                </div>
-                            </hbox>
-                        </vbox>
-                        <vbox padding="false" classNames="grid-data">
-                            <formLayout
-                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
-                                <responsiveSteps>
-                                    <responsiveStep minWidth="0" columns="1"/>
-                                </responsiveSteps>
-                                <!--                        <hbox css="width: 100%; justify-content: flex-end; gap: 8px;">-->
-                                <!--                           -->
-                                <!--                        </hbox>-->
-                                <dataGrid id="chiTietDichVusDataGrid"
-                                          dataContainer="chiTietDichVuDc"
-                                          width="100%">
-                                    <emptyStateComponent>
-                                        <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
-                                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
-                                            <h2 text="Chưa có dữ liệu"/>
-                                        </vbox>
-                                    </emptyStateComponent>
-                                    <actions>
-                                        <action id="create" type="list_create" text="Thêm dịch vụ"/>
-                                        <action id="edit" type="list_edit" text="Chi tiết"/>
-                                        <action id="remove" type="list_remove" text="xóa"/>
-                                        <action id="refresh" type="list_refresh"/>
-                                    </actions>
+<!--                    <vbox width="100%" alignItems="START" padding="false"-->
+<!--                          spacing="false" classNames="tab-5-grid">-->
+<!--                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"-->
+<!--                              width="100%">-->
+<!--                            <hbox classNames="buttons-panel" width="100%">-->
+<!--                                <div width="100%" classNames="all-control-auto-pay">-->
+<!--                                    <div classNames="title-grid">-->
+<!--                                        <span text="CHỈ ĐỊNH DỊCH VỤ"/>-->
+<!--                                    </div>-->
+<!--                                    <div classNames="function-flex-end">-->
+<!--                                        <button action="chiTietDichVusDataGrid.create" text="Thêm dịch vụ"-->
+<!--                                                classNames="action-button create"/>-->
+<!--                                        <button action="chiTietDichVusDataGrid.refresh" classNames="action-button refresh"/>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </hbox>-->
+<!--                        </vbox>-->
+<!--                        <vbox padding="false" classNames="grid-data">-->
+<!--                            <formLayout-->
+<!--                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">-->
+<!--                                <responsiveSteps>-->
+<!--                                    <responsiveStep minWidth="0" columns="1"/>-->
+<!--                                </responsiveSteps>-->
+<!--                                <dataGrid id="chiTietDichVusDataGrid"-->
+<!--                                          dataContainer="chiTietDichVuDc"-->
+<!--                                          width="100%">-->
+<!--                                    <emptyStateComponent>-->
+<!--                                        <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">-->
+<!--                                            <icon icon="vaadin:file-o" size="48px" color="var(&#45;&#45;lumo-tertiary-text-color)"/>-->
+<!--                                            <h2 text="Chưa có dữ liệu"/>-->
+<!--                                        </vbox>-->
+<!--                                    </emptyStateComponent>-->
+<!--                                    <actions>-->
+<!--                                        <action id="create" type="list_create" text="Thêm dịch vụ"/>-->
+<!--                                        <action id="edit" type="list_edit" text="Chi tiết"/>-->
+<!--                                        <action id="remove" type="list_remove" text="xóa"/>-->
+<!--                                        <action id="refresh" type="list_refresh"/>-->
+<!--                                    </actions>-->
 
-                                    <columns resizable="true">
-                                        <column key="tenDichVu" property="idDichVu.tenDichVu"/>
-                                        <column key="nhomDichVu" property="idDichVu.nhomDichVu"/>
-                                        <column key="ghiChu" property="ghiChu" header="Ghi chú"/>
-                                        <column key="soLuong" property="soLuong" header="Số buổi"/>
-                                        <column key="ngayBatDau" property="ngayBatDau"/>
-                                    </columns>
-                                </dataGrid>
-                            </formLayout>
-                        </vbox>
-                    </vbox>
+<!--                                    <columns resizable="true">-->
+<!--                                        <column key="tenDichVu" property="idDichVu.tenDichVu"/>-->
+<!--                                        <column key="nhomDichVu" property="idDichVu.nhomDichVu"/>-->
+<!--                                        <column key="ghiChu" property="ghiChu" header="Ghi chú"/>-->
+<!--                                        <column key="soLuong" property="soLuong" header="Số buổi"/>-->
+<!--                                        <column key="ngayBatDau" property="ngayBatDau"/>-->
+<!--                                    </columns>-->
+<!--                                </dataGrid>-->
+<!--                            </formLayout>-->
+<!--                        </vbox>-->
+<!--                    </vbox>-->
 
 <!--                    <vbox width="100%" alignItems="START" padding="false"-->
 <!--                          spacing="false" classNames="tab-5-grid">-->
@@ -368,83 +390,7 @@
 <!--                        </vbox>-->
 <!--                    </vbox>-->
 
-                    <vbox width="100%" alignItems="START" padding="false"
-                          spacing="false" classNames="tab-5-grid">
-                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
-                              width="100%">
-                            <hbox classNames="buttons-panel" width="100%">
-                                <div width="100%" classNames="all-control-auto-pay">
-                                    <div classNames="title-grid">
-                                        <span text="THÔNG TIN THANH TOÁN"/>
-                                    </div>
-                                </div>
-                            </hbox>
-                        </vbox>
-                        <vbox padding="false" classNames="grid-data">
-                            <formLayout dataContainer="chiTietDieuTriDc"
-                                        css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
-                                <responsiveSteps>
-                                    <responsiveStep minWidth="0" columns="6"/>
-                                </responsiveSteps>
-                                <textField id="tongTienField" property="tongTien" readOnly="true"/>
-                                <textField id="khuyenMaiField" label="Khuyến mãi (%)" placeholder="VD: 10,5 hoặc 10.5"/>
-                                <textField id="tongTienSauKhuyenMaiField" property="tongTienSauKhuyenMai" readOnly="true"/>
-                                <textField id="daThanhToanField" property="daThanhToan" readOnly="true"/>
-                                <textField id="phaiDongField" property="phaiDong" readOnly="true"/>
-                                <datePicker id="ngayThanhToanField" property="ngayThanhToan" readOnly="true"/>
-                            </formLayout>
-                        </vbox>
                     </vbox>
-
-                    <vbox width="100%" alignItems="START" padding="false"
-                          spacing="false" classNames="tab-5-grid">
-                        <vbox spacing="false" padding="false" classNames="header-grid-auto-pay"
-                              width="100%">
-                            <hbox classNames="buttons-panel" width="100%">
-                                <div width="100%" classNames="all-control-auto-pay">
-                                    <div classNames="title-grid">
-                                        <span text="LỊCH SỬ THANH TOÁN"/>
-                                    </div>
-                                    <div classNames="function-flex-end">
-                                        <button action="lichSuThanhToansDataGrid.create" classNames="action-button"/>
-                                        <button action="lichSuThanhToansDataGrid.refresh" classNames="action-button"/>
-                                    </div>
-                                </div>
-                            </hbox>
-                        </vbox>
-                        <vbox padding="false" classNames="grid-data">
-                            <formLayout
-                                    css="border: 1px #BFBFBF solid; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 20px">
-                                <responsiveSteps>
-                                    <responsiveStep minWidth="0" columns="1"/>
-                                </responsiveSteps>
-                                <dataGrid id="lichSuThanhToansDataGrid" dataContainer="lichSuThanhToansDc" minWidth="100px"
-                                          width="100%">
-                                    <emptyStateComponent>
-                                        <vbox width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
-                                            <icon icon="vaadin:file-o" size="48px" color="var(--lumo-tertiary-text-color)"/>
-                                            <h2 text="Chưa có dữ liệu"/>
-                                        </vbox>
-                                    </emptyStateComponent>
-                                    <actions>
-                                        <action id="create" type="list_create" text="Thanh toán"/>
-                                        <action id="edit" type="list_edit" text="Chi tiết"/>
-                                        <action id="remove" type="list_remove" text="Xóa"/>
-                                        <action id="refresh" type="list_refresh"/>
-                                    </actions>
-                                    <columns resizable="true">
-                                        <column property="thanhToanLuc"/>
-                                        <column property="daThanhToan"/>
-                                        <column property="ghiChu"/>
-                                        <column property="hoTenNguoiNopTien"/>
-                                        <column property="soDienThoai"/>
-                                    </columns>
-                                </dataGrid>
-                            </formLayout>
-                        </vbox>
-                    </vbox>
-
-                </vbox>
             </tab>
             <tab id="tab3" label="TỜ ĐIỀU TRỊ">
                 <vbox width="100%">
@@ -498,6 +444,7 @@
                         </vbox>
                     </vbox>
                     <hbox width="100%" justifyContent="END" padding="true">
+                        <button id="printTheoDoiBNButton" text="In bảng theo dõi BN" icon="PRINT"/>
                         <button id="printToDieuTriButton" text="In tờ điều trị" icon="PRINT"/>
                     </hbox>
                 </vbox>
@@ -546,9 +493,9 @@
                                         <column property="maDonThuoc" header="Mã đơn thuốc"/>
                                         <column property="ngayKe" header="Ngày kê"/>
                                         <column property="tenBacSi" header="Bác sĩ kê đơn"/>
-                                        <column property="hinhThucDieuTri" header="Hình thức ĐT"/>
-                                        <column key="trangThaiLabel" header="Trạng thái"/>
+                                        <column key="chanDoanColumn" header="Chẩn đoán"/>
                                         <column property="soLuongThuocTrongDon" header="SL thuốc"/>
+                                        <column key="trangThaiLabel" header="Trạng thái"/>
                                     </columns>
                                 </dataGrid>
                             </formLayout>

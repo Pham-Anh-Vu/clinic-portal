@@ -7,6 +7,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteParameters;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
@@ -15,6 +16,7 @@ import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
+import io.jmix.flowui.view.navigation.RouteSupport;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,6 +33,8 @@ public class SoBenhAnListView extends StandardListView<BenhNhan> {
     private UiComponents uiComponents;
     @Autowired
     private ViewNavigators viewNavigators;
+    @Autowired
+    private RouteSupport routeSupport;
     @ViewComponent
     private DataGrid<BenhNhan> benhNhansDataGrid;
     @Autowired
@@ -69,19 +73,36 @@ public class SoBenhAnListView extends StandardListView<BenhNhan> {
                 .setHeader("Trạng thái")
                 .setAutoWidth(true);
 
+//        benhNhansDataGrid.addComponentColumn(benhNhan -> {
+//            JmixButton button = uiComponents.create(JmixButton.class);
+//            button.setText("Chi tiết");
+//            button.addClickListener(e -> {
+//                if (benhNhan != null && benhNhan.getId() != null) {
+//                    DialogWindow<SoBenhAnDetailView> windows = dialogWindows.view(this, SoBenhAnDetailView.class).build();
+//                    windows.getView().setIdBenhNhan(benhNhan);
+//                    windows.addAfterCloseListener(soBenhAnDetailViewAfterCloseEvent -> {benhNhansDl.load();});
+//                    windows.open();
+//                }
+//            });
+//            return button;
+//        }).setHeader("Thao tác").setAutoWidth(true);
         benhNhansDataGrid.addComponentColumn(benhNhan -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText("Chi tiết");
-            button.addClickListener(e -> {
-                if (benhNhan != null && benhNhan.getId() != null) {
-                    DialogWindow<SoBenhAnDetailView> windows = dialogWindows.view(this, SoBenhAnDetailView.class).build();
-                    windows.getView().setIdBenhNhan(benhNhan);
-                    windows.addAfterCloseListener(soBenhAnDetailViewAfterCloseEvent -> {benhNhansDl.load();});
-                    windows.open();
-                }
-            });
-            return button;
-        }).setHeader("Thao tác").setAutoWidth(true);
+                    JmixButton button = uiComponents.create(JmixButton.class);
+                    button.setText("Chi tiết");
+
+                    button.addClickListener(e -> {
+                        if (benhNhan != null && benhNhan.getId() != null) {
+
+                            viewNavigators.view(this, SoBenhAnDetailView.class)
+                                    .withRouteParameters(routeSupport.createRouteParameters("id", benhNhan.getId().toString()))
+                                    .withBackwardNavigation(true)
+                                    .navigate();
+                        }
+                    });
+
+                    return button;
+                }).setHeader("Thao tác")
+                .setAutoWidth(true);
     }
 
     @Supply(to = "benhNhansDataGrid.tuoi", subject = "renderer")

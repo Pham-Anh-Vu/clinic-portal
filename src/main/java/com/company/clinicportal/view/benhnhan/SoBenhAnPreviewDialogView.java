@@ -30,6 +30,7 @@ public class SoBenhAnPreviewDialogView extends StandardView {
     private byte[] wordBytes;
     private String wordFileName;
     private String previewTitle;
+    private String previewFileName;
 
     public void setPreviewData(byte[] pdfBytes, byte[] wordBytes, String wordFileName) {
         this.pdfBytes = pdfBytes;
@@ -41,11 +42,17 @@ public class SoBenhAnPreviewDialogView extends StandardView {
         this.previewTitle = previewTitle;
     }
 
+    /**
+     * Tên file hiển thị cho iframe xem trước (chỉ áp dụng cho PDF preview).
+     * Mặc định "so-benh-an-preview.pdf" nếu caller không truyền.
+     */
+    public void setPreviewFileName(String previewFileName) {
+        this.previewFileName = previewFileName;
+    }
+
     @Subscribe
     public void onInit(final InitEvent event) {
-        if (previewTitle != null && !previewTitle.isBlank()) {
-            setPageTitle(previewTitle);
-        }
+        // previewTitle có thể được set sau onInit; phần apply title sẽ chạy lại trong onReady.
     }
 
     @Subscribe
@@ -57,8 +64,15 @@ public class SoBenhAnPreviewDialogView extends StandardView {
             return;
         }
 
+        if (previewTitle != null && !previewTitle.isBlank()) {
+            setPageTitle(previewTitle);
+        }
+
+        String iframeFileName = (previewFileName != null && !previewFileName.isBlank())
+                ? previewFileName
+                : "so-benh-an-preview.pdf";
         StreamResource streamResource = new StreamResource(
-                "so-benh-an-preview.pdf",
+                iframeFileName,
                 () -> new ByteArrayInputStream(pdfBytes)
         );
         streamResource.setContentType("application/pdf");

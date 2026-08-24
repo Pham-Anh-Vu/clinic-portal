@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -36,9 +35,11 @@ public class ToDieuTriPrintService {
     private static final Set<String> RAW_HTML_PLACEHOLDERS = Set.of("${ROWS}");
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 
-    /** Đường dẫn tuyệt đối ảnh chữ ký BS chỉ định. */
-    private static final String CHU_KY_IMAGE_PATH =
-            "E:\\0000.PROJECT\\clinic-portal\\src\\main\\resources\\reports\\anh-chu-ky.jpg";
+    /**
+     * Classpath resource cho ảnh chữ ký BS chỉ định.
+     * Đọc qua classpath (không phụ thuộc CWD, chạy được cả khi đóng gói jar/war).
+     */
+    private static final String CHU_KY_RESOURCE = "/reports/anh-chu-ky.jpg";
 
     /** Cache base64 (lazy + thread-safe). null khi file không tồn tại/không đọc được. */
     private static final AtomicReference<String> CHU_KY_BASE64_CACHE = new AtomicReference<>();
@@ -83,11 +84,23 @@ public class ToDieuTriPrintService {
         values.put("${BenhNhan.tuoi}", safeText(benhNhan != null ? BenhNhan.calculateTuoi(benhNhan.getNgaySinh()) : null));
         values.put("${BenhNhan.gioiTinh}", formatGioiTinh(benhNhan != null ? benhNhan.getGioiTinh() : null));
         values.put("${BenhNhan.diaChi}", safeText(benhNhan != null ? benhNhan.getDiaChi() : null));
-        values.put("${ChiTietDieuTri.chuanDoan}", safeText(chiTietDieuTri.getChuanDoan()));
+        values.put("${ChiTietDieuTri.chuanDoan}",  resolveChuanDoanForReport(chiTietDieuTri));
         values.put("${ROWS}", rows.toString());
 
         String html = applyTemplateValues(loadHtmlTemplate(TO_DIEU_TRI_TEMPLATE_HTML), values);
+
         return htmlToPdfBytes(html);
+    }
+
+    private String resolveChuanDoanForReport(ChiTietDieuTri ctdt) {
+        if (ctdt == null) {
+            return "";
+        }
+        String icdText = ctdt.getDsChanDoanIcdText();
+        if (icdText != null && !icdText.isBlank()) {
+            return icdText;
+        }
+        return safeText(ctdt.getChuanDoan());
     }
 
     private void appendPrintRow(StringBuilder rows, ToDieuTri line) {
@@ -144,24 +157,24 @@ public class ToDieuTriPrintService {
             if (Boolean.TRUE.equals(CHU_KY_LOAD_ATTEMPTED.get())) {
                 return CHU_KY_BASE64_CACHE.get();
             }
-            File f = new File(CHU_KY_IMAGE_PATH);
-            if (!f.isFile()) {
-                log.warn("Không tìm thấy ảnh chữ ký tại {}. Cột BS chỉ định sẽ chỉ hiển thị tên.",
-                        CHU_KY_IMAGE_PATH);
+            InputStream in = ToDieuTriPrintService.class.getResourceAsStream(CHU_KY_RESOURCE);
+            if (in == null) {
+                log.warn("Không tìm thấy ảnh chữ ký trong classpath tại {}. Cột BS chỉ định sẽ chỉ hiển thị tên.",
+                        CHU_KY_RESOURCE);
                 CHU_KY_LOAD_ATTEMPTED.set(true);
                 return null;
             }
-            try {
-                byte[] bytes = Files.readAllBytes(f.toPath());
+            try (InputStream stream = in) {
+                byte[] bytes = stream.readAllBytes();
                 String b64 = Base64.getEncoder().encodeToString(bytes);
                 CHU_KY_BASE64_CACHE.set(b64);
                 CHU_KY_LOAD_ATTEMPTED.set(true);
-                log.info("Đã load ảnh chữ ký BS chỉ định ({} bytes, {} chars base64) từ {}.",
-                        bytes.length, b64.length(), CHU_KY_IMAGE_PATH);
+                log.info("Đã load ảnh chữ ký BS chỉ định ({} bytes, {} chars base64) từ classpath {}.",
+                        bytes.length, b64.length(), CHU_KY_RESOURCE);
                 return b64;
             } catch (IOException ex) {
-                log.error("Không đọc được ảnh chữ ký tại {}. Cột BS chỉ định sẽ chỉ hiển thị tên.",
-                        CHU_KY_IMAGE_PATH, ex);
+                log.error("Không đọc được ảnh chữ ký trong classpath {}. Cột BS chỉ định sẽ chỉ hiển thị tên.",
+                        CHU_KY_RESOURCE, ex);
                 CHU_KY_LOAD_ATTEMPTED.set(true);
                 return null;
             }

@@ -29,4 +29,15 @@ public class LibreOfficeDocumentConversionService {
             return out.toByteArray();
         }
     }
+
+    /**
+     * Chuyển bảng tính Excel (.xlsx/.xls) sang PDF qua LibreOffice.
+     */
+    public byte[] convertSpreadsheetToPdf(byte[] spreadsheetBytes) throws IOException {
+        DocumentConverter converter = new DocumentConverterImpl(officeIntegration);
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            converter.convertToPdf(DocumentConverter.FileType.SPREADSHEET, spreadsheetBytes, out);
+            return out.toByteArray();
+        }
+    }
 }

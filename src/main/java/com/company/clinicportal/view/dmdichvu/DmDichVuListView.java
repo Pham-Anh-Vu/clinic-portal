@@ -3,6 +3,7 @@ package com.company.clinicportal.view.dmdichvu;
 import com.company.clinicportal.entity.BuoiDieuTri;
 import com.company.clinicportal.entity.DmDichVu;
 import com.company.clinicportal.entity.GiaKpi;
+import com.company.clinicportal.enumentity.TrangThaiDichVu;
 import com.company.clinicportal.view.buoidieutri.ThuThuatDetailView;
 import com.company.clinicportal.view.main.MainView;
 import com.vaadin.flow.component.Component;
@@ -106,6 +107,35 @@ public class DmDichVuListView extends StandardListView<DmDichVu> {
             if (dmdichvu.getNhomDichVu()!=null) {
                 span.setText(messages.getMessage(dmdichvu.getNhomDichVu()));
                 span.addClassName(dmdichvu.getNhomDichVu().getId());
+            }
+            return span;
+        });
+    }
+
+    @Supply(to = "dmDichVusDataGrid.trangThai", subject = "renderer")
+    private Renderer<DmDichVu> dmDichVusDataGridTrangThaiRenderer() {
+        return new ComponentRenderer<>(dmdichvu -> {
+            Span span = uiComponents.create(Span.class);
+            TrangThaiDichVu trangThai = dmdichvu.getTrangThai();
+            if (trangThai == null) {
+                span.setText("");
+                return span;
+            }
+            span.setText(messages.getMessage(trangThai));
+            span.getStyle()
+                    .set("display", "inline-block")
+                    .set("padding", "2px 10px")
+                    .set("border-radius", "10px")
+                    .set("font-size", "var(--lumo-font-size-s)")
+                    .set("font-weight", "600");
+            if (trangThai == TrangThaiDichVu.HOAT_DONG) {
+                span.getStyle()
+                        .set("color", "var(--lumo-success-contrast-color)")
+                        .set("background-color", "var(--lumo-success-color)");
+            } else {
+                span.getStyle()
+                        .set("color", "var(--lumo-contrast-80pct)")
+                        .set("background-color", "var(--lumo-contrast-10pct)");
             }
             return span;
         });

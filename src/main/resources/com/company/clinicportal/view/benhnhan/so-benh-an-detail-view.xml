@@ -138,7 +138,6 @@
                                         classNames="action-button create"/>
                                 <button id="printReportButton" text="In sổ" visible="false"/>
                                 <button id="printReportButton2" text="In sổ"/>
-<!--                                <button id="printToDieuTriButton" text="In tờ điều trị"/>-->
 
                             </div>
                         </div>

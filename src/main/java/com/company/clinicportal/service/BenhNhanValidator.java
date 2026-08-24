@@ -1,26 +1,26 @@
 package com.company.clinicportal.service;
 
 import com.company.clinicportal.entity.BenhNhan;
-import io.jmix.core.Messages;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
  * Validation rule cho bệnh nhân. Dùng để chặn save nếu vi phạm.
  * Đơn giản, không thay thế Jmix Bean Validation, chỉ bổ sung các rule "yu" theo
  * Quyết định 808/QĐ-BYT (CCCD, BHYT, người giám hộ cho trẻ em, ...).
+ *
+ * Trả về danh sách {@link ValidationError}; mỗi lỗi gắn với id của field trên
+ * view để có thể hiển thị inline (qua Jmix ValidationEvent) thay vì ném
+ * exception → dialog lỗi hệ thống.
  */
 @Service
 public class BenhNhanValidator {
-
-    @Autowired
-    private Messages messages;
 
     private static final Pattern CCCD_PATTERN = Pattern.compile("^\\d{9,12}$");
     private static final Pattern SSKT_PATTERN = Pattern.compile("^[A-Z]{2}\\d{10}$");
@@ -28,64 +28,79 @@ public class BenhNhanValidator {
     private static final Pattern GUARDIAN_PHONE_PATTERN = PHONE_PATTERN;
 
     /**
-     * Tích luỹ lỗi vào {@code errors}, mỗi lỗi là 1 message key.
-     * @param roughAgeInYears tuổi ước lượng (để quyết định có bắt buộc người giám hộ không).
+     * Validate và trả về danh sách lỗi (rỗng nếu hợp lệ).
+     *
+     * @param bn               bệnh nhân cần validate.
+     * @param roughAgeInYears  tuổi ước lượng (để quyết định có bắt buộc người giám hộ không).
+     *                         Nếu null sẽ tự tính từ {@code bn.getNgaySinh()}.
      */
-    public void validate(BenhNhan bn, java.util.List<String> errors, Integer roughAgeInYears) {
+    public List<ValidationError> validate(BenhNhan bn, Integer roughAgeInYears) {
+        List<ValidationError> errors = new ArrayList<>();
         if (bn == null) {
-            errors.add("bn-empty");
-            return;
+            errors.add(ValidationError.withoutField("bn-empty"));
+            return errors;
         }
         if (isBlank(bn.getHoVaTen())) {
-            errors.add("bn.hoVaTenRequired");
+            errors.add(ValidationError.of("hoVaTenField", "bn.hoVaTenRequired"));
         }
         if (bn.getNgaySinh() == null) {
-            errors.add("bn.ngaySinhRequired");
+            errors.add(ValidationError.of("ngaySinhField", "bn.ngaySinhRequired"));
         } else {
             LocalDate today = LocalDate.now();
             LocalDate ns = toLocalDate(bn.getNgaySinh());
             if (ns == null) {
-                errors.add("bn.ngaySinhInvalid");
+                errors.add(ValidationError.of("ngaySinhField", "bn.ngaySinhInvalid"));
             } else if (ns.isAfter(today)) {
-                errors.add("bn.ngaySinhInFuture");
+                errors.add(ValidationError.of("ngaySinhField", "bn.ngaySinhInFuture"));
             } else if (ns.isBefore(today.minusYears(150))) {
-                errors.add("bn.ngaySinhTooOld");
+                errors.add(ValidationError.of("ngaySinhField", "bn.ngaySinhTooOld"));
             }
         }
         if (isBlank(bn.getDienThoai())) {
-            errors.add("bn.dienThoaiRequired");
+            errors.add(ValidationError.of("dienThoaiField", "bn.dienThoaiRequired"));
         } else if (!PHONE_PATTERN.matcher(bn.getDienThoai().trim()).matches()) {
-            errors.add("bn.dienThoaiInvalid");
+            errors.add(ValidationError.of("dienThoaiField", "bn.dienThoaiInvalid"));
         }
         if (isBlank(bn.getDiaChi())) {
-            errors.add("bn.diaChiRequired");
+            errors.add(ValidationError.of("diaChiField", "bn.diaChiRequired"));
         }
         if (!isBlank(bn.getMaDinhDanhCongDan())
                 && !CCCD_PATTERN.matcher(bn.getMaDinhDanhCongDan().trim()).matches()) {
-            errors.add("bn.cccdInvalid");
+            errors.add(ValidationError.withoutField("bn.cccdInvalid"));
         }
         if (!isBlank(bn.getMaSoTheBaoHiemYTe())) {
             String bhyt = bn.getMaSoTheBaoHiemYTe().trim().toUpperCase();
             if (!SSKT_PATTERN.matcher(bhyt).matches()) {
-                errors.add("bn.bhytInvalid");
+                errors.add(ValidationError.withoutField("bn.bhytInvalid"));
             }
         }
         if (bn.getCanNang() != null && (bn.getCanNang() < 0 || bn.getCanNang() > 500)) {
-            errors.add("bn.canNangOutOfRange");
+            errors.add(ValidationError.withoutField("bn.canNangOutOfRange"));
         }
         int age = roughAgeInYears != null ? roughAgeInYears : roughAgeFromNgaySinh(bn.getNgaySinh());
         // Người giám hộ bắt buộc nếu bệnh nhân dưới 18 tuổi.
         if (age >= 0 && age < 18) {
             if (isBlank(bn.getHoTenNguoiThan())) {
-                errors.add("bn.giamHoHoTenRequired");
+                errors.add(ValidationError.of("hoTenNguoiThanField", "bn.giamHoHoTenRequired"));
             }
             if (isBlank(bn.getQuanHeVoiBenhNhan())) {
-                errors.add("bn.giamHoQuanHeRequired");
+                errors.add(ValidationError.of("quanHeVoiBenhNhanField", "bn.giamHoQuanHeRequired"));
             }
             if (!isBlank(bn.getSdtNguoiThan())
-                    && !GUARDIAN_PHONE_PATTERN.matcher(bn.getNguoiGiamHoSoDienThoai().trim()).matches()) {
-                errors.add("bn.giamHoSdtInvalid");
+                    && !GUARDIAN_PHONE_PATTERN.matcher(bn.getSdtNguoiThan().trim()).matches()) {
+                errors.add(ValidationError.of("sdtNguoiThanField", "bn.giamHoSdtInvalid"));
             }
+        }
+        return errors;
+    }
+
+    /**
+     * Backwards-compatible overload: tích luỹ chỉ message key vào {@code sink}
+     * (bỏ qua fieldKey). Giữ để tương thích với code cũ / test cũ nếu cần.
+     */
+    public void validate(BenhNhan bn, List<String> sink, Integer roughAgeInYears) {
+        for (ValidationError e : validate(bn, roughAgeInYears)) {
+            sink.add(e.messageKey());
         }
     }
 

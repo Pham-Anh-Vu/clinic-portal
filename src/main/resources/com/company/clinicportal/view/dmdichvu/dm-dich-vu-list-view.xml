@@ -41,8 +41,7 @@
     </actions>
     <layout>
         <vbox spacing="true" width="100%" height="100%">
-            <!-- Vùng 1: Danh mục dịch vụ -->
-            <vbox spacing="false" width="100%" 
+            <vbox spacing="false" width="100%"
                   css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; padding: 16px; background: var(--lumo-base-color);">
                 <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
                       css="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--lumo-primary-color);">
@@ -92,8 +91,7 @@
                 <simplePagination id="pagination" dataLoader="dmDichVusDl" alignSelf="END" css="margin-top: 8px;"/>
             </vbox>
 
-            <!-- Vùng 2: Giá KPI -->
-            <vbox spacing="false" width="100%" 
+            <vbox spacing="false" width="100%"
                   css="border: 1px solid var(--lumo-contrast-20pct); border-radius: 8px; padding: 16px; background: var(--lumo-base-color); margin-top: 16px;">
                 <hbox width="100%" alignItems="CENTER" justifyContent="BETWEEN"
                       css="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--lumo-success-color);">

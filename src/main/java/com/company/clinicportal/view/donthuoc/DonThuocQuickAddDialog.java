@@ -27,6 +27,7 @@ import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.exception.ValidationException;
 import io.jmix.flowui.component.select.JmixSelect;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.kit.action.Action;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionContainer;
@@ -110,6 +111,8 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
     private com.vaadin.flow.component.datepicker.DatePicker tuNgayField;
     @ViewComponent
     private com.vaadin.flow.component.datepicker.DatePicker denNgayField;
+    @ViewComponent("chanDoanDataGrid.refresh")
+    private Action chanDoanDataGridRefreshAction;
 
     private ChiTietDieuTri chiTietDieuTri;
     private UUID donThuocIdParam;
@@ -159,6 +162,18 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
             } catch (Exception e) {}        }
         // Cập nhật trạng thái required của "Hình thức điều trị" theo loại đơn
         applyHinhThucDieuTriRequired(event.getValue());
+
+        if(event.getValue().equals(LoaiDon.THUONG)){
+            soDotField.setRequired(false);
+            tuNgayField.setRequired(false);
+            denNgayField.setRequired(false);
+            hinhThucDieuTriField.setRequired(true);
+        }else{
+            soDotField.setRequired(true);
+            tuNgayField.setRequired(true);
+            denNgayField.setRequired(true);
+            hinhThucDieuTriField.setRequired(false);
+        }
     }
 
     @Subscribe("loaiDonField")
@@ -176,6 +191,18 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
             } catch (Exception e) {}
         }
         applyHinhThucDieuTriRequired(event.getValue());
+
+        if(event.getValue().equals(LoaiDon.THUONG)){
+            soDotField.setRequired(false);
+            tuNgayField.setRequired(false);
+            denNgayField.setRequired(false);
+            hinhThucDieuTriField.setRequired(true);
+        }else{
+            soDotField.setRequired(true);
+            tuNgayField.setRequired(true);
+            denNgayField.setRequired(true);
+            hinhThucDieuTriField.setRequired(false);
+        }
     }
 
     /**
@@ -410,8 +437,17 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
                 dialogWindows.detail(this, DonThuocChanDoan.class)
                         .withViewClass(DonThuocChanDoanEditDialog.class)
                         .editEntity(cd)
+                        .withContainer(chanDoansDc)
                         .withParentDataContext(getViewData().getDataContext())
                         .build();
+        window.addAfterCloseListener(closeEvent -> {
+            // Dialog commit vào cùng DataContext với parent, nên entity đã được
+            // cập nhật. Tuy nhiên DataGrid không tự refresh khi container cùng
+            // context → phải ép refresh item để cột "Kết luận" hiển thị giá trị mới.
+            if (closeEvent.closedWith(StandardOutcome.SAVE)) {
+                updateChanDoanCountLabel();
+            }
+        });
         window.open();
     }
 
