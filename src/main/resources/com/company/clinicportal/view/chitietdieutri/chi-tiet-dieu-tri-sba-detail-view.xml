@@ -527,7 +527,13 @@
                                 <textField id="khamBenhToanThanField1" property="khamBenhToanThan" colspan="2"/>
                                 <textArea id="kbBoPhanField1" height="9.5em" property="kbBoPhan" colspan="2"
                                           label="Khám các bộ phận, toàn thân"/>
-                                <textField id="chuanDoanRaVienField" property="chuanDoanRaVien" colspan="2" />
+                                <textArea id="chuanDoanRaVienField" height="9.5em" property="chuanDoanRaVien"
+                                          colspan="2" label="Chẩn đoán ra viện" visible="false"/>
+                                <multiSelectComboBox id="dsChanDoanIcdRaVienField" property="dsChanDoanIcd"
+                                                     itemsContainer="icd10sDc"
+                                                     colspan="2" width="100%"
+                                                     label="Chẩn đoán ra viện"
+                                                     clearButtonVisible="true"  visible="false"/>
                                 <textField id="tinhTrangBenhNhanField" property="tinhTrangBenhNhan" colspan="2" label="Tình trạng bệnh nhân ra viện"/>
                                 <textArea id="huongDieuTriField" height="9.5em" property="huongDieuTri" colspan="2" label="Hướng điều trị và các chế độ tiếp theo"/>
                                 <textField id="ngayBatDauField" property="ngayBatDau" label="Ngày bắt đầu"/>

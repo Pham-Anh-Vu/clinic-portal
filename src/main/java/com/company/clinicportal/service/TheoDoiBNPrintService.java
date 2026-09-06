@@ -6,11 +6,14 @@ import com.company.clinicportal.entity.DmDichVu;
 import com.company.clinicportal.entity.ToDieuTri;
 import com.company.clinicportal.entity.ToDieuTriKyThuat;
 import io.jmix.core.DataManager;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -26,11 +29,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Sinh bảng "Theo dõi bệnh nhân điều trị tại phòng khám Nhật Minh" dựa trên file
@@ -60,18 +65,40 @@ public class TheoDoiBNPrintService {
     private static final int NGAY_COL = 1;
     /** Cột bắt đầu ghi tên dịch vụ (cùng cột với C trong template). */
     private static final int FIRST_SERVICE_COL = 2;
-    /** Số cột tối đa dành cho tên dịch vụ (đủ lớn để bao nhiều DV khác nhau). */
-    private static final int MAX_SERVICE_COLS = 14;
+    /**
+     * Số cột tối đa dành cho tên dịch vụ. Được nâng lên 30 để đủ chứa nhiều DV
+     * thực tế của một phiếu điều trị; khi vượt quá sẽ tự động cắt bớt DV dư.
+     */
+    private static final int MAX_SERVICE_COLS = 30;
+
+    /**
+     * Cột "BN ký tên" trong template gốc (0-based = 5, tức F).
+     * Khi số DV thực tế &gt; 0, vùng từ cột này trở đi sẽ được shift sang phải
+     * để nhường chỗ cho các cột DV mới.
+     */
+    private static final int BN_KY_TEN_COL = 5;
+    /**
+     * Cột "Người nhận tiền" trong template gốc (0-based = 6, tức G).
+     */
+    private static final int NGUOI_NHAN_TIEN_COL = 6;
+    /**
+     * Cột "Người T.Hiện" trong template gốc (0-based = 3, tức D, nằm ở row 7).
+     */
+    private static final int NGUOI_THUC_HIEN_COL = 3;
+    /**
+     * Cột "Tiền nộp" trong template gốc (0-based = 4, tức E, nằm ở row 7).
+     */
+    private static final int TIEN_NOP_COL = 4;
 
     /** Header của bệnh nhân đặt tại các ô cố định. */
     private static final int HO_TEN_CELL_ROW = 2;
-    private static final int HO_TEN_CELL_COL = 6;        // G3
-    private static final int NGAY_SINH_CELL_COL = 13;     // N3
-    private static final int NGAY_VAO_DT_CELL_COL = 17;   // T3
+    private static final int HO_TEN_CELL_COL = 5;        // G3
+    private static final int NGAY_SINH_CELL_COL = 12;     // N3
+    private static final int NGAY_VAO_DT_CELL_COL = 16;   // T3
     private static final int DIA_CHI_CELL_ROW = 3;
-    private static final int DIA_CHI_CELL_COL = 6;       // G4
+    private static final int DIA_CHI_CELL_COL = 5;       // G4
     private static final int CHAN_DOAN_CELL_ROW = 4;
-    private static final int CHAN_DOAN_CELL_COL = 6;     // G5
+    private static final int CHAN_DOAN_CELL_COL = 5;     // G5
 
     /** Hàng header cuối cùng (row 7 trong Excel, 0-based = 6) — hàng đầu tiên của dữ liệu là row 7 (0-based = 7). */
     private static final int FIRST_DATA_ROW_INDEX = 7;
@@ -79,8 +106,15 @@ public class TheoDoiBNPrintService {
     /** Tổng số dòng dữ liệu trong template (STT 1..312 trong file mẫu). */
     private static final int MAX_DATA_ROWS = 312;
 
+    /**
+     * Row index 0-based cuối cùng luôn được áp border bảng DV (kể cả khi BN có ít
+     * {@code ToDieuTri} hơn - các dòng trống phía dưới vẫn có border để người dùng
+     * điền tay). Mặc định = 20 tương ứng row 21 0-based / row 22 Excel 1-based.
+     */
+    private static final int PRINT_LAST_DATA_ROW_INDEX = 20;
+
     /** Font size cho các cell header & data fill vào (theo yêu cầu: 12px). */
-    private static final short FILL_FONT_SIZE_PT = 12;
+    private static final short FILL_FONT_SIZE_PT = 13;
 
     /** Row index (0-based) của hàng sub-header (hàng 7 trong Excel 1-based) —
      *  vị trí ghi tên dịch vụ bên dưới hàng "Dịch vụ kỹ thuật" (C6) và bên trái
@@ -137,6 +171,7 @@ public class TheoDoiBNPrintService {
                 .parameter("ctdt", chiTietDieuTri)
                 .fetchPlan(fp -> fp
                         .addFetchPlan("_base")
+                        .add("idNguoiThucHien", ns -> ns.addFetchPlan("_base"))
                         .add("kyThuatList", k -> k
                                 .addFetchPlan("_base")
                                 .add("idDichVu", d -> d.addFetchPlan("_base"))))
@@ -185,60 +220,148 @@ public class TheoDoiBNPrintService {
             setStringCell(sheet, DIA_CHI_CELL_ROW, DIA_CHI_CELL_COL,
                     benhNhan != null ? benhNhan.getDiaChi() : "");
             setStringCell(sheet, CHAN_DOAN_CELL_ROW, CHAN_DOAN_CELL_COL,
-                    chiTietDieuTri.getChuanDoan());
+                    resolveChuanDoanForReport(chiTietDieuTri));
 
             // 2) Gom tất cả dịch vụ thực tế được sử dụng trong các dòng ToDieuTri của bệnh nhân,
             //    giữ thứ tự xuất hiện đầu tiên (LinkedHashSet). Mỗi tên dịch vụ sẽ được
-            //    ghi vào 1 cột ở hàng sub-header (row 7, idx 6) - bên dưới "Dịch vụ kỹ thuật"
-            //    (C6) và bên trái "Người T.Hiện" (D7 trong template gốc, sẽ được chuyển lên row 6).
-            LinkedHashSet<String> allUsedServiceNames = new LinkedHashSet<>();
+            //    ghi vào 1 cột ở hàng sub-header (row 7, idx 6).
+            //
+            //    Lưu ý: set chứa tên đã normalize (lowercase + collapse space) để so khớp
+            //    với collectKyThuatNames(). Display name gốc lấy từ lần xuất hiện đầu tiên.
+            Map<String, String> firstDisplayByNormalized = new LinkedHashMap<>();
             for (ToDieuTri line : toDieuTris) {
-                allUsedServiceNames.addAll(collectKyThuatNames(line));
+                if (line == null || line.getKyThuatList() == null) {
+                    continue;
+                }
+                for (ToDieuTriKyThuat kt : line.getKyThuatList()) {
+                    DmDichVu dv = kt.getIdDichVu();
+                    if (dv != null && dv.getTenDichVu() != null) {
+                        String normalized = normalize(dv.getTenDichVu());
+                        if (!normalized.isEmpty() && !firstDisplayByNormalized.containsKey(normalized)) {
+                            firstDisplayByNormalized.put(normalized, dv.getTenDichVu());
+                        }
+                    }
+                }
             }
-            // Lưu lại display name (chưa normalize) của từng DV thực tế để hiển thị & map 'x'.
-            List<String> actualServiceNames = new ArrayList<>(allUsedServiceNames);
+            List<String> normalizedServiceKeys = new ArrayList<>(firstDisplayByNormalized.keySet());
+            List<String> actualServiceNames = new ArrayList<>(firstDisplayByNormalized.values());
 
-            // 3) Ghi tên dịch vụ vào row 7 (sub-header) theo thứ tự.
-            //    Cột bắt đầu = FIRST_SERVICE_COL (= 2, cột C). Mỗi DV chiếm 1 cột.
-            //    "Người T.Hiện" (D7) và "Tiền nộp" (E7) sẽ được dời sang row 6.
-            int numServices = actualServiceNames.size();
-            for (int i = 0; i < numServices && i < MAX_SERVICE_COLS; i++) {
+            // Cắt bớt nếu vượt quá giới hạn (giữ thứ tự đầu tiên).
+            int numServices = Math.min(actualServiceNames.size(), MAX_SERVICE_COLS);
+            if (actualServiceNames.size() > MAX_SERVICE_COLS) {
+                log.warn("Bệnh nhân có {} dịch vụ khác nhau, chỉ in {} cột đầu tiên",
+                        actualServiceNames.size(), MAX_SERVICE_COLS);
+                actualServiceNames = new ArrayList<>(actualServiceNames.subList(0, MAX_SERVICE_COLS));
+                normalizedServiceKeys = new ArrayList<>(normalizedServiceKeys.subList(0, MAX_SERVICE_COLS));
+            }
+
+            // 3) Relocate 4 ô header phụ sang phải numServices cột (công thức user xác nhận).
+            //    Template gốc:  D7="Người T.Hiện"  E7="Tiền nộp"
+            //                   F6="BN ký tên"      G6="Người nhận tiền"
+            //    Sau relocate:  D7→row 7, col (3+N);  E7→row 7, col (4+N)
+            //                   F6→row 6, col (5+N);  G6→row 6, col (6+N)
+            //    Sau đó clear 4 ô gốc để khỏi cột trống thừa.
+            if (numServices > 0) {
+                int nguoiTHNewCol       = FIRST_SERVICE_COL + numServices;       // 3+N
+                int tienNopNewCol       = FIRST_SERVICE_COL + numServices + 1;   // 4+N
+                int bnKyTenNewCol       = FIRST_SERVICE_COL + numServices + 2;   // 5+N
+                int nguoiNhanTienNewCol = FIRST_SERVICE_COL + numServices + 3;   // 6+N
+
+                setStringCell(sheet, SERVICE_NAME_ROW_INDEX,     nguoiTHNewCol,       "Người T.Hiện");
+                setStringCell(sheet, SERVICE_NAME_ROW_INDEX,     tienNopNewCol,       "Tiền nộp");
+                setStringCell(sheet, SERVICE_NAME_ROW_INDEX - 1, bnKyTenNewCol,       "BN ký tên");
+                setStringCell(sheet, SERVICE_NAME_ROW_INDEX - 1, nguoiNhanTienNewCol, "Người nhận tiền");
+
+                clearCellValue(sheet, SERVICE_NAME_ROW_INDEX,     NGUOI_THUC_HIEN_COL); // D7
+                clearCellValue(sheet, SERVICE_NAME_ROW_INDEX,     TIEN_NOP_COL);        // E7
+                clearCellValue(sheet, SERVICE_NAME_ROW_INDEX - 1, BN_KY_TEN_COL);       // F6
+                clearCellValue(sheet, SERVICE_NAME_ROW_INDEX - 1, NGUOI_NHAN_TIEN_COL); // G6
+            }
+
+            // 4) Ghi tên dịch vụ vào row 7 (sub-header) theo thứ tự, bắt đầu từ cột C.
+            for (int i = 0; i < numServices; i++) {
                 int col = FIRST_SERVICE_COL + i;
                 setStringCell(sheet, SERVICE_NAME_ROW_INDEX, col, actualServiceNames.get(i));
             }
 
-            // 4) Chuyển 2 sub-header "Người T.Hiện" / "Tiền nộp" lên row 6 ngay sau cột DV cuối
-            //    để không bị đè bởi tên dịch vụ ở row 7.
-            int afterLastServiceCol = FIRST_SERVICE_COL + numServices;
-            if (numServices < MAX_SERVICE_COLS) {
-                setStringCell(sheet, SERVICE_NAME_ROW_INDEX - 1, afterLastServiceCol, "Người T.Hiện");
-            }
-            if (numServices + 1 < MAX_SERVICE_COLS) {
-                setStringCell(sheet, SERVICE_NAME_ROW_INDEX - 1, afterLastServiceCol + 1, "Tiền nộp");
-            }
+            // 5) (đã gộp vào bước 3 ở trên)
 
-            // 5) Fill từng dòng dữ liệu từ ToDieuTri (giới hạn MAX_DATA_ROWS).
+            // 6) Fill từng dòng dữ liệu từ ToDieuTri (giới hạn MAX_DATA_ROWS).
             //    Cột "Ngày, tháng năm" (B) KHÔNG fill - để trống theo yêu cầu.
-            //    Cột "BN ký tên" để trống — BN tự ký tay khi in.
             //    Cột dịch vụ giờ là FIRST_SERVICE_COL..(FIRST_SERVICE_COL + numServices - 1).
+            //    Cột "Người T.Hiện" ở (FIRST_SERVICE_COL + numServices) - ghi tên người TH.
+            //    Các cột "BN ký tên" / "Người nhận tiền" / "Tiền nộp" để trống.
+            int nguoiTHCol = FIRST_SERVICE_COL + numServices;
             int rowsToPrint = Math.min(toDieuTris.size(), MAX_DATA_ROWS);
             for (int i = 0; i < rowsToPrint; i++) {
                 ToDieuTri line = toDieuTris.get(i);
                 int rowIndex = FIRST_DATA_ROW_INDEX + i;
 
                 setIntCell(sheet, rowIndex, STT_COL, i + 1);
-                // B� fill cột "Ngày, tháng năm" theo yêu cầu.
-                // setStringCell(sheet, rowIndex, NGAY_COL, formatKhoangNgay(line));
+                // Cột "Ngày, tháng năm" (B) cố ý để trống theo yêu cầu.
 
-                Set<String> kyThuatNames = collectKyThuatNames(line);
-                for (int svcIdx = 0; svcIdx < actualServiceNames.size(); svcIdx++) {
-                    String actualService = actualServiceNames.get(svcIdx);
-                    if (kyThuatNames.contains(actualService)) {
-                        int col = FIRST_SERVICE_COL + svcIdx;
-                        setStringCell(sheet, rowIndex, col, "x");
+//                Set<String> kyThuatNames = collectKyThuatNames(line);
+//                for (int svcIdx = 0; svcIdx < numServices; svcIdx++) {
+//                    String normalizedKey = normalizedServiceKeys.get(svcIdx);
+//                    if (kyThuatNames.contains(normalizedKey)) {
+//                        int col = FIRST_SERVICE_COL + svcIdx;
+//                        setStringCell(sheet, rowIndex, col, "x");
+//                    }
+//                }
+
+                // Cột "Người T.Hiện": lấy tên người thực hiện (ưu tiên theo thứ tự).
+//                String tenNguoiTH = resolveNguoiThucHienName(line);
+//                if (tenNguoiTH != null && !tenNguoiTH.isEmpty()) {
+//                    setStringCell(sheet, rowIndex, nguoiTHCol, tenNguoiTH);
+//                }
+            }
+
+            // 7) Áp border mỏng cho toàn bộ bảng DV (header + data + cột phụ đã relocate).
+            //    Vùng: cột FIRST_SERVICE_COL (=C) → cột "Người nhận tiền" (= col 6+N).
+            //    Hàng: header DV (SERVICE_NAME_ROW_INDEX = row 7) → dòng dữ liệu cuối
+            //    cố định (PRINT_LAST_DATA_ROW_INDEX = 20, tức row 21) để luôn có đủ 12
+            //    dòng border cho người dùng điền tay khi BN có ít ToDieuTri.
+            int lastColBorder = FIRST_SERVICE_COL + numServices + 3; // cột "Người nhận tiền"
+            int lastRowBorder = PRINT_LAST_DATA_ROW_INDEX;
+            // 7a) Pre-fill blank cells cho 2 cột "BN ký tên" và "Người nhận tiền" ở các
+            //     row data (cột K, L). Các cột này không được setStringCell nên cell
+            //     vẫn NULL → border có thể bị LibreOffice bỏ qua. Clone style từ cột
+            //     "Tiền nộp" (col 4+N) để giữ font/fill, setBlank để đảm bảo render.
+            if (numServices > 0) {
+                int tienNopCol = FIRST_SERVICE_COL + numServices + 1;       // 4+N
+                int bnKyTenCol = FIRST_SERVICE_COL + numServices + 2;       // 5+N
+                int nguoiNhanTienCol = FIRST_SERVICE_COL + numServices + 3; // 6+N
+                for (int r = FIRST_DATA_ROW_INDEX; r <= lastRowBorder; r++) {
+                    Row dataRow = sheet.getRow(r);
+                    if (dataRow == null) {
+                        dataRow = sheet.createRow(r);
+                    }
+                    Cell tienNopCell = dataRow.getCell(tienNopCol);
+                    CellStyle srcStyle = tienNopCell != null ? tienNopCell.getCellStyle() : null;
+                    for (int c : new int[]{bnKyTenCol, nguoiNhanTienCol}) {
+                        Cell target = dataRow.getCell(c);
+                        if (target == null) {
+                            target = dataRow.createCell(c);
+                        }
+                        if (srcStyle != null && target.getCellStyle() == null) {
+                            CellStyle newStyle = sheet.getWorkbook().createCellStyle();
+                            newStyle.cloneStyleFrom(srcStyle);
+                            target.setCellStyle(newStyle);
+                        }
+                        target.setBlank();
                     }
                 }
             }
+            applyBorderToRange(sheet, FIRST_SERVICE_COL, lastColBorder,
+                    SERVICE_NAME_ROW_INDEX - 1, lastRowBorder); // bao luôn row header phụ (excel row 6)
+
+            // Gộp vùng "Dịch vụ kỹ thuật" ở hàng header phụ (excel row 6) thành 1 ô duy nhất:
+            // chỉ áp dụng cho các cột DV (C → cột DV cuối); giữ border ngăn với
+            // cột "Người T.Hiện", "Tiền nộp", "BN ký tên", "Người nhận tiền".
+            mergeDichVuKyThuatHeader(sheet,
+                    FIRST_SERVICE_COL,
+                    FIRST_SERVICE_COL + numServices - 1,
+                    SERVICE_NAME_ROW_INDEX - 1);
 
             workbook.write(out);
             return out.toByteArray();
@@ -330,6 +453,73 @@ public class TheoDoiBNPrintService {
     }
 
     /**
+     * Dời các cột phụ trong template sang phải để nhường chỗ cho {@code numServices} cột DV mới.
+     * <p>
+     * Template gốc (sheet "mẫu") có cấu trúc cột:
+     * <pre>
+     *   A=STT  B=Ngày  C..(C+numServices-1)=DV mới  F=BN ký tên  G=Người nhận tiền
+     *   D7=Người T.Hiện  E7=Tiền nộp
+     * </pre>
+     * Khi {@code numServices > 0}, toàn bộ cột từ {@code FIRST_SERVICE_COL + numServices}
+     * trở đi (gồm cả F, G, ...) sẽ được dịch sang phải thêm đúng {@code numServices} cột,
+     * đảm bảo các giá trị cũ (nhãn "BN ký tên", "Người nhận tiền" và "Người T.Hiện",
+     * "Tiền nộp") không bị đè bởi tên DV.
+     * <p>
+     * Lưu ý: dùng {@link Sheet#shiftColumns(int, int, int)} của POI — hàm này tự xử lý
+     * style, merged region và cell value của toàn bộ cột. Các cột nguồn sẽ trống sau khi
+     * shift (sẽ được ghi đè bằng tên DV ngay sau đó).
+     */
+    private static void shiftTrailingColumns(Sheet sheet, int numServices) {
+        int startCol = FIRST_SERVICE_COL + numServices;
+        int lastCol = computeLastColumn(sheet);
+        if (lastCol < startCol) {
+            return;
+        }
+        try {
+            sheet.shiftColumns(startCol, lastCol, numServices);
+        } catch (Exception e) {
+            log.warn("Không thể shift cột phụ ({}..{}) sang phải {} cột: {}",
+                    startCol, lastCol, numServices, e.getMessage());
+        }
+    }
+
+    /**
+     * Duyệt tất cả row để tìm chỉ số cột (0-based) lớn nhất có dữ liệu trong sheet.
+     * Trả về -1 nếu sheet rỗng. Dùng chung cho {@link #shiftTrailingColumns} và
+     * {@link #applyBorderToRange}.
+     */
+    private static int computeLastColumn(Sheet sheet) {
+        int lastCol = -1;
+        for (int r = sheet.getFirstRowNum(); r <= sheet.getLastRowNum(); r++) {
+            Row row = sheet.getRow(r);
+            if (row == null) {
+                continue;
+            }
+            short last = row.getLastCellNum();
+            if (last > 0 && last - 1 > lastCol) {
+                lastCol = last - 1;
+            }
+        }
+        return lastCol;
+    }
+
+    /**
+     * Lấy tên người thực hiện cho 1 dòng ToDieuTri (từ {@link ToDieuTri#getIdNguoiThucHien()}).
+     * Entity {@link ToDieuTriKyThuat} hiện chưa có trường người thực hiện riêng.
+     * Trả về chuỗi rỗng nếu không có.
+     */
+    private static String resolveNguoiThucHienName(ToDieuTri line) {
+        if (line == null || line.getIdNguoiThucHien() == null) {
+            return "";
+        }
+        return nullSafe(line.getIdNguoiThucHien().getHoTen());
+    }
+
+    private static String nullSafe(String s) {
+        return s != null ? s : "";
+    }
+
+    /**
      * Ghi giá trị chuỗi vào cell; trả về cell để caller có thể chỉnh thêm (font/style).
      * Mặc định áp font 12pt cho mọi cell do service ghi — đảm bảo kích thước đồng nhất,
      * không bị ảnh hưởng bởi font mặc định (thường 11pt) của workbook.
@@ -359,6 +549,22 @@ public class TheoDoiBNPrintService {
         }
         cell.setCellValue(value);
         applyFillFont(cell, sheet.getWorkbook(), FILL_FONT_SIZE_PT, false);
+    }
+
+    /**
+     * Xoá giá trị của cell nhưng giữ nguyên style/border. Nếu cell chưa tồn tại thì không làm gì.
+     * Dùng khi cần di chuyển nhãn từ ô gốc sang ô mới mà không phát sinh thêm ô trống có border.
+     */
+    private static void clearCellValue(Sheet sheet, int rowIndex, int colIndex) {
+        Row row = sheet.getRow(rowIndex);
+        if (row == null) {
+            return;
+        }
+        Cell cell = row.getCell(colIndex);
+        if (cell == null) {
+            return;
+        }
+        cell.setBlank();
     }
 
     /**
@@ -436,6 +642,22 @@ public class TheoDoiBNPrintService {
         }
     }
 
+    private String safeText(Object value) {
+        return value != null ? String.valueOf(value) : "";
+    }
+
+    private String resolveChuanDoanForReport(ChiTietDieuTri ctdt) {
+        if (ctdt == null) {
+            return "";
+        }
+        String icdText = ctdt.getDsChanDoanIcdText();
+        if (icdText != null && !icdText.isBlank()) {
+            return icdText;
+        }
+        return safeText(ctdt.getChuanDoan());
+    }
+
+
     /**
      * Đặt font Times New Roman 12pt cho các cell header chứa value bệnh nhân:
      * G3 (họ tên), P3 (ngày sinh), T3 (ngày vào điều trị), G4 (địa chỉ), G5 (chẩn đoán).
@@ -463,5 +685,128 @@ public class TheoDoiBNPrintService {
             }
             applyFillFont(cell, wb, FILL_FONT_SIZE_PT, false);
         }
+    }
+
+    /**
+     * Áp viền mỏng (THIN, đen) cho cả 4 cạnh của 1 cell. Clone style hiện có để
+     * giữ font và các thuộc tính khác; chỉ ghi đè 4 thuộc tính border.
+     * <p>
+     * Cache style theo (existingStyleIndex, workbook) để tránh tạo CellStyle mới
+     * cho mỗi cell — giữ file xlsx nhẹ và render ổn định hơn.
+     */
+    private static final Map<Workbook, Map<Short, CellStyle>> BORDER_STYLE_CACHE = new ConcurrentHashMap<>();
+
+    private static void applyThinBorder(Cell cell, Workbook workbook) {
+        if (cell == null || workbook == null) {
+            return;
+        }
+        CellStyle existing = cell.getCellStyle();
+        Short existingIdx = existing != null ? Short.valueOf(existing.getIndex()) : null;
+
+        Map<Short, CellStyle> cache = BORDER_STYLE_CACHE.computeIfAbsent(workbook, k -> new ConcurrentHashMap<>());
+        CellStyle style = existingIdx != null ? cache.get(existingIdx) : null;
+        if (style == null) {
+            style = workbook.createCellStyle();
+            if (existing != null) {
+                style.cloneStyleFrom(existing);
+            }
+            style.setBorderTop(BorderStyle.THIN);
+            style.setBorderBottom(BorderStyle.THIN);
+            style.setBorderLeft(BorderStyle.THIN);
+            style.setBorderRight(BorderStyle.THIN);
+            if (existingIdx != null) {
+                cache.put(existingIdx, style);
+            }
+        }
+        cell.setCellStyle(style);
+    }
+
+    /**
+     * Áp viền mỏng cho toàn bộ cell nằm trong vùng {@code [firstCol..lastCol]} x
+     * {@code [firstRow..lastRow]}. Các ô chưa tồn tại sẽ được tạo mới (kèm style clone
+     * từ neighbor có value + setBlank) để đảm bảo LibreOffice render border đầy đủ —
+     * nếu cell hoàn toàn NULL, border có thể bị bỏ qua khi convert sang PDF.
+     * <p>
+     * Chú ý: việc {@code createCell} chỉ được gọi trong vùng đã biết là cần border
+     * — tránh tạo cell thừa ngoài bảng.
+     */
+    private static void applyBorderToRange(Sheet sheet, int firstCol, int lastCol,
+                                           int firstRow, int lastRow) {
+        if (sheet == null || firstCol > lastCol || firstRow > lastRow) {
+            return;
+        }
+        Workbook wb = sheet.getWorkbook();
+        for (int r = firstRow; r <= lastRow; r++) {
+            Row row = sheet.getRow(r);
+            if (row == null) {
+                row = sheet.createRow(r);
+            }
+            for (int c = firstCol; c <= lastCol; c++) {
+                Cell cell = row.getCell(c);
+                if (cell == null) {
+                    cell = row.createCell(c);
+                    // Clone style từ neighbor bên trái có value để giữ font/fill.
+                    CellStyle neighborStyle = null;
+                    for (int nc = c - 1; nc >= firstCol; nc--) {
+                        Cell nb = row.getCell(nc);
+                        if (nb != null && nb.getCellStyle() != null) {
+                            neighborStyle = nb.getCellStyle();
+                            break;
+                        }
+                    }
+                    if (neighborStyle != null) {
+                        CellStyle newStyle = wb.createCellStyle();
+                        newStyle.cloneStyleFrom(neighborStyle);
+                        cell.setCellStyle(newStyle);
+                    }
+                    // setBlank để cell không phải NULL — giúp LibreOffice render border.
+                    cell.setBlank();
+                }
+                applyThinBorder(cell, wb);
+            }
+        }
+    }
+
+    /**
+     * Gộp vùng "Dịch vụ kỹ thuật" ở hàng header phụ (excel row {@code headerRowIndex + 1})
+     * thành 1 ô duy nhất — bỏ border ngăn dọc giữa các cột DV.
+     * <ul>
+     *   <li>Vùng: [firstCol..lastCol] x headerRowIndex.</li>
+     *   <li>Cell giữa (firstCol &lt; c &lt; lastCol): clear borderLeft + borderRight,
+     *       giữ borderTop + borderBottom để vẫn ngăn với row trên/dưới.</li>
+     *   <li>Cell biên (firstCol, lastCol): giữ nguyên border bao (left/right + top/bottom).</li>
+     * </ul>
+     * Nếu {@code lastCol < firstCol} (không có cột DV) thì không làm gì.
+     */
+    private static void mergeDichVuKyThuatHeader(Sheet sheet, int firstCol,
+                                                 int lastCol, int headerRowIndex) {
+        if (sheet == null || lastCol < firstCol) {
+            return;
+        }
+        Row row = sheet.getRow(headerRowIndex);
+        if (row == null) {
+            return;
+        }
+        Workbook wb = sheet.getWorkbook();
+        // Clear border left/right cho các cell giữa region (giữ top/bottom).
+        for (int c = firstCol + 1; c < lastCol; c++) {
+            Cell cell = row.getCell(c);
+            if (cell == null) {
+                cell = row.createCell(c);
+                cell.setBlank();
+            }
+            CellStyle existing = cell.getCellStyle();
+            CellStyle style = wb.createCellStyle();
+            if (existing != null) {
+                style.cloneStyleFrom(existing);
+            }
+            style.setBorderLeft(BorderStyle.NONE);
+            style.setBorderRight(BorderStyle.NONE);
+            // borderTop + borderBottom giữ nguyên từ style gốc (applyBorderToRange đã set).
+            cell.setCellStyle(style);
+        }
+        // Merge region C(headerRowIndex+1) → lastCol(headerRowIndex+1).
+        sheet.addMergedRegion(new CellRangeAddress(
+                headerRowIndex, headerRowIndex, firstCol, lastCol));
     }
 }

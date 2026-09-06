@@ -8,20 +8,28 @@
                     class="com.company.clinicportal.entity.BuoiDieuTri">
             <fetchPlan extends="_base">
                 <property name="idBenhNhan" fetchPlan="_base">
-                    <property name="hoVaTen"/>
-                    <property name="trangThaiKhamBenh"/>
-                    <property name="ngayKhamBenh"/>
-                    <property name="thoiGianTaiKham"/>
+                </property>
+                <property name="idChiTietDieuTri" fetchPlan="_base">
+                    <property name="toDieuTri" fetchPlan="_base"/>
                 </property>
                 <property name="idChiTietDichVu" fetchPlan="_base">
                     <property name="idChiTietPhieuDieuTri" fetchPlan="_base">
-                        <property name="chuanDoan"/>
+                        <property name="dsChanDoanIcd" fetchPlan="_base"/>
                     </property>
                 </property>
             </fetchPlan>
             <loader id="buoiDieuTrisDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from BuoiDieuTri e where e.ngayThucHien = :currentDate order by e.createdAt desc]]>
+                    <![CDATA[
+                select distinct e
+                from BuoiDieuTri e
+                join e.idChiTietDieuTri cdt
+                join cdt.toDieuTri tdt
+                where e.ngayThucHien = :currentDate
+                  and tdt.tuNgay <= :currentDate
+                  and tdt.denNgay >= :currentDate
+                order by e.createdAt desc
+            ]]>
                 </query>
             </loader>
         </collection>
@@ -55,13 +63,14 @@
                 <action id="refreshAction" type="list_refresh"/>
             </actions>
             <columns resizable="true">
+                <column property="idBenhNhan.id" header="Mã bệnh nhân"/>
                 <column property="idBenhNhan.hoVaTen"/>
                 <column property="idBenhNhan.ngaySinh"/>
-                <column property="idBenhNhan.diaChi"/>
-                <column key="ca" header="ca"/>
-                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.chuanDoan"/>
-                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.createdAt"/>
-                <column property="ngayThucHien"/>
+<!--                <column property="idBenhNhan.diaChi"/>-->
+<!--                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.dsChanDoanIcd"/>-->
+<!--                <column property="idChiTietDichVu.idChiTietPhieuDieuTri.chuanDoan"/>-->
+                <column key="chuanDoan" header="Chuẩn đoán"/>
+                <column property="idBenhNhan.trangThaiKhamBenh"/>
             </columns>
         </dataGrid>
         <hbox id="lookupActions" visible="false">

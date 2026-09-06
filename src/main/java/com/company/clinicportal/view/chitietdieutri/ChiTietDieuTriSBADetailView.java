@@ -10,10 +10,7 @@ import com.company.clinicportal.lienthong.LienThongGuiDonThuocService;
 import com.company.clinicportal.lienthong.LienThongPasswordPrompt;
 import com.company.clinicportal.lienthong.SecretCipher;
 import com.company.clinicportal.lienthong.entity.CoSoKhamChuaBenhLienThong;
-import com.company.clinicportal.service.ChiTietDieuTriPaymentSummaryService;
-import com.company.clinicportal.service.DonThuocService;
-import com.company.clinicportal.service.TinhKpiChiTietService;
-import com.company.clinicportal.service.ToDieuTriPrintService;
+import com.company.clinicportal.service.*;
 import com.company.clinicportal.view.benhnhan.SoBenhAnPreviewDialogView;
 import com.company.clinicportal.view.buoidieutri.BuoiDieuTriListView;
 import com.company.clinicportal.view.chitietdichvu.ChiTietDichVuDetailView;
@@ -31,6 +28,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -101,7 +100,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     @Autowired
     private ToDieuTriPrintService toDieuTriPrintService;
     @Autowired
-    private com.company.clinicportal.service.TheoDoiBNPrintService theoDoiBNPrintService;
+    private TheoDoiBNPrintService theoDoiBNPrintService;
     @ViewComponent
     private DataGrid<LichSuThanhToan> lichSuThanhToansDataGrid;
     @ViewComponent
@@ -154,6 +153,10 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     private CollectionContainer<DonThuoc> donThuocsDc;
     @ViewComponent
     private JmixTextArea huongDieuTriField;
+    @ViewComponent
+    private JmixMultiSelectComboBox<Icd10> dsChanDoanIcdRaVienField;
+    @ViewComponent
+    private JmixTextArea chuanDoanRaVienField;
 
     /**
      * Renderer hiển thị tiếng Việt cho cột "Trạng thái" đơn thuốc: chuyển {@code trangThai}
@@ -198,19 +201,19 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     @ViewComponent
     private JmixMultiSelectComboBox<Icd10> dsChanDoanIcdField;
     @ViewComponent
-    private com.vaadin.flow.component.textfield.TextField machField;
+    private TextField machField;
     @ViewComponent
-    private com.vaadin.flow.component.textfield.TextField nhietDoField;
+    private TextField nhietDoField;
     @ViewComponent
-    private com.vaadin.flow.component.textfield.TextField huyetApField;
+    private TextField huyetApField;
     @ViewComponent
-    private com.vaadin.flow.component.textfield.TextField nhipThoField;
+    private TextField nhipThoField;
     @ViewComponent
-    private com.vaadin.flow.component.textfield.TextField canNangField;
+    private TextField canNangField;
     @ViewComponent
-    private com.vaadin.flow.component.textfield.TextField chieuCaoField;
+    private TextField chieuCaoField;
     @ViewComponent
-    private com.vaadin.flow.component.textfield.TextField bmiField;
+    private TextField bmiField;
 
     public void setIdBenhNhan(BenhNhan idBenhNhan) {
         this.idBenhNhan = idBenhNhan;
@@ -285,20 +288,30 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         // chỗ nào đó đã chọn sẵn tab3) thì load + cấu hình renderer luôn trong onBeforeShow.
         // Nếu không, việc này sẽ được làm lười (lazy) trong onTabSheetSelectedChange khi
         // user thực sự chuyển sang tab này.
-        if (tabSheet != null) {
-            com.vaadin.flow.component.tabs.Tab selected = tabSheet.getSelectedTab();
-            if (selected != null
-                    && selected.getId().isPresent()
-                    && "tab3".equals(selected.getId().get())) {
-                if (getEditedEntity() != null
-                        && toDieuTrisDl != null
-                        && toDieuTrisDc.getItems().isEmpty()) {
-                    toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
-                    toDieuTrisDl.load();
-                }
-                configureToDieuTriGridColumns();
-            }
+//        if (tabSheet != null) {
+//            Tab selected = tabSheet.getSelectedTab();
+//            if (selected != null
+//                    && selected.getId().isPresent()
+//                    && "tab3".equals(selected.getId().get())) {
+//                if (getEditedEntity() != null
+//                        && toDieuTrisDl != null
+//                        && toDieuTrisDc.getItems().isEmpty()) {
+//                    toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
+//                    toDieuTrisDl.load();
+//                }
+//                configureToDieuTriGridColumns();
+//            }
+//        }
+
+        if (getEditedEntity() != null
+                && toDieuTrisDl != null
+                && toDieuTrisDc.getItems().isEmpty()) {
+            toDieuTrisDl.setParameter("idChiTietDieuTri", getEditedEntity());
+            toDieuTrisDl.load();
         }
+        configureToDieuTriGridColumns();
+
+        visibleChuanDoan();
     }
 
     @Subscribe("canNangField")
@@ -320,14 +333,14 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
      */
     @Subscribe("tabSheet")
     public void onTabSheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
-        com.vaadin.flow.component.tabs.Tab selected = event.getSelectedTab();
+        Tab selected = event.getSelectedTab();
         if (selected == null || selected.getId().isEmpty()) {
             return;
         }
-        String tabId = selected.getId().get();
-        if ("tab3".equals(tabId)) {
-            handleToDieuTriTabSelected();
-        }
+//        String tabId = selected.getId().get();
+//        if ("tab3".equals(tabId)) {
+//            handleToDieuTriTabSelected();
+//        }
     }
 
     private void handleToDieuTriTabSelected() {
@@ -381,7 +394,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
     }
 
     private boolean isToDieuTriTabSelected(JmixTabSheet.SelectedChangeEvent event) {
-        com.vaadin.flow.component.tabs.Tab selected = event.getSelectedTab();
+        Tab selected = event.getSelectedTab();
         return selected != null
                 && selected.getId().isPresent()
                 && "tab3".equals(selected.getId().get());
@@ -944,13 +957,23 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         });
         setColumnRenderer("tenDichVuColumn", toDieuTri -> {
             Span span = uiComponents.create(Span.class);
-            span.getStyle().set("white-space", "pre-line");
+            span.getStyle()
+                    .set("white-space", "pre-line")
+                    .set("text-align", "left")
+                    .set("display", "block")
+                    .set("width", "100%")
+                    .set("line-height", "1.4");
             span.setText(formatKyThuatText(toDieuTri, true));
             return span;
         });
         setColumnRenderer("thoiGianColumn", toDieuTri -> {
             Span span = uiComponents.create(Span.class);
-            span.getStyle().set("white-space", "pre-line");
+            span.getStyle()
+                    .set("white-space", "pre-line")
+                    .set("text-align", "left")
+                    .set("display", "block")
+                    .set("width", "100%")
+                    .set("line-height", "1.4");
             span.setText(formatKyThuatText(toDieuTri, false));
             return span;
         });
@@ -1099,16 +1122,19 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             return "";
         }
         StringBuilder sb = new StringBuilder();
+        int index = 1;
         for (ToDieuTriKyThuat kt : toDieuTri.getKyThuatList()) {
             if (!sb.isEmpty()) {
                 sb.append("\n");
             }
+            sb.append(index).append(". ");
             if (tenDichVu) {
                 String name = kt.getIdDichVu() != null ? safeText(kt.getIdDichVu().getTenDichVu()) : "";
-                sb.append("• ").append(name);
+                sb.append(name);
             } else {
-                sb.append("• ").append(kt.getThoiGianPhut() != null ? kt.getThoiGianPhut() : "");
+                sb.append(kt.getThoiGianPhut() != null ? kt.getThoiGianPhut() : "");
             }
+            index++;
         }
         return sb.toString();
     }
@@ -1264,6 +1290,11 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             case XOA_BOP_TRI_LIEU -> "Xoa bóp trị liệu";
             case KHAM_LUONG_GIA -> "Khám lượng giá";
         };
+    }
+
+    private void visibleChuanDoan(){
+        dsChanDoanIcdRaVienField.setVisible(!getEditedEntity().getDsChanDoanIcd().isEmpty());
+        chuanDoanRaVienField.setVisible(getEditedEntity().getDsChanDoanIcd().isEmpty());
     }
 
 
