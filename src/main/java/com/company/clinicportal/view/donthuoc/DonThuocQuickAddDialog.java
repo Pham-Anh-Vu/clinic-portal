@@ -351,8 +351,8 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
     /** Thêm cột "Thao tác" với nút Sửa cho mỗi dòng thuốc. */
     private void configureThuocActionsColumn() {
         Grid.Column<DonThuocChiTiet> col = chiTietDataGrid.addComponentColumn(this::buildThuocActionsCell);
-        col.setHeader("");
-        col.setWidth("7em");
+        col.setHeader("Thao tác");
+        col.setWidth("15em");
         col.setFlexGrow(0);
         col.setSortable(false);
     }
@@ -363,16 +363,13 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         actions.setPadding(false);
 
         JmixButton editBtn = uiComponents.create(JmixButton.class);
-        editBtn.setIcon(VaadinIcon.EDIT.create());
-        editBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        editBtn.setTitle("Sửa");
+        //        delBtn.setIcon(VaadinIcon.TRASH.create());
+        editBtn.setText("Sửa");
         editBtn.addClickListener(e -> openThuocEditModal(ct));
 
         JmixButton delBtn = uiComponents.create(JmixButton.class);
-        delBtn.setIcon(VaadinIcon.TRASH.create());
-        delBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR,
-                ButtonVariant.LUMO_TERTIARY);
-        delBtn.setTitle("Xoá");
+//        delBtn.setIcon(VaadinIcon.TRASH.create());
+        delBtn.setText("Xoá");
         delBtn.addClickListener(e -> {
             chiTietsDc.getMutableItems().remove(ct);
             updateThuocCountLabel();
@@ -388,7 +385,7 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         Grid.Column<DonThuocChanDoan> col = chanDoanDataGrid.addComponentColumn(
                 this::buildChanDoanActionsCell);
         col.setHeader("");
-        col.setWidth("7em");
+        col.setWidth("15em");
         col.setFlexGrow(0);
         col.setSortable(false);
     }
@@ -399,16 +396,13 @@ public class DonThuocQuickAddDialog extends StandardDetailView<DonThuoc> {
         actions.setPadding(false);
 
         JmixButton editBtn = uiComponents.create(JmixButton.class);
-        editBtn.setIcon(VaadinIcon.EDIT.create());
-        editBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        editBtn.setTitle("Sửa");
+//        editBtn.setIcon(VaadinIcon.EDIT.create());
+        editBtn.setText("Sửa");
         editBtn.addClickListener(e -> openChanDoanEditModal(cd));
 
         JmixButton delBtn = uiComponents.create(JmixButton.class);
-        delBtn.setIcon(VaadinIcon.TRASH.create());
-        delBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR,
-                ButtonVariant.LUMO_TERTIARY);
-        delBtn.setTitle("Xoá");
+//        delBtn.setIcon(VaadinIcon.TRASH.create());
+        delBtn.setText("Xoá");
         delBtn.addClickListener(e -> {
             chanDoansDc.getMutableItems().remove(cd);
             updateChanDoanCountLabel();

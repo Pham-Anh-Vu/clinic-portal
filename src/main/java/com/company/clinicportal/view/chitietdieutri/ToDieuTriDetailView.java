@@ -85,15 +85,13 @@ public class ToDieuTriDetailView extends StandardDetailView<ToDieuTri> {
                 layout.setSpacing(true);
 
                 JmixButton editButton = uiComponents.create(JmixButton.class);
-                editButton.setIcon(VaadinIcon.EDIT.create());
-                editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+                editButton.setText("Sửa");
+//                editButton.setIcon(VaadinIcon.EDIT.create());
                 editButton.addClickListener(e -> openKyThuatDetail(kyThuat));
 
                 JmixButton deleteButton = uiComponents.create(JmixButton.class);
-                Icon trashIcon = VaadinIcon.TRASH.create();
-                trashIcon.setColor("var(--lumo-error-text-color)");
-                deleteButton.setIcon(trashIcon);
-                deleteButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+                deleteButton.setText("Xoá");
+//                deleteButton.setIcon(trashIcon);
                 deleteButton.addClickListener(e -> kyThuatListDc.getMutableItems().remove(kyThuat));
 
                 layout.add(editButton, deleteButton);

@@ -36,6 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Sinh bảng "Theo dõi bệnh nhân điều trị tại phòng khám Nhật Minh" dựa trên file
@@ -159,9 +160,18 @@ public class TheoDoiBNPrintService {
     }
 
     /**
-     * Sinh PDF bảng theo dõi cho một phiếu điều trị.
+     * Sinh PDF bảng theo dõi cho một phiếu điều trị (in tất cả các dòng ToDieuTri).
      */
     public byte[] generatePdf(ChiTietDieuTri chiTietDieuTri) throws IOException {
+        return generatePdf(chiTietDieuTri, null);
+    }
+
+    /**
+     * Sinh PDF bảng theo dõi cho một phiếu điều trị. Nếu {@code singleToDieuTri}
+     * được truyền vào có id hợp lệ, chỉ in dữ liệu của đúng dòng đó; ngược lại in
+     * tất cả các dòng ToDieuTri của phiếu (giữ nguyên hành vi cũ).
+     */
+    public byte[] generatePdf(ChiTietDieuTri chiTietDieuTri, ToDieuTri singleToDieuTri) throws IOException {
         if (chiTietDieuTri == null) {
             throw new IllegalArgumentException("ChiTietDieuTri is null");
         }
@@ -176,6 +186,12 @@ public class TheoDoiBNPrintService {
                                 .addFetchPlan("_base")
                                 .add("idDichVu", d -> d.addFetchPlan("_base"))))
                 .list();
+
+        if (singleToDieuTri != null && singleToDieuTri.getId() != null) {
+            toDieuTris = toDieuTris.stream()
+                    .filter(t -> singleToDieuTri.getId().equals(t.getId()))
+                    .collect(Collectors.toList());
+        }
 
         BenhNhan benhNhan = chiTietDieuTri.getIdBenhNhan();
         if (benhNhan != null && benhNhan.getId() != null) {

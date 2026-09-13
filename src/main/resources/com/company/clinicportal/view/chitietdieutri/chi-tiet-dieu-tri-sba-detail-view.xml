@@ -437,14 +437,13 @@
                                         <column key="thoiGianColumn" header="Thời gian (phút)"/>
                                         <column key="nguoiThucHienColumn" header="Người thực hiện"/>
                                         <column key="bacSiColumn" header="BS chỉ định"/>
-                                        <column key="thaoTacColumn" header="Thao tác"/>
+                                        <column key="thaoTacColumn" header="Thao tác" flexGrow="0" width="30em"/>
                                     </columns>
                                 </dataGrid>
                             </formLayout>
                         </vbox>
                     </vbox>
                     <hbox width="100%" justifyContent="END" padding="true">
-                        <button id="printTheoDoiBNButton" text="In bảng theo dõi BN" icon="PRINT"/>
                         <button id="printToDieuTriButton" text="In tờ điều trị" icon="PRINT"/>
                     </hbox>
                 </vbox>

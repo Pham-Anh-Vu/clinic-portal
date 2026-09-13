@@ -68,7 +68,7 @@
                 <hbox classNames="buttons-panel" width="100%">
                     <div width="100%" classNames="all-control-auto-pay">
                         <div classNames="title-grid">
-                            <span text="CHẨN ĐOÁN VÀ KẾT LUẬN   "/>
+                            <span text="CHẨN ĐOÁN VÀ KẾT LUẬN"/>
                             <span id="chanDoanCountLabel" themeName="badge" visible="false"/>
                         </div>
                     </div>
@@ -149,7 +149,7 @@
                             </column>
                             <column property="cachDung" header="Cách dùng" editable="true">
                             </column>
-                            <column key="actionsColumn" header="Thao tác" width="7em" flexGrow="0"/>
+<!--                            <column key="actionsColumn" header="Thao tác" width="7em" flexGrow="0"/>-->
                         </columns>
                     </dataGrid>
                 </formLayout>

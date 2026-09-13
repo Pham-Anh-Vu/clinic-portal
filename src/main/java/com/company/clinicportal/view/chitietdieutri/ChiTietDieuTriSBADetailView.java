@@ -409,7 +409,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             Grid.Column<DonThuoc> thaoTacColumn = donThuocsDataGrid.addComponentColumn(this::buildDonThuocActionsCell);
             thaoTacColumn.setKey("thaoTacDonThuocColumn");
             thaoTacColumn.setHeader("Thao tác");
-            thaoTacColumn.setWidth("9em");
+            thaoTacColumn.setWidth("20em");
             thaoTacColumn.setFlexGrow(0);
             thaoTacColumn.setSortable(false);
         }
@@ -421,25 +421,17 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         layout.setPadding(false);
 
         JmixButton openButton = uiComponents.create(JmixButton.class);
-        openButton.setIcon(VaadinIcon.EYE.create());
-        openButton.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_TERTIARY);
-        openButton.setTitle("Mở xem");
+        openButton.setText("Xem");
         openButton.addClickListener(e -> openDonThuocDetail(donThuoc));
 
         JmixButton editButton = uiComponents.create(JmixButton.class);
-        editButton.setIcon(VaadinIcon.EDIT.create());
-        editButton.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_TERTIARY);
-        editButton.setTitle("Sửa");
+        //        delButton.setIcon(VaadinIcon.TRASH.create());
+        editButton.setText("Sửa");
         editButton.addClickListener(e -> openDonThuocDetail(donThuoc));
 
         JmixButton delButton = uiComponents.create(JmixButton.class);
-        delButton.setIcon(VaadinIcon.TRASH.create());
-        delButton.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_ERROR,
-                ButtonVariant.LUMO_TERTIARY);
-        delButton.setTitle("Xoá");
+//        delButton.setIcon(VaadinIcon.TRASH.create());
+        delButton.setText("Xoá");
         delButton.addClickListener(e -> confirmAndDeleteDonThuoc(donThuoc));
 
         layout.add(openButton, editButton, delButton);
@@ -867,6 +859,39 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         }
     }
 
+//    @Subscribe("printToDieuTriButton")
+//    public void onPrintToDieuTriButtonClick(final ClickEvent<JmixButton> event) {
+//        if (getEditedEntity().getId() == null) {
+//            notifications.create("Vui lòng lưu phiếu điều trị trước khi in.")
+//                    .withType(Notifications.Type.WARNING)
+//                    .show();
+//            return;
+//        }
+//        try {
+//            notifications.create("Đang tạo bản xem trước...")
+//                    .withPosition(Notification.Position.TOP_END)
+//                    .withDuration(3000)
+//                    .show();
+//
+//            byte[] pdfBytes = toDieuTriPrintService.generatePdf(getEditedEntity());
+//            String fileName = "to-dieu-tri-" + getEditedEntity().getId() + ".pdf";
+//
+//            DialogWindow<SoBenhAnPreviewDialogView> window = dialogWindows
+//                    .view(this, SoBenhAnPreviewDialogView.class)
+//                    .build();
+//            window.getView().setPreviewData(pdfBytes, pdfBytes, fileName);
+//            window.getView().setPreviewTitle("Xem trước tờ điều trị");
+//            window.getView().setPreviewFileName(fileName);
+//            window.setWidth("90%");
+//            window.setHeight("90%");
+//            window.open();
+//        } catch (Exception ex) {
+//            notifications.create("Không thể tạo bản xem trước tờ điều trị. Vui lòng thử lại.")
+//                    .withType(Notifications.Type.ERROR)
+//                    .show();
+//        }
+//    }
+
     @Subscribe("printToDieuTriButton")
     public void onPrintToDieuTriButtonClick(final ClickEvent<JmixButton> event) {
         if (getEditedEntity().getId() == null) {
@@ -876,7 +901,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
             return;
         }
         try {
-            notifications.create("Đang tạo bản xem trước...")
+            notifications.create("Đang tạo tờ điều trị...")
                     .withPosition(Notification.Position.TOP_END)
                     .withDuration(3000)
                     .show();
@@ -900,8 +925,13 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
         }
     }
 
-    @Subscribe("printTheoDoiBNButton")
-    public void onPrintTheoDoiBNButtonClick(final ClickEvent<JmixButton> event) {
+    private void printTheoDoiBNForRow(ToDieuTri toDieuTri) {
+        if (toDieuTri == null || toDieuTri.getId() == null) {
+            notifications.create("Dòng điều trị chưa được lưu, không thể in.")
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
         if (getEditedEntity().getId() == null) {
             notifications.create("Vui lòng lưu phiếu điều trị trước khi in.")
                     .withType(Notifications.Type.WARNING)
@@ -914,8 +944,9 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                     .withDuration(3000)
                     .show();
 
-            byte[] pdfBytes = theoDoiBNPrintService.generatePdf(getEditedEntity());
-            String fileName = "theo-doi-bn-" + getEditedEntity().getId() + ".pdf";
+            byte[] pdfBytes = theoDoiBNPrintService.generatePdf(getEditedEntity(), toDieuTri);
+            String fileName = "theo-doi-bn-" + getEditedEntity().getId()
+                    + "-to-" + toDieuTri.getId() + ".pdf";
 
             DialogWindow<SoBenhAnPreviewDialogView> window = dialogWindows
                     .view(this, SoBenhAnPreviewDialogView.class)
@@ -999,6 +1030,7 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
                 layout.add(
                         createIconActionButton(VaadinIcon.EDIT, "Sửa", () -> openToDieuTriDetail(toDieuTri, false)),
                         createIconActionButton(VaadinIcon.COPY, "Sao chép", () -> copyToDieuTri(toDieuTri)),
+                        createIconActionButton(VaadinIcon.PRINT, "In bảng theo dõi BN", () -> printTheoDoiBNForRow(toDieuTri)),
                         createIconActionButton(VaadinIcon.TRASH, "Xóa", () -> deleteToDieuTri(toDieuTri))
                 );
                 return layout;
@@ -1016,13 +1048,8 @@ public class ChiTietDieuTriSBADetailView extends StandardDetailView<ChiTietDieuT
 
     private JmixButton createIconActionButton(VaadinIcon icon, String tooltip, Runnable action) {
         JmixButton button = uiComponents.create(JmixButton.class);
-        Icon vaadinIcon = icon.create();
-        if (icon == VaadinIcon.TRASH) {
-            vaadinIcon.setColor("var(--lumo-error-text-color)");
-        }
-        button.setIcon(vaadinIcon);
-        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        button.getElement().setProperty("title", tooltip);
+//        button.setIcon(vaadinIcon);
+        button.setText(tooltip);
         button.addClickListener(e -> action.run());
         return button;
     }
